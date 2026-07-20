@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================
+   GenFlow Design System - CSS Variables
+   =========================================== */
+
+:root {
+  /* ─── Colors - Brand ─── */
+  --color-navy-950: #0A0F2E;
+  --color-navy-900: #0F1435;
+  --color-navy-800: #181c34;
+  --color-navy-700: #1E2448;
+  --color-navy-600: #2A3158;
+  
+  --color-teal-600: #1A6B62;
+  --color-teal-500: #298581;
+  --color-teal-400: #3D9E97;
+  --color-teal-300: #5CB8B2;
+  
+  --color-gold-600: #C49A2E;
+  --color-gold-500: #ECBA3D;
+  --color-gold-400: #F0C85A;
+  --color-gold-300: #F4D47A;
+  
+  /* ─── Colors - Semantic (Light Mode) ─── */
+  --color-bg-primary: #F8F9FB;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F1F5F9;
+  --color-bg-card: #FFFFFF;
+  
+  --color-text-primary: #181c34;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #9CA3AF;
+  
+  --color-border-default: #E5E7EB;
+  --color-border-strong: #D1D5DB;
+  --color-border-accent: #298581;
+  
+  /* ─── Semantic Colors ─── */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* ─── Spacing ─── */
+  --space-unit: 8px;
+  
+  /* ─── Border Radius ─── */
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* ─── Shadows ─── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 22px rgba(0, 0, 0, 0.1);
+  
+  /* ─── Motion ─── */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Dark Mode ─── */
+[data-theme="dark"] {
+  --color-bg-primary: #0A0F2E;
+  --color-bg-secondary: #10183c;
+  --color-bg-tertiary: #151D42;
+  --color-bg-card: #10183c;
+  
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  
+  --color-border-default: #1E2448;
+  --color-border-strong: #2A3158;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+/* ===========================================
+   Base Styles
+   =========================================== */
+
+@layer base {
+  html {
+    font-family: 'IRANSansX', 'Vazirmatn', system-ui, sans-serif;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  body {
+    @apply bg-[var(--color-bg-primary)] text-[var(--color-text-primary)];
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    @apply border-[var(--color-border-default)];
+  }
+}
+
+/* ===========================================
+   Component Utilities
+   =========================================== */
+
+@layer components {
+  /* GenCard accent line */
+  .gen-card-accent {
+    @apply absolute top-0 right-0 w-1 h-full rounded-r-xl;
+    background-color: var(--color-teal-500);
+  }
+  
+  /* Step indicator */
+  .gen-step__circle {
+    @apply flex items-center justify-center font-semibold;
+    background-color: var(--color-teal-500);
+    color: white;
+  }
+  
+  /* Textarea */
+  .gen-textarea {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply bg-white border border-[var(--color-border-default)];
+    @apply text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)];
+    @apply focus:outline-none focus:ring-2 focus:ring-[var(--color-teal-500)] focus:border-transparent;
+    @apply transition-all duration-150;
+    min-height: 100px;
+    resize: vertical;
+  }
+}
+
+/* ===========================================
+   RTL Support
+   =========================================== */
+
+[dir="rtl"] {
+  .gen-card-accent {
+    @apply right-0 left-auto rounded-r-xl rounded-l-none;
+  }
+}
+
+/* ===========================================
+   Scrollbar
+   =========================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
