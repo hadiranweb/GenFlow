@@ -1,46 +1,23 @@
-# New York Nyc Local Law 144
+# New York City Local Law 144 — Initial Notes
 
-> وضعیت: فایل خام / Scaffold. محتوای نهایی در sprintهای بعدی تکمیل می‌شود.
+> Status: draft  
+> Related Sprint: Sprint 1 scope; detailed audit design continues in Sprint 2 and Sprint 6.
 
-## Metadata
+## Sprint 1 Summary
 
-| Field | Value |
-|---|---|
-| File | `docs/mcp/legal/05-new-york-nyc-local-law-144.md` |
-| Layer / Category | Legal / New York |
-| Role | الزامات NYC LL144 |
-| Related Step / Source | گام ۱، ۶، ۷ |
-| Priority | حیاتی |
+If GenFlow is used as an Automated Employment Decision Tool (AEDT) for candidates or employees in New York City, Local Law 144 requirements may apply.
 
-## هدف سند
+## Key Implications for GenFlow
 
-TODO: تکمیل سند برای نقش زیر:
+- AEDT classification must be checked before enabling candidate screening/ranking use cases.
+- Bias audit status must be known before use.
+- Candidate/employee notice must be supported.
+- Audit summary/public availability requirements may affect documentation and customer onboarding.
 
-> الزامات NYC LL144
+## MVP Boundary
 
-## محتوای کلیدی برای تکمیل
+GenFlow should not provide automated candidate ranking/rejection for NYC use cases until legal review and audit requirements are satisfied.
 
-- TODO: AEDT
-- TODO: bias audit سالانه
-- TODO: اطلاع‌رسانی به کاندیدا
-- TODO: independent audit
-- TODO: summary publication
+## Source
 
-## ارتباطات مهم
-
-- `fairness/10-bias-audit-reporting.md`
-- `compliance/10-compliance-test-cases.md`
-
-## سوالات باز
-
-- TODO: این سند توسط چه کسی تکمیل/بازبینی می‌شود؟
-- TODO: چه منابع رسمی یا داخلی باید برای این سند استفاده شود؟
-- TODO: خروجی این سند در کدام بخش محصول استفاده می‌شود؟
-
-## وضعیت تکمیل
-
-- [ ] Draft آماده شود
-- [ ] بازبینی محصول
-- [ ] بازبینی HR
-- [ ] بازبینی حقوقی/Compliance
-- [ ] تبدیل به requirement یا rule قابل اجرا، در صورت نیاز
+- NYC DCWP AEDT page: https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page

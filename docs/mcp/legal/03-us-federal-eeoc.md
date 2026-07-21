@@ -1,46 +1,19 @@
-# Us Federal Eeoc
+# US Federal EEOC — Initial Notes
 
-> وضعیت: فایل خام / Scaffold. محتوای نهایی در sprintهای بعدی تکمیل می‌شود.
+> Status: draft  
+> Related Sprint: Sprint 1 scope; detailed fairness work continues in Sprint 2.
 
-## Metadata
+## Sprint 1 Summary
 
-| Field | Value |
-|---|---|
-| File | `docs/mcp/legal/03-us-federal-eeoc.md` |
-| Layer / Category | Legal / US Federal |
-| Role | قوانین EEOC |
-| Related Step / Source | گام ۱ و ۶ |
-| Priority | حیاتی |
+GenFlow must assume that any AI-supported employment selection workflow in the United States may be evaluated under anti-discrimination principles, especially disparate/adverse impact under Title VII.
 
-## هدف سند
+## Key Implications for GenFlow
 
-TODO: تکمیل سند برای نقش زیر:
+- Do not position GenFlow as an automated selection or rejection tool in MVP.
+- If GenFlow is later used for candidate ranking or screening, fairness testing and adverse impact review become necessary.
+- Vendor/tool responsibility cannot be ignored by the employer/deployer.
+- The 4/5ths rule may be used as a screening heuristic, but it is not a complete safe harbor.
 
-> قوانین EEOC
+## Source
 
-## محتوای کلیدی برای تکمیل
-
-- TODO: منع تبعیض
-- TODO: protected attributes
-- TODO: disparate impact
-- TODO: 4/5ths rule
-- TODO: hiring decision risk
-
-## ارتباطات مهم
-
-- `fairness/01-protected-attributes.md`
-- `fairness/05-disparate-impact-4-5ths-rule.md`
-
-## سوالات باز
-
-- TODO: این سند توسط چه کسی تکمیل/بازبینی می‌شود؟
-- TODO: چه منابع رسمی یا داخلی باید برای این سند استفاده شود؟
-- TODO: خروجی این سند در کدام بخش محصول استفاده می‌شود؟
-
-## وضعیت تکمیل
-
-- [ ] Draft آماده شود
-- [ ] بازبینی محصول
-- [ ] بازبینی HR
-- [ ] بازبینی حقوقی/Compliance
-- [ ] تبدیل به requirement یا rule قابل اجرا، در صورت نیاز
+- EEOC publications index: https://www.eeoc.gov/eeoc-publications

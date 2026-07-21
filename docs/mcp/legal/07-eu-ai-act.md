@@ -1,46 +1,22 @@
-# Eu Ai Act
+# EU AI Act — Initial Notes
 
-> وضعیت: فایل خام / Scaffold. محتوای نهایی در sprintهای بعدی تکمیل می‌شود.
+> Status: draft  
+> Related Sprint: Sprint 1 scope; detailed compliance design continues in Sprint 6.
 
-## Metadata
+## Sprint 1 Summary
 
-| Field | Value |
-|---|---|
-| File | `docs/mcp/legal/07-eu-ai-act.md` |
-| Layer / Category | Legal / EU AI |
-| Role | الزامات EU AI Act |
-| Related Step / Source | گام ۱، ۶، ۷ |
-| Priority | حیاتی |
+Under the EU AI Act, AI systems used in employment, workers management, and access to self-employment can fall into the high-risk category, especially when used for recruitment, selection, promotion, termination, task allocation, or performance monitoring.
 
-## هدف سند
+## Key Implications for GenFlow
 
-TODO: تکمیل سند برای نقش زیر:
+- EU market entry requires high-risk classification analysis.
+- If GenFlow uses profiling or influences employment decisions, compliance obligations increase significantly.
+- Human oversight, technical documentation, logging, risk management, and transparency must be planned before EU deployment.
 
-> الزامات EU AI Act
+## MVP Boundary
 
-## محتوای کلیدی برای تکمیل
+Do not market GenFlow in the EU as an employment decision automation tool. Keep it in HR planning and position documentation support unless a full compliance plan exists.
 
-- TODO: high-risk employment AI
-- TODO: technical documentation
-- TODO: human oversight
-- TODO: logging
-- TODO: risk management
+## Source
 
-## ارتباطات مهم
-
-- `compliance/01-compliance-engine-architecture.md`
-- `compliance/07-audit-log-requirements.md`
-
-## سوالات باز
-
-- TODO: این سند توسط چه کسی تکمیل/بازبینی می‌شود؟
-- TODO: چه منابع رسمی یا داخلی باید برای این سند استفاده شود؟
-- TODO: خروجی این سند در کدام بخش محصول استفاده می‌شود؟
-
-## وضعیت تکمیل
-
-- [ ] Draft آماده شود
-- [ ] بازبینی محصول
-- [ ] بازبینی HR
-- [ ] بازبینی حقوقی/Compliance
-- [ ] تبدیل به requirement یا rule قابل اجرا، در صورت نیاز
+- EUR-Lex Regulation (EU) 2024/1689: https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng
