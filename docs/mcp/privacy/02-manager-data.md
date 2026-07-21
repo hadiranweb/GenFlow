@@ -1,0 +1,47 @@
+# Manager Data
+
+> وضعیت: فایل خام / Scaffold. محتوای نهایی در sprintهای بعدی تکمیل می‌شود.
+
+## Metadata
+
+| Field | Value |
+|---|---|
+| File | `docs/mcp/privacy/02-manager-data.md` |
+| Layer / Category | Privacy / Data Class |
+| Role | داده‌های مدیر |
+| Related Step / Source | گام ۲ |
+| Priority | بالا |
+
+## هدف سند
+
+TODO: تکمیل سند برای نقش زیر:
+
+> داده‌های مدیر
+
+## محتوای کلیدی برای تکمیل
+
+- TODO: نام
+- TODO: نقش سازمانی
+- TODO: سبک مدیریتی
+- TODO: archetype
+- TODO: اولویت تصمیم‌گیری
+- TODO: consent requirements
+
+## ارتباطات مهم
+
+- `schemas/manager-data-schema.md`
+- `legal/02-target-customers-legal-profile.md`
+
+## سوالات باز
+
+- TODO: این سند توسط چه کسی تکمیل/بازبینی می‌شود؟
+- TODO: چه منابع رسمی یا داخلی باید برای این سند استفاده شود؟
+- TODO: خروجی این سند در کدام بخش محصول استفاده می‌شود؟
+
+## وضعیت تکمیل
+
+- [ ] Draft آماده شود
+- [ ] بازبینی محصول
+- [ ] بازبینی HR
+- [ ] بازبینی حقوقی/Compliance
+- [ ] تبدیل به requirement یا rule قابل اجرا، در صورت نیاز

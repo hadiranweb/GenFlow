@@ -1,0 +1,45 @@
+# Gap Analysis
+
+> وضعیت: فایل خام / Scaffold. محتوای نهایی در sprintهای بعدی تکمیل می‌شود.
+
+## Metadata
+
+| Field | Value |
+|---|---|
+| File | `docs/mcp/hr/06-gap-analysis.md` |
+| Layer / Category | HR / Business Analysis |
+| Role | تحلیل شکاف |
+| Related Step / Source | گام ۴ |
+| Priority | بالا |
+
+## هدف سند
+
+TODO: تکمیل سند برای نقش زیر:
+
+> تحلیل شکاف
+
+## محتوای کلیدی برای تکمیل
+
+- TODO: مهارت‌های مفقود
+- TODO: گلوگاه‌های عملیاتی
+- TODO: نیاز به پوزیشن جدید
+- TODO: توجیه ساخت پوزیشن
+
+## ارتباطات مهم
+
+- `hr/07-job-description-standard.md`
+- `examples/scenario-smb-tech-startup.md`
+
+## سوالات باز
+
+- TODO: این سند توسط چه کسی تکمیل/بازبینی می‌شود؟
+- TODO: چه منابع رسمی یا داخلی باید برای این سند استفاده شود؟
+- TODO: خروجی این سند در کدام بخش محصول استفاده می‌شود؟
+
+## وضعیت تکمیل
+
+- [ ] Draft آماده شود
+- [ ] بازبینی محصول
+- [ ] بازبینی HR
+- [ ] بازبینی حقوقی/Compliance
+- [ ] تبدیل به requirement یا rule قابل اجرا، در صورت نیاز
