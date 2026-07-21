@@ -1,5 +1,5 @@
 //! Error handling
-//! 
+//!
 //! Central error types and HTTP response mapping.
 
 use axum::{
@@ -10,24 +10,31 @@ use axum::{
 use serde_json::json;
 
 #[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
 pub enum AppError {
     #[error("Database error: {0}")]
     Database(#[from] sqlx::Error),
-    
+
     #[error("Redis error: {0}")]
     Redis(#[from] redis::RedisError),
-    
+
     #[error("Validation error: {0}")]
     Validation(String),
-    
+
     #[error("Not found: {0}")]
     NotFound(String),
-    
+
     #[error("AI error: {0}")]
     AI(String),
-    
+
     #[error("Internal error: {0}")]
     Internal(String),
+}
+
+impl From<validator::ValidationErrors> for AppError {
+    fn from(err: validator::ValidationErrors) -> Self {
+        Self::Validation(err.to_string())
+    }
 }
 
 impl IntoResponse for AppError {
@@ -41,12 +48,8 @@ impl IntoResponse for AppError {
                 tracing::error!("Redis error: {}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Cache error")
             }
-            AppError::Validation(msg) => {
-                (StatusCode::BAD_REQUEST, msg.as_str())
-            }
-            AppError::NotFound(msg) => {
-                (StatusCode::NOT_FOUND, msg.as_str())
-            }
+            AppError::Validation(msg) => (StatusCode::BAD_REQUEST, msg.as_str()),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.as_str()),
             AppError::AI(msg) => {
                 tracing::error!("AI error: {}", msg);
                 (StatusCode::INTERNAL_SERVER_ERROR, "AI processing error")

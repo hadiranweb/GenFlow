@@ -1,17 +1,17 @@
 //! Position generation endpoints
-//! 
+//!
 //! Handles job position creation and retrieval.
 
 use axum::{
     extract::Path,
-    routing::{post, get},
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::AppError;
+use crate::error::AppError;
 
 // ===========================================
 // Request/Response Types
@@ -20,12 +20,10 @@ use crate::AppError;
 /// Position generation request
 #[derive(Debug, Deserialize, Validate)]
 pub struct PositionRequest {
-    #[validate(length(min = 1, message = "Personality analysis ID is required"))]
     pub personality_analysis_id: Uuid,
-    
-    #[validate(length(min = 1, message = "Business analysis ID is required"))]
+
     pub business_analysis_id: Uuid,
-    
+
     /// Priority weights (0.0 to 1.0)
     pub priorities: Option<PriorityWeights>,
 }
@@ -56,7 +54,7 @@ pub struct PositionResponse {
     pub level: String,
     pub summary: String,
     pub interpretation: String,
-    pub kpis: Vec<KPI>,
+    pub kpis: Vec<Kpi>,
     pub tasks: Vec<Task>,
     pub requirements: Requirements,
     pub match_scores: MatchScores,
@@ -64,7 +62,7 @@ pub struct PositionResponse {
 
 /// Key Performance Indicator
 #[derive(Debug, Serialize)]
-pub struct KPI {
+pub struct Kpi {
     pub name: String,
     pub target: String,
     pub frequency: String,
@@ -118,12 +116,12 @@ async fn generate_position(
     tracing::info!("Generating position...");
     tracing::info!("Personality analysis: {}", req.personality_analysis_id);
     tracing::info!("Business analysis: {}", req.business_analysis_id);
-    
+
     // TODO: Fetch analyses from database
     // TODO: Integrate with AI service for position generation
-    
+
     let _priorities = req.priorities.unwrap_or_default();
-    
+
     // Mock response
     let position = PositionResponse {
         id: Uuid::new_v4(),
@@ -132,19 +130,19 @@ async fn generate_position(
         summary: "Responsible for business growth through process optimization and new customer acquisition.".to_string(),
         interpretation: "This position is designed to fill the gap between the current sales team and growth objectives.".to_string(),
         kpis: vec![
-            KPI {
+            Kpi {
                 name: "Sales Growth".to_string(),
                 target: "20% monthly growth".to_string(),
                 frequency: "monthly".to_string(),
                 weight: 0.4,
             },
-            KPI {
+            Kpi {
                 name: "Customer Satisfaction".to_string(),
                 target: "85%".to_string(),
                 frequency: "monthly".to_string(),
                 weight: 0.3,
             },
-            KPI {
+            Kpi {
                 name: "Response Time".to_string(),
                 target: "Under 2 hours".to_string(),
                 frequency: "daily".to_string(),
@@ -191,19 +189,20 @@ async fn generate_position(
             overall_score: 0.79,
         },
     };
-    
+
     tracing::info!("Position generated: {}", position.id);
-    tracing::info!("Match score: {:.0}%", position.match_scores.overall_score * 100.0);
-    
+    tracing::info!(
+        "Match score: {:.0}%",
+        position.match_scores.overall_score * 100.0
+    );
+
     Ok(Json(position))
 }
 
 /// Get position by ID
-async fn get_position(
-    Path(id): Path<Uuid>,
-) -> Result<Json<PositionResponse>, AppError> {
+async fn get_position(Path(id): Path<Uuid>) -> Result<Json<PositionResponse>, AppError> {
     tracing::info!("Fetching position: {}", id);
-    
+
     // TODO: Fetch from database
     Err(AppError::NotFound(format!("Position {} not found", id)))
 }

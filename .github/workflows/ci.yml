@@ -63,7 +63,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm typecheck || pnpm --filter web typecheck || true
+        run: pnpm typecheck
 
   # ===========================================
   # Test
@@ -155,7 +155,7 @@ jobs:
       - name: Run clippy
         run: |
           cd apps/api
-          cargo clippy -- -D warnings || true
+          cargo clippy -- -D warnings
 
       - name: Build
         run: |
@@ -204,7 +204,8 @@ jobs:
       - name: Build and push web
         uses: docker/build-push-action@v5
         with:
-          context: ./apps/web
+          context: .
+          file: ./apps/web/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha

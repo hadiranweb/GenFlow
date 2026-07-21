@@ -1,17 +1,17 @@
 //! Analysis endpoints
-//! 
+//!
 //! Handles personality and business analysis requests.
 
 use axum::{
-    extract::{Path},
-    routing::{post, get},
+    extract::Path,
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::AppError;
+use crate::error::AppError;
 
 // ===========================================
 // Request/Response Types
@@ -22,14 +22,14 @@ use crate::AppError;
 pub struct PersonalityAnalysisRequest {
     #[validate(length(min = 1, message = "Name is required"))]
     pub name: String,
-    
+
     pub age: Option<String>,
     pub education: Option<String>,
     pub work_experience: Option<String>,
-    
+
     #[validate(length(min = 10, message = "Description must be at least 10 characters"))]
     pub description: String,
-    
+
     pub mbti_preference: Option<String>,
     pub enneagram_preference: Option<String>,
 }
@@ -60,16 +60,16 @@ pub struct PersonalityTraits {
 pub struct BusinessAnalysisRequest {
     #[validate(length(min = 1, message = "Business name is required"))]
     pub business_name: String,
-    
+
     pub industry: Option<String>,
     pub business_size: Option<String>,
-    
+
     #[validate(length(min = 10, message = "Description must be at least 10 characters"))]
     pub description: String,
-    
+
     pub challenges: Option<String>,
     pub goals: Option<String>,
-    
+
     pub employee_count: Option<i32>,
     pub annual_revenue: Option<String>,
 }
@@ -78,7 +78,7 @@ pub struct BusinessAnalysisRequest {
 #[derive(Debug, Serialize)]
 pub struct BusinessAnalysisResponse {
     pub id: Uuid,
-    pub swot: SWOT,
+    pub swot: Swot,
     pub bottlenecks: Vec<String>,
     pub processes: Vec<Process>,
     pub recommended_positions: Vec<String>,
@@ -86,7 +86,7 @@ pub struct BusinessAnalysisResponse {
 
 /// SWOT analysis structure
 #[derive(Debug, Serialize)]
-pub struct SWOT {
+pub struct Swot {
     pub strengths: Vec<String>,
     pub weaknesses: Vec<String>,
     pub opportunities: Vec<String>,
@@ -121,9 +121,16 @@ async fn analyze_personality(
     Json(req): Json<PersonalityAnalysisRequest>,
 ) -> Result<Json<PersonalityAnalysisResponse>, AppError> {
     req.validate()?;
-    
+
     tracing::info!("Processing personality analysis for: {}", req.name);
-    
+    let _analysis_context = (
+        &req.age,
+        &req.education,
+        &req.work_experience,
+        &req.mbti_preference,
+        &req.enneagram_preference,
+    );
+
     // TODO: Integrate with AI service for actual analysis
     let response = PersonalityAnalysisResponse {
         id: Uuid::new_v4(),
@@ -143,9 +150,9 @@ async fn analyze_personality(
             "Strategic Consultant".to_string(),
         ],
     };
-    
+
     tracing::info!("Personality analysis complete: {:?}", response.id);
-    
+
     Ok(Json(response))
 }
 
@@ -154,21 +161,26 @@ async fn analyze_business(
     Json(req): Json<BusinessAnalysisRequest>,
 ) -> Result<Json<BusinessAnalysisResponse>, AppError> {
     req.validate()?;
-    
+
     tracing::info!("Processing business analysis: {}", req.business_name);
-    
+    let _business_context = (
+        &req.industry,
+        &req.business_size,
+        &req.challenges,
+        &req.goals,
+        &req.employee_count,
+        &req.annual_revenue,
+    );
+
     // TODO: Integrate with AI service for actual analysis
     let response = BusinessAnalysisResponse {
         id: Uuid::new_v4(),
-        swot: SWOT {
+        swot: Swot {
             strengths: vec![
                 "Experienced team".to_string(),
                 "Loyal customer base".to_string(),
             ],
-            weaknesses: vec![
-                "Manual processes".to_string(),
-                "No CRM system".to_string(),
-            ],
+            weaknesses: vec!["Manual processes".to_string(), "No CRM system".to_string()],
             opportunities: vec![
                 "Growing market".to_string(),
                 "Digital transformation opportunity".to_string(),
@@ -199,18 +211,16 @@ async fn analyze_business(
             "Marketing Manager".to_string(),
         ],
     };
-    
+
     tracing::info!("Business analysis complete: {:?}", response.id);
-    
+
     Ok(Json(response))
 }
 
 /// Get analysis by ID
-async fn get_analysis(
-    Path(id): Path<Uuid>,
-) -> Result<Json<serde_json::Value>, AppError> {
+async fn get_analysis(Path(id): Path<Uuid>) -> Result<Json<serde_json::Value>, AppError> {
     tracing::info!("Fetching analysis: {}", id);
-    
+
     // TODO: Fetch from database
     Ok(Json(serde_json::json!({
         "id": id,

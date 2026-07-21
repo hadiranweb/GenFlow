@@ -1,16 +1,13 @@
 //! GenFlow API Server
-//! 
+//!
 //! A lightweight API service for job position generation.
 
+mod api;
 mod config;
 mod error;
-mod api;
 
-use axum::{
-    Router,
-    routing::get,
-};
-use tower_http::cors::{CorsLayer, Any};
+use axum::{routing::get, Router};
+use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -30,7 +27,14 @@ async fn main() -> anyhow::Result<()> {
     let config = config::Config::from_env()?;
 
     tracing::info!("GenFlow API Starting...");
-    tracing::info!("Database configured");
+    tracing::info!("Database configured: {}", !config.database_url.is_empty());
+    tracing::info!("Redis configured: {}", !config.redis_url.is_empty());
+    tracing::info!("Qdrant configured: {}", !config.qdrant_url.is_empty());
+    tracing::info!("OpenAI key configured: {}", config.openai_api_key.is_some());
+    tracing::info!(
+        "Anthropic key configured: {}",
+        config.anthropic_api_key.is_some()
+    );
     tracing::info!("Port: {}", config.port);
 
     // Build router
@@ -39,9 +43,9 @@ async fn main() -> anyhow::Result<()> {
     // Start server
     let addr = format!("0.0.0.0:{}", config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    
+
     tracing::info!("Server running on http://{}", addr);
-    
+
     axum::serve(listener, app).await?;
 
     Ok(())
@@ -55,14 +59,11 @@ fn router() -> Router {
         .allow_headers(Any);
 
     // Build routes
-    let router = Router::new()
+    Router::new()
         .route("/health", get(health_check))
-        .nest("/api/v1/analyze", api::analysis::routes())
-        .nest("/api/v1/generate", api::position::routes())
+        .nest("/api/v1", api::routes())
         .layer(cors)
-        .layer(tower_http::trace::TraceLayer::new_for_http());
-
-    router
+        .layer(tower_http::trace::TraceLayer::new_for_http())
 }
 
 /// Health check endpoint

@@ -27,6 +27,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # Environment
 dotenvy = "0.15"
 
+# Database / cache errors
+sqlx = { version = "0.8", default-features = false }
+redis = { version = "0.32", default-features = false }
+
 # UUID
 uuid = { version = "1.7", features = ["v4", "serde"] }
 

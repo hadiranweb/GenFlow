@@ -15,6 +15,6 @@ pub async fn health() -> (StatusCode, Json<Value>) {
                 "database": "configured",
                 "redis": "configured"
             }
-        }))
+        })),
     )
 }
