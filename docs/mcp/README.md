@@ -34,3 +34,15 @@ docs/mcp/
 - [ ] تکمیل فایل‌های حیاتی legal/privacy/fairness/compliance
 - [ ] تکمیل قالب‌ها و schemaها
 - [ ] تولید نمونه‌های واقعی و feedback loop
+
+## MCP source preservation strategy
+
+The project keeps all MCP source drafts under `docs/mcp/_sources` so no deep research or implementation idea is lost. For v1, fast defaults can be used from Team 1 while Team 2 remains the canonical source for compliance-aware documentation and schema-first design.
+
+Key files:
+
+- `00-source-index.md`
+- `00-mcp-v1-canonical-strategy.md`
+- `00-mcp-merge-plan.md`
+- `defaults/v1-fast-defaults.md`
+- `technical/api-sketches-index.md`
