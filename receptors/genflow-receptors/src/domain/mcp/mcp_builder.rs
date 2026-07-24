@@ -3,9 +3,7 @@
 use chrono::Utc;
 use uuid::Uuid;
 
-use super::mcp_context::{
-    McpContext, McpType, McpScope, McpStatus,
-};
+use super::mcp_context::{McpContext, McpScope, McpStatus, McpType};
 
 /// Builder Pattern برای ساخت MCP در کد
 pub struct McpContextBuilder {

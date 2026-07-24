@@ -1,13 +1,10 @@
 //! PgMcpRepository — PostgreSQL implementation of McpRepository trait
 
+use crate::traits::{McpRepository, McpRuntimeError};
 use async_trait::async_trait;
+use genflow_receptors::{FragmentRole, McpContext, McpPromptFragment, McpScope, McpType};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
-use genflow_receptors::{
-    McpContext, McpType, McpScope, McpPromptFragment,
-    FragmentRole,
-};
-use crate::traits::{McpRepository, McpRuntimeError};
 
 pub struct PgMcpRepository {
     pool: PgPool,
@@ -23,13 +20,15 @@ impl PgMcpRepository {
 fn row_to_context(row: &sqlx::postgres::PgRow) -> McpContext {
     McpContext {
         id: row.get("id"),
-        mcp_type: McpType::PlatformPolicy, // TODO: parse from db string
-        scope: McpScope::Global, // TODO: parse from db string
+        mcp_type: McpType::from_db_str(&row.get::<String, _>("mcp_type"))
+            .unwrap_or(McpType::PlatformPolicy),
+        scope: McpScope::from_db_str(&row.get::<String, _>("scope")).unwrap_or(McpScope::Global),
         code: row.get("code"),
         title: row.get("title"),
         description: row.get("description"),
         version: row.get("version"),
-        status: genflow_receptors::McpStatus::Draft, // TODO: parse from db string
+        status: genflow_receptors::McpStatus::from_db_str(&row.get::<String, _>("status"))
+            .unwrap_or(genflow_receptors::McpStatus::Draft),
         content: row.get("content"),
         content_hash: row.get("content_hash"),
         evidence: row.get("evidence"),
@@ -124,7 +123,7 @@ impl McpRepository for PgMcpRepository {
         cache_hit: bool,
     ) -> Result<(), McpRuntimeError> {
         sqlx::query(
-            "INSERT INTO mcp_usage (analysis_id, mcp_id, usage_role, cache_hit) VALUES ($1, $2, $3, $4)"
+            "INSERT INTO business_analysis_mcp_usage (business_analysis_id, mcp_context_id, usage_role, cache_hit) VALUES ($1, $2, $3, $4)"
         )
             .bind(analysis_id)
             .bind(mcp_id)
@@ -149,17 +148,20 @@ impl McpRepository for PgMcpRepository {
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(results.iter().map(|row| McpPromptFragment {
-            id: row.get("id"),
-            mcp_context_id: row.get("mcp_context_id"),
-            fragment_key: row.get("fragment_key"),
-            fragment_role: FragmentRole::from_db_str(&row.get::<String, _>("fragment_role"))
-                .unwrap_or(FragmentRole::PromptInstruction),
-            content: row.get("content"),
-            token_estimate: row.get::<i32, _>("token_estimate") as usize,
-            content_hash: row.get("content_hash"),
-            locale: row.get("locale"),
-            active: row.get("active"),
-        }).collect())
+        Ok(results
+            .iter()
+            .map(|row| McpPromptFragment {
+                id: row.get("id"),
+                mcp_context_id: row.get("mcp_context_id"),
+                fragment_key: row.get("fragment_key"),
+                fragment_role: FragmentRole::from_db_str(&row.get::<String, _>("fragment_role"))
+                    .unwrap_or(FragmentRole::PromptInstruction),
+                content: row.get("content"),
+                token_estimate: row.get::<i32, _>("token_estimate") as usize,
+                content_hash: row.get("content_hash"),
+                locale: row.get("locale"),
+                active: row.get("active"),
+            })
+            .collect())
     }
 }

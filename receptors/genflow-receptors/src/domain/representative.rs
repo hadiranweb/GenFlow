@@ -8,11 +8,11 @@ use serde::{Deserialize, Serialize};
 /// نوع رابطه نماینده با سازمان
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RepresentativeRelation {
-    Owner,          // صاحب کسب‌وکار
-    SeniorManager,  // مدیر ارشد
-    Manager,        // مدیر میانی
-    Advisor,        // مشاور
-    External,       // خارجی
+    Owner,         // صاحب کسب‌وکار
+    SeniorManager, // مدیر ارشد
+    Manager,       // مدیر میانی
+    Advisor,       // مشاور
+    External,      // خارجی
 }
 
 impl RepresentativeRelation {
@@ -63,7 +63,7 @@ impl RepresentativeInfluencePolicy {
             return Err(PolicyError::PersonalityNotAllowed);
         }
 
-        if requested_weight < 0.0 || requested_weight > 1.0 {
+        if !(0.0..=1.0).contains(&requested_weight) {
             return Err(PolicyError::InvalidWeight(requested_weight));
         }
 
@@ -105,7 +105,9 @@ pub enum PolicyError {
 impl std::fmt::Display for PolicyError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::PersonalityNotAllowed => write!(f, "Personality data not allowed for this relation type"),
+            Self::PersonalityNotAllowed => {
+                write!(f, "Personality data not allowed for this relation type")
+            }
             Self::InvalidWeight(w) => write!(f, "Invalid weight: {}", w),
         }
     }
@@ -125,31 +127,23 @@ mod tests {
 
     #[test]
     fn test_effective_weight_owner() {
-        let policy = RepresentativeInfluencePolicy::new(
-            true,
-            RepresentativeRelation::Owner,
-            0.25,
-        ).unwrap();
+        let policy =
+            RepresentativeInfluencePolicy::new(true, RepresentativeRelation::Owner, 0.25).unwrap();
         assert_eq!(policy.effective_weight(), 0.30);
     }
 
     #[test]
     fn test_effective_weight_external() {
-        let policy = RepresentativeInfluencePolicy::new(
-            false,
-            RepresentativeRelation::External,
-            0.10,
-        ).unwrap();
+        let policy =
+            RepresentativeInfluencePolicy::new(false, RepresentativeRelation::External, 0.10)
+                .unwrap();
         assert_eq!(policy.effective_weight(), 0.05);
     }
 
     #[test]
     fn test_personality_not_allowed() {
-        let result = RepresentativeInfluencePolicy::new(
-            true,
-            RepresentativeRelation::External,
-            0.05,
-        );
+        let result =
+            RepresentativeInfluencePolicy::new(true, RepresentativeRelation::External, 0.05);
         assert!(result.is_err());
     }
 }

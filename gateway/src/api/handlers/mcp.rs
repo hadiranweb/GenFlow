@@ -1,25 +1,29 @@
 //! MCP Registry Handlers
 
-use std::sync::Arc;
-use axum::extract::{State, Path};
-use axum::Json;
-use uuid::Uuid;
-use crate::state::AppState;
 use crate::error_response::ApiError;
+use crate::state::AppState;
+use axum::extract::{Path, State};
+use axum::Json;
 use genflow_shared_infra::error::AppError;
+use std::sync::Arc;
+use uuid::Uuid;
 
 pub async fn get_mcp(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::McpContext>, ApiError> {
-    let mcp = state.mcp_resolver
+    let mcp = state
+        .mcp_resolver
         .find_by_id(id)
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
     match mcp {
         Some(ctx) => Ok(Json(ctx)),
-        None => Err(ApiError(AppError::NotFound(format!("MCP {} not found", id)))),
+        None => Err(ApiError(AppError::NotFound(format!(
+            "MCP {} not found",
+            id
+        )))),
     }
 }
 
@@ -37,7 +41,8 @@ pub async fn resolve_mcp(
 ) -> Result<Json<genflow_receptors::McpBundle>, ApiError> {
     let analysis_id = Uuid::new_v4();
 
-    let bundle = state.mcp_resolver
+    let bundle = state
+        .mcp_resolver
         .resolve_for_analysis(
             req.organization_id,
             req.industry_code.as_deref(),

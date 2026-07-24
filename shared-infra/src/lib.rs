@@ -4,17 +4,17 @@
 //! This crate provides PgPool setup, Redis connections, JWT auth,
 //! unified error types, and tracing/metrics setup.
 
+pub mod auth;
 pub mod config;
 pub mod db;
-pub mod redis;
 pub mod error;
-pub mod auth;
-pub mod telemetry;
 pub mod health;
+pub mod redis;
+pub mod telemetry;
 
+pub use auth::{AuthClaims, JwtAuth};
 pub use config::AppConfig;
 pub use db::DatabasePool;
-pub use redis::RedisPool;
 pub use error::{AppError, AppResult};
-pub use auth::{AuthClaims, JwtAuth};
 pub use health::HealthChecker;
+pub use redis::RedisPool;

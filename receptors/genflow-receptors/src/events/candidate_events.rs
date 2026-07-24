@@ -1,8 +1,8 @@
 //! Candidate Matching Events — Published by candidate-matching island
 
+use crate::events::common::{DomainEvent, EventSource};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::events::common::{DomainEvent, EventSource};
 
 /// Candidate invited to a position
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,8 +14,12 @@ pub struct CandidateInvitedEvent {
 }
 
 impl DomainEvent for CandidateInvitedEvent {
-    fn event_type(&self) -> &'static str { "candidate.invited" }
-    fn source(&self) -> EventSource { EventSource::CandidateMatching }
+    fn event_type(&self) -> &'static str {
+        "candidate.invited"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::CandidateMatching
+    }
 }
 
 /// Match calculated
@@ -29,8 +33,12 @@ pub struct MatchCalculatedEvent {
 }
 
 impl DomainEvent for MatchCalculatedEvent {
-    fn event_type(&self) -> &'static str { "match.calculated" }
-    fn source(&self) -> EventSource { EventSource::CandidateMatching }
+    fn event_type(&self) -> &'static str {
+        "match.calculated"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::CandidateMatching
+    }
 }
 
 /// Report generated
@@ -42,6 +50,10 @@ pub struct ReportGeneratedEvent {
 }
 
 impl DomainEvent for ReportGeneratedEvent {
-    fn event_type(&self) -> &'static str { "report.generated" }
-    fn source(&self) -> EventSource { EventSource::CandidateMatching }
+    fn event_type(&self) -> &'static str {
+        "report.generated"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::CandidateMatching
+    }
 }

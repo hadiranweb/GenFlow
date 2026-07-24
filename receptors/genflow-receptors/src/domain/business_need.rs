@@ -5,10 +5,10 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BusinessNeedType {
-    CapabilityGap,      // کمبود توانایی
-    ProcessBottleneck,  // گلوگاه فرایند
-    GrowthOpportunity,  // فرصت رشد
-    RiskMitigation,     // کاهش ریسک
+    CapabilityGap,         // کمبود توانایی
+    ProcessBottleneck,     // گلوگاه فرایند
+    GrowthOpportunity,     // فرصت رشد
+    RiskMitigation,        // کاهش ریسک
     DirectPositionRequest, // درخواست مستقیم
 }
 
@@ -53,9 +53,9 @@ impl BusinessNeed {
     pub fn implies_position(&self) -> bool {
         matches!(
             self.need_type,
-            BusinessNeedType::CapabilityGap |
-            BusinessNeedType::ProcessBottleneck |
-            BusinessNeedType::DirectPositionRequest
+            BusinessNeedType::CapabilityGap
+                | BusinessNeedType::ProcessBottleneck
+                | BusinessNeedType::DirectPositionRequest
         )
     }
 

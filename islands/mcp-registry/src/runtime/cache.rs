@@ -1,8 +1,8 @@
 //! RedisMcpCache — Redis implementation of McpCache trait
 
+use crate::traits::McpRuntimeError;
 use async_trait::async_trait;
 use genflow_receptors::McpContext;
-use crate::traits::McpRuntimeError;
 use genflow_shared_infra::RedisPool;
 use std::sync::Arc;
 
@@ -19,7 +19,10 @@ impl RedisMcpCache {
 #[async_trait]
 impl crate::traits::McpCache for RedisMcpCache {
     async fn get(&self, key: &str) -> Result<Option<McpContext>, McpRuntimeError> {
-        let mut conn = self.redis.connection().await
+        let mut conn = self
+            .redis
+            .connection()
+            .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
         let result: Option<String> = redis::cmd("GET")
@@ -38,11 +41,19 @@ impl crate::traits::McpCache for RedisMcpCache {
         }
     }
 
-    async fn set(&self, key: &str, value: &McpContext, ttl_seconds: u64) -> Result<(), McpRuntimeError> {
+    async fn set(
+        &self,
+        key: &str,
+        value: &McpContext,
+        ttl_seconds: u64,
+    ) -> Result<(), McpRuntimeError> {
         let json = serde_json::to_string(value)
             .map_err(|e| McpRuntimeError::Cache(format!("Serialization: {}", e)))?;
 
-        let mut conn = self.redis.connection().await
+        let mut conn = self
+            .redis
+            .connection()
+            .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
         redis::cmd("SETEX")
@@ -57,7 +68,10 @@ impl crate::traits::McpCache for RedisMcpCache {
     }
 
     async fn invalidate(&self, key: &str) -> Result<(), McpRuntimeError> {
-        let mut conn = self.redis.connection().await
+        let mut conn = self
+            .redis
+            .connection()
+            .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
         redis::cmd("DEL")

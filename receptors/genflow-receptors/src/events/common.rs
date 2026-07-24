@@ -40,7 +40,11 @@ pub struct EventEnvelope {
 }
 
 impl EventEnvelope {
-    pub fn new(source: EventSource, event_type: impl Into<String>, payload: serde_json::Value) -> Self {
+    pub fn new(
+        source: EventSource,
+        event_type: impl Into<String>,
+        payload: serde_json::Value,
+    ) -> Self {
         Self {
             event_id: Uuid::new_v4(),
             event_type: event_type.into(),

@@ -12,7 +12,7 @@ pub struct Score(pub f32);
 impl Score {
     /// Create a new Score. Returns `None` if value is outside [0, 100].
     pub fn new(value: f32) -> Option<Self> {
-        if value >= 0.0 && value <= 100.0 {
+        if (0.0..=100.0).contains(&value) {
             Some(Self(value))
         } else {
             None

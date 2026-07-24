@@ -1,9 +1,9 @@
 //! Health Check Utilities
 
-use std::sync::Arc;
-use sqlx::PgPool;
 use crate::RedisPool;
 use serde::Serialize;
+use sqlx::PgPool;
+use std::sync::Arc;
 
 #[derive(Debug, Serialize)]
 pub struct HealthStatus {
@@ -48,9 +48,8 @@ impl HealthChecker {
     }
 
     async fn check_db(&self) -> ComponentHealth {
-        let result: Result<i32, sqlx::Error> = sqlx::query_scalar("SELECT 1")
-            .fetch_one(&self.db)
-            .await;
+        let result: Result<i32, sqlx::Error> =
+            sqlx::query_scalar("SELECT 1").fetch_one(&self.db).await;
 
         match result {
             Ok(_) => ComponentHealth {

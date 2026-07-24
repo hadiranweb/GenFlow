@@ -1,9 +1,9 @@
 //! Redis Pool — Connection and pub/sub helpers
 
-use redis::Client;
-use redis::aio::MultiplexedConnection;
 use crate::config::RedisConfig;
 use crate::error::AppError;
+use redis::aio::MultiplexedConnection;
+use redis::Client;
 
 pub struct RedisPool {
     client: Client,
@@ -12,8 +12,9 @@ pub struct RedisPool {
 impl RedisPool {
     /// Create Redis client from config and verify connection
     pub async fn connect(config: &RedisConfig) -> Result<Self, AppError> {
-        let client = Client::open(config.url.clone())
-            .map_err(|e| AppError::Infrastructure(format!("Redis client creation failed: {}", e)))?;
+        let client = Client::open(config.url.clone()).map_err(|e| {
+            AppError::Infrastructure(format!("Redis client creation failed: {}", e))
+        })?;
 
         let mut conn = client
             .get_multiplexed_async_connection()
@@ -27,7 +28,9 @@ impl RedisPool {
             .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {}", e)))?;
 
         if result != "PONG" {
-            return Err(AppError::Infrastructure("Redis ping did not return PONG".to_string()));
+            return Err(AppError::Infrastructure(
+                "Redis ping did not return PONG".to_string(),
+            ));
         }
 
         tracing::info!("Redis pool connected to {}", config.url);

@@ -1,9 +1,9 @@
 //! Job Match Domain — 5-Axis Matching
 
-use serde::{Deserialize, Serialize};
 use crate::domain::score::Score;
-use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JobMatch {

@@ -14,39 +14,30 @@ pub mod events;
 
 // Convenient re-exports
 pub use domain::{
-    score::Score,
-    mcp::{
-        McpType, McpScope, McpStatus, McpLinkType, FragmentRole,
-        McpContext, McpBundle, ResolutionMetadata, McpPromptFragment, McpContextLink,
-        McpError, McpContextBuilder,
-    },
+    assessment::{AssessmentMethod, BigFiveScores, CandidateProfile, RiasecScores},
     business_need::{BusinessNeed, BusinessNeedType, NeedUrgency},
-    position_generation::{
-        BusinessAnalysisRequest, BusinessInputMode, CapabilityLevel,
-        RepresentativeContextInput, PositionHypothesis, AxisWeights,
-        StandardPositionMatch, PositionGraph, PositionGraphAxis, AxisCode,
-        DimensionRequirement, PositionRequirement, RequirementType,
-        RequirementImportance, RequirementSource, GeneratedPositionProfile,
-        JobPosition, PositionGenerationMethod, PositionStatus,
-        PositionGenerationEvidence, GenerationWarning, WarningSeverity,
-        BusinessAnalysisResult,
-    },
-    representative::{
-        RepresentativeRelation, RepresentativeInfluencePolicy, PolicyError,
-    },
-    candidate::{
-        Candidate, CandidateStatus, PositionInvite, InviteStatus,
+    candidate::{Candidate, CandidateStatus, InviteStatus, PositionInvite},
+    dashboard::{
+        ActivityAction, ActivityItem, AlertType, AlertUrgency, DashboardAlert, DashboardOverview,
+        KeyMetrics, MatchSummary, PipelineStats, PositionAlert, PositionDashboardDetail,
+        PositionSummary, RiskLevel,
     },
     job_match::{
-        JobMatch, AxisMatch, DimensionMatchDetail, GapSeverity,
-        MatchStatus, MatchReport, ReportType, RiskFlag, FlagSeverity,
+        AxisMatch, DimensionMatchDetail, FlagSeverity, GapSeverity, JobMatch, MatchReport,
+        MatchStatus, ReportType, RiskFlag,
     },
-    assessment::{
-        CandidateProfile, BigFiveScores, RiasecScores, AssessmentMethod,
+    mcp::{
+        FragmentRole, McpBundle, McpContext, McpContextBuilder, McpContextLink, McpError,
+        McpLinkType, McpPromptFragment, McpScope, McpStatus, McpType, ResolutionMetadata,
     },
-    dashboard::{
-        DashboardOverview, KeyMetrics, PositionAlert, AlertUrgency,
-        ActivityItem, ActivityAction, PositionDashboardDetail, PositionSummary,
-        PipelineStats, MatchSummary, RiskLevel, DashboardAlert, AlertType,
+    position_generation::{
+        AxisCode, AxisWeights, BusinessAnalysisRequest, BusinessAnalysisResult, BusinessInputMode,
+        CapabilityLevel, DimensionRequirement, GeneratedPositionProfile, GenerationWarning,
+        JobPosition, PositionGenerationEvidence, PositionGenerationMethod, PositionGraph,
+        PositionGraphAxis, PositionHypothesis, PositionRequirement, PositionStatus,
+        RepresentativeContextInput, RequirementImportance, RequirementSource, RequirementType,
+        StandardPositionMatch, WarningSeverity,
     },
+    representative::{PolicyError, RepresentativeInfluencePolicy, RepresentativeRelation},
+    score::Score,
 };

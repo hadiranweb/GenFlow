@@ -1,11 +1,16 @@
 //! Representative Calibrator — Adjusts work style axis based on representative influence
 
 use genflow_receptors::{
-    RepresentativeRelation, RepresentativeInfluencePolicy,
-    PositionGraph, AxisCode,
+    AxisCode, PositionGraph, RepresentativeInfluencePolicy, RepresentativeRelation,
 };
 
 pub struct RepresentativeCalibrator;
+
+impl Default for RepresentativeCalibrator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl RepresentativeCalibrator {
     pub fn new() -> Self {
@@ -21,11 +26,8 @@ impl RepresentativeCalibrator {
         requested_weight: f32,
         use_personality: bool,
     ) -> Result<(), genflow_receptors::PolicyError> {
-        let policy = RepresentativeInfluencePolicy::new(
-            use_personality,
-            relation,
-            requested_weight,
-        )?;
+        let policy =
+            RepresentativeInfluencePolicy::new(use_personality, relation, requested_weight)?;
 
         // Only modify the Work Style axis
         for axis in &mut graph.axes {

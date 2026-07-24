@@ -1,9 +1,9 @@
 //! Report Generator — Generates match reports (employer + candidate)
 
+use genflow_receptors::{JobMatch, MatchReport, ReportType};
+use genflow_shared_infra::error::AppError;
 use sqlx::PgPool;
 use uuid::Uuid;
-use genflow_receptors::{MatchReport, ReportType, JobMatch};
-use genflow_shared_infra::error::AppError;
 
 pub struct ReportGenerator {
     pool: PgPool,
@@ -24,8 +24,14 @@ impl ReportGenerator {
 
         let (title, summary, strengths, development_areas) = match report_type {
             ReportType::ForEmployer => (
-                format!("Match Report — Position vs Candidate ({})", job_match.position_id),
-                format!("Composite score: {:.1}/100", job_match.composite_index.value()),
+                format!(
+                    "Match Report — Position vs Candidate ({})",
+                    job_match.position_id
+                ),
+                format!(
+                    "Composite score: {:.1}/100",
+                    job_match.composite_index.value()
+                ),
                 vec![
                     "Capability alignment is strong".to_string(),
                     "Work style shows good fit".to_string(),
@@ -37,13 +43,10 @@ impl ReportGenerator {
             ),
             ReportType::ForCandidate => (
                 "Your Match Profile".to_string(),
-                "This report highlights how your profile aligns with the position requirements.".to_string(),
-                vec![
-                    "Your skills match key requirements".to_string(),
-                ],
-                vec![
-                    "Opportunities for skill development".to_string(),
-                ],
+                "This report highlights how your profile aligns with the position requirements."
+                    .to_string(),
+                vec!["Your skills match key requirements".to_string()],
+                vec!["Opportunities for skill development".to_string()],
             ),
         };
 
@@ -60,13 +63,14 @@ impl ReportGenerator {
             report_type,
             title,
             summary,
-            key_findings: vec![
-                format!("Composite: {:.1}", job_match.composite_index.value()),
-            ],
+            key_findings: vec![format!(
+                "Composite: {:.1}",
+                job_match.composite_index.value()
+            )],
             strengths,
             development_areas,
             recommendations: vec![
-                "Schedule a structured interview for deeper evaluation".to_string(),
+                "Schedule a structured interview for deeper evaluation".to_string()
             ],
             disclaimers,
         };

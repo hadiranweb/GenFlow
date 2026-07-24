@@ -1,13 +1,13 @@
 //! Position Generation Handlers
 
-use std::sync::Arc;
-use axum::extract::{State, Path};
-use axum::Json;
-use uuid::Uuid;
-use crate::state::AppState;
 use crate::error_response::ApiError;
-use genflow_shared_infra::error::AppError;
+use crate::state::AppState;
+use axum::extract::{Path, State};
+use axum::Json;
 use genflow_receptors::BusinessAnalysisRequest;
+use genflow_shared_infra::error::AppError;
+use std::sync::Arc;
+use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
 pub struct GeneratePositionRequest {
@@ -43,5 +43,7 @@ pub async fn get_position(
     State(_state): State<Arc<AppState>>,
     Path(_id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::JobPosition>, ApiError> {
-    Err(ApiError(AppError::NotFound("Position not yet implemented".to_string())))
+    Err(ApiError(AppError::NotFound(
+        "Position not yet implemented".to_string(),
+    )))
 }

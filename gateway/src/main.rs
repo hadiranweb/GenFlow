@@ -6,17 +6,17 @@
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
-mod state;
 mod api;
 mod error_response;
+mod state;
 
-use state::AppState;
-use genflow_shared_infra::telemetry;
+use genflow_shared_infra::auth::JwtAuth;
 use genflow_shared_infra::config::AppConfig;
 use genflow_shared_infra::db::DatabasePool;
-use genflow_shared_infra::redis::RedisPool;
-use genflow_shared_infra::auth::JwtAuth;
 use genflow_shared_infra::health::HealthChecker;
+use genflow_shared_infra::redis::RedisPool;
+use genflow_shared_infra::telemetry;
+use state::AppState;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -48,17 +48,17 @@ async fn main() -> anyhow::Result<()> {
         mcp_builder.clone(),
     ));
 
-    let position_engine = genflow_position_generation::PositionGenerationEngine::new(pg_pool.clone());
+    let position_engine =
+        genflow_position_generation::PositionGenerationEngine::new(pg_pool.clone());
     let matching_engine = genflow_candidate_matching::MatchingEngine::new(pg_pool.clone());
     let invitation_manager = genflow_candidate_matching::InvitationManager::new(pg_pool.clone());
     let report_generator = genflow_candidate_matching::ReportGenerator::new(pg_pool.clone());
     let dashboard_engine = genflow_dashboard_analytics::DashboardEngine::new(pg_pool.clone());
-    let notification_service = genflow_dashboard_analytics::NotificationService::new(pg_pool.clone());
+    let notification_service =
+        genflow_dashboard_analytics::NotificationService::new(pg_pool.clone());
 
     // 6. Initialize Synaptic Hub
-    let synaptic_bus = Arc::new(genflow_synaptic_hub::SynapticBus::new(
-        redis_pool.clone(),
-    ));
+    let synaptic_bus = Arc::new(genflow_synaptic_hub::SynapticBus::new(redis_pool.clone()));
 
     // 7. Build application state
     let host = config.server.host.clone();
@@ -86,8 +86,7 @@ async fn main() -> anyhow::Result<()> {
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{}:{}", host, port))
-        .await?;
+    let listener = TcpListener::bind(format!("{}:{}", host, port)).await?;
 
     tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
 

@@ -1,11 +1,9 @@
 //! McpBuilderImpl — MCP draft builder implementation
 
-use async_trait::async_trait;
-use uuid::Uuid;
-use genflow_receptors::{
-    McpContext, McpContextBuilder, McpType, McpScope, McpStatus,
-};
 use crate::traits::{McpBuilder, McpRuntimeError};
+use async_trait::async_trait;
+use genflow_receptors::{McpContext, McpContextBuilder, McpScope, McpStatus, McpType};
+use uuid::Uuid;
 
 pub struct McpBuilderImpl;
 
@@ -15,14 +13,19 @@ impl McpBuilderImpl {
     }
 }
 
+impl Default for McpBuilderImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait]
 impl McpBuilder for McpBuilderImpl {
-    async fn build_industry_draft(&self, industry_code: &str) -> Result<McpContext, McpRuntimeError> {
-        let mcp = McpContextBuilder::new(
-            McpType::Industry,
-            McpScope::Industry,
-            industry_code,
-        )
+    async fn build_industry_draft(
+        &self,
+        industry_code: &str,
+    ) -> Result<McpContext, McpRuntimeError> {
+        let mcp = McpContextBuilder::new(McpType::Industry, McpScope::Industry, industry_code)
             .title(format!("Industry: {}", industry_code))
             .content(serde_json::json!({
                 "industry_code": industry_code,
@@ -46,12 +49,12 @@ impl McpBuilder for McpBuilderImpl {
         process_code: &str,
         industry_code: Option<&str>,
     ) -> Result<McpContext, McpRuntimeError> {
-        let scope = if industry_code.is_some() { McpScope::Industry } else { McpScope::Global };
-        let mcp = McpContextBuilder::new(
-            McpType::BusinessProcess,
-            scope,
-            process_code,
-        )
+        let scope = if industry_code.is_some() {
+            McpScope::Industry
+        } else {
+            McpScope::Global
+        };
+        let mcp = McpContextBuilder::new(McpType::BusinessProcess, scope, process_code)
             .title(format!("Process: {}", process_code))
             .content(serde_json::json!({
                 "process_code": process_code,
@@ -76,13 +79,13 @@ impl McpBuilder for McpBuilderImpl {
             McpScope::Case,
             format!("case-{}", org_id),
         )
-            .title(format!("Case for org {}", org_id))
-            .organization_id(org_id)
-            .content(serde_json::json!({
-                "organization_id": org_id,
-                "temporary": true,
-            }))
-            .build();
+        .title(format!("Case for org {}", org_id))
+        .organization_id(org_id)
+        .content(serde_json::json!({
+            "organization_id": org_id,
+            "temporary": true,
+        }))
+        .build();
 
         // case_temporary is not reusable
         let mcp = McpContext {

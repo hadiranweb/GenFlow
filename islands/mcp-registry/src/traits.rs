@@ -1,10 +1,8 @@
 //! MCP Runtime Traits — async trait definitions (requires sqlx)
 
 use async_trait::async_trait;
+use genflow_receptors::{McpContext, McpError, McpPromptFragment, McpScope, McpType};
 use uuid::Uuid;
-use genflow_receptors::{
-    McpContext, McpType, McpScope, McpPromptFragment, McpError,
-};
 
 /// MCP Runtime Error — extends domain McpError with infrastructure errors
 #[derive(Debug)]
@@ -27,11 +25,15 @@ impl std::fmt::Display for McpRuntimeError {
 impl std::error::Error for McpRuntimeError {}
 
 impl From<sqlx::Error> for McpRuntimeError {
-    fn from(e: sqlx::Error) -> Self { Self::Database(e) }
+    fn from(e: sqlx::Error) -> Self {
+        Self::Database(e)
+    }
 }
 
 impl From<McpError> for McpRuntimeError {
-    fn from(e: McpError) -> Self { Self::Domain(e) }
+    fn from(e: McpError) -> Self {
+        Self::Domain(e)
+    }
 }
 
 /// Trait Repository برای MCP — Runtime (async, requires DB)
@@ -63,14 +65,22 @@ pub trait McpRepository: Send + Sync {
 #[async_trait]
 pub trait McpCache: Send + Sync {
     async fn get(&self, key: &str) -> Result<Option<McpContext>, McpRuntimeError>;
-    async fn set(&self, key: &str, value: &McpContext, ttl_seconds: u64) -> Result<(), McpRuntimeError>;
+    async fn set(
+        &self,
+        key: &str,
+        value: &McpContext,
+        ttl_seconds: u64,
+    ) -> Result<(), McpRuntimeError>;
     async fn invalidate(&self, key: &str) -> Result<(), McpRuntimeError>;
 }
 
 /// Trait Builder برای MCP Draft — Runtime (async)
 #[async_trait]
 pub trait McpBuilder: Send + Sync {
-    async fn build_industry_draft(&self, industry_code: &str) -> Result<McpContext, McpRuntimeError>;
+    async fn build_industry_draft(
+        &self,
+        industry_code: &str,
+    ) -> Result<McpContext, McpRuntimeError>;
     async fn build_process_draft(
         &self,
         process_code: &str,

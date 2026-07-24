@@ -1,8 +1,13 @@
 //! Database Pool — PgPool setup and migration runner
 
-use sqlx::postgres::{PgPoolOptions, PgPool};
 use crate::config::DatabaseConfig;
 use crate::error::AppError;
+use sqlx::migrate::Migrator;
+use sqlx::postgres::{PgPool, PgPoolOptions};
+
+/// Embed migrations at compile time (relative to this crate's Cargo.toml)
+/// shared-infra/Cargo.toml → ../migrations
+static MIGRATOR: Migrator = sqlx::migrate!("../migrations");
 
 pub struct DatabasePool {
     pool: PgPool,
@@ -14,13 +19,19 @@ impl DatabasePool {
         let pool = PgPoolOptions::new()
             .max_connections(config.max_connections)
             .min_connections(config.min_connections)
-            .acquire_timeout(std::time::Duration::from_secs(config.connect_timeout_seconds))
+            .acquire_timeout(std::time::Duration::from_secs(
+                config.connect_timeout_seconds,
+            ))
             .idle_timeout(std::time::Duration::from_secs(config.idle_timeout_seconds))
             .connect(&config.url)
             .await
             .map_err(|e| AppError::Infrastructure(format!("Database connection failed: {}", e)))?;
 
-        tracing::info!("Database pool connected (max={}, min={})", config.max_connections, config.min_connections);
+        tracing::info!(
+            "Database pool connected (max={}, min={})",
+            config.max_connections,
+            config.min_connections
+        );
 
         Ok(Self { pool })
     }
@@ -30,13 +41,14 @@ impl DatabasePool {
         &self.pool
     }
 
-    /// Run migrations (embedded SQL files)
+    /// Run migrations using embedded SQL files
     pub async fn run_migrations(&self) -> Result<(), AppError> {
-        // Run migrations using runtime query approach (no macro, paths independent)
-        // The migration files are in the workspace root: /migrations/
-        tracing::info!("Database migrations will be run at application startup");
-        // For now, migrations are run externally via sqlx-cli or the migrate service
-        // In production, use sqlx::migrate! with proper path or external migration runner
+        MIGRATOR
+            .run(&self.pool)
+            .await
+            .map_err(|e| AppError::Infrastructure(format!("Migration failed: {}", e)))?;
+
+        tracing::info!("Database migrations completed successfully");
         Ok(())
     }
 }

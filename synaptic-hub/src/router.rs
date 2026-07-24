@@ -16,48 +16,59 @@ impl EventRouter {
         let mut routes = HashMap::new();
 
         // MCP events → Position Generation, Dashboard
-        routes.insert("mcp.resolved".to_string(), vec![
-            EventSource::PositionGeneration,
-            EventSource::DashboardAnalytics,
-        ]);
+        routes.insert(
+            "mcp.resolved".to_string(),
+            vec![
+                EventSource::PositionGeneration,
+                EventSource::DashboardAnalytics,
+            ],
+        );
 
         // Position events → Candidate Matching, Dashboard
-        routes.insert("position.generated".to_string(), vec![
-            EventSource::CandidateMatching,
-            EventSource::DashboardAnalytics,
-        ]);
+        routes.insert(
+            "position.generated".to_string(),
+            vec![
+                EventSource::CandidateMatching,
+                EventSource::DashboardAnalytics,
+            ],
+        );
 
-        routes.insert("position.analysis_completed".to_string(), vec![
-            EventSource::CandidateMatching,
-            EventSource::DashboardAnalytics,
-        ]);
+        routes.insert(
+            "position.analysis_completed".to_string(),
+            vec![
+                EventSource::CandidateMatching,
+                EventSource::DashboardAnalytics,
+            ],
+        );
 
         // Candidate events → Dashboard
-        routes.insert("candidate.invited".to_string(), vec![
-            EventSource::DashboardAnalytics,
-        ]);
+        routes.insert(
+            "candidate.invited".to_string(),
+            vec![EventSource::DashboardAnalytics],
+        );
 
-        routes.insert("match.calculated".to_string(), vec![
-            EventSource::DashboardAnalytics,
-        ]);
+        routes.insert(
+            "match.calculated".to_string(),
+            vec![EventSource::DashboardAnalytics],
+        );
 
         // Dashboard events → all (for cross-cutting concerns)
-        routes.insert("dashboard.metrics_updated".to_string(), vec![
-            EventSource::Gateway,
-        ]);
+        routes.insert(
+            "dashboard.metrics_updated".to_string(),
+            vec![EventSource::Gateway],
+        );
 
-        routes.insert("dashboard.alert_triggered".to_string(), vec![
-            EventSource::Gateway,
-        ]);
+        routes.insert(
+            "dashboard.alert_triggered".to_string(),
+            vec![EventSource::Gateway],
+        );
 
         Self { routes }
     }
 
     /// Get target islands for an event type
     pub fn route(&self, event_type: &str) -> Vec<EventSource> {
-        self.routes.get(event_type)
-            .cloned()
-            .unwrap_or_default()
+        self.routes.get(event_type).cloned().unwrap_or_default()
     }
 
     /// Check if an event should be routed to a specific island

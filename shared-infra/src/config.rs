@@ -121,8 +121,9 @@ impl AppConfig {
                     .unwrap_or(4),
             },
             database: DatabaseConfig {
-                url: std::env::var("DATABASE_URL")
-                    .unwrap_or_else(|_| "postgres://genflow:genflow@localhost:5432/genflow".to_string()),
+                url: std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+                    "postgres://genflow:genflow@localhost:5432/genflow".to_string()
+                }),
                 max_connections: std::env::var("DB_MAX_CONNECTIONS")
                     .ok()
                     .and_then(|v| v.parse().ok())
@@ -149,8 +150,7 @@ impl AppConfig {
                     .unwrap_or(24),
             },
             logging: LoggingConfig {
-                level: std::env::var("LOG_LEVEL")
-                    .unwrap_or_else(|_| "info".to_string()),
+                level: std::env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string()),
                 format: match std::env::var("LOG_FORMAT").as_deref() {
                     Ok("json") => LogFormat::Json,
                     _ => LogFormat::Pretty,

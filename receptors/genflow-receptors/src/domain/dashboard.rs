@@ -1,9 +1,9 @@
 //! Dashboard Domain
 
+use crate::domain::score::Score;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use crate::domain::score::Score;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DashboardOverview {

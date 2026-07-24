@@ -10,9 +10,9 @@
 //! Events flow from Islands → Synaptic Hub → Receptors (other Islands)
 
 pub mod bus;
-pub mod router;
 pub mod convergence;
+pub mod router;
 
 pub use bus::SynapticBus;
-pub use router::EventRouter;
 pub use convergence::ConvergenceTracker;
+pub use router::EventRouter;

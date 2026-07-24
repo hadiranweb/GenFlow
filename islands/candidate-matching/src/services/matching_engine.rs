@@ -1,13 +1,12 @@
 //! 5-Axis Matching Engine — Core matching algorithm
 
-use sqlx::PgPool;
-use uuid::Uuid;
 use genflow_receptors::{
-    JobMatch, AxisMatch, GapSeverity, MatchStatus, Score,
-    RiskFlag, FlagSeverity,
-    PositionGraph, CandidateProfile, BigFiveScores,
+    AxisMatch, CandidateProfile, FlagSeverity, GapSeverity, JobMatch, MatchStatus, PositionGraph,
+    RiskFlag, Score,
 };
 use genflow_shared_infra::error::AppError;
+use sqlx::PgPool;
+use uuid::Uuid;
 
 pub struct MatchingEngine {
     pool: PgPool,
@@ -37,7 +36,12 @@ impl MatchingEngine {
 
         // Calculate composite
         let composite = self.calculate_composite(
-            &capability, &output_kpi, &business_gap, &work_style, &growth, &graph
+            &capability,
+            &output_kpi,
+            &business_gap,
+            &work_style,
+            &growth,
+            &graph,
         );
 
         // Identify risk flags
@@ -45,14 +49,23 @@ impl MatchingEngine {
 
         // Determine if human review is required
         let human_review = composite.value() < 60.0
-            || risk_flags.iter().any(|f| f.severity == FlagSeverity::ActionRequired);
+            || risk_flags
+                .iter()
+                .any(|f| f.severity == FlagSeverity::ActionRequired);
 
         // Save match
-        let match_id = self.save_match(
-            position_id, candidate_id,
-            &capability, &output_kpi, &business_gap, &work_style, &growth,
-            composite,
-        ).await?;
+        let match_id = self
+            .save_match(
+                position_id,
+                candidate_id,
+                &capability,
+                &output_kpi,
+                &business_gap,
+                &work_style,
+                &growth,
+                composite,
+            )
+            .await?;
 
         tracing::info!(
             match_id = %match_id,
@@ -80,8 +93,14 @@ impl MatchingEngine {
 
     // ─── Axis Matching Functions ───
 
-    fn match_capability_axis(&self, graph: &PositionGraph, candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
-        let axis = graph.axes.iter()
+    fn match_capability_axis(
+        &self,
+        graph: &PositionGraph,
+        candidate: &CandidateProfile,
+    ) -> Result<AxisMatch, AppError> {
+        let axis = graph
+            .axes
+            .iter()
             .find(|a| a.code == genflow_receptors::AxisCode::Capability)
             .ok_or(AppError::Business("Missing capability axis".to_string()))?;
 
@@ -90,7 +109,8 @@ impl MatchingEngine {
         let count = axis.dimensions.len().max(1);
 
         for dim in &axis.dimensions {
-            let candidate_score = candidate.get_skill_score(&dim.code)
+            let candidate_score = candidate
+                .get_skill_score(&dim.code)
                 .or(candidate.get_skill_score(&dim.description))
                 .unwrap_or(50.0);
 
@@ -118,10 +138,15 @@ impl MatchingEngine {
         }
 
         let avg = total_percentage / count as f32;
-        let severity = if avg >= 80.0 { GapSeverity::Aligned }
-            else if avg >= 60.0 { GapSeverity::Acceptable }
-            else if avg >= 40.0 { GapSeverity::Development }
-            else { GapSeverity::Misaligned };
+        let severity = if avg >= 80.0 {
+            GapSeverity::Aligned
+        } else if avg >= 60.0 {
+            GapSeverity::Acceptable
+        } else if avg >= 40.0 {
+            GapSeverity::Development
+        } else {
+            GapSeverity::Misaligned
+        };
 
         Ok(AxisMatch {
             axis_code: "capability".to_string(),
@@ -131,7 +156,11 @@ impl MatchingEngine {
         })
     }
 
-    fn match_output_kpi_axis(&self, _graph: &PositionGraph, _candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
+    fn match_output_kpi_axis(
+        &self,
+        _graph: &PositionGraph,
+        _candidate: &CandidateProfile,
+    ) -> Result<AxisMatch, AppError> {
         // Simplified: placeholder for KPI matching
         Ok(AxisMatch {
             axis_code: "output_kpi".to_string(),
@@ -141,7 +170,11 @@ impl MatchingEngine {
         })
     }
 
-    fn match_business_gap_axis(&self, _graph: &PositionGraph, _candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
+    fn match_business_gap_axis(
+        &self,
+        _graph: &PositionGraph,
+        _candidate: &CandidateProfile,
+    ) -> Result<AxisMatch, AppError> {
         Ok(AxisMatch {
             axis_code: "business_gap".to_string(),
             match_percentage: Score::new(70.0).unwrap_or_default(),
@@ -150,14 +183,24 @@ impl MatchingEngine {
         })
     }
 
-    fn match_work_style_axis(&self, _graph: &PositionGraph, candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
-        let score = candidate.big_five.as_ref()
+    fn match_work_style_axis(
+        &self,
+        _graph: &PositionGraph,
+        candidate: &CandidateProfile,
+    ) -> Result<AxisMatch, AppError> {
+        let score = candidate
+            .big_five
+            .as_ref()
             .map(|bf| bf.average())
             .unwrap_or(50.0);
 
-        let severity = if score >= 75.0 { GapSeverity::Aligned }
-            else if score >= 50.0 { GapSeverity::Acceptable }
-            else { GapSeverity::Development };
+        let severity = if score >= 75.0 {
+            GapSeverity::Aligned
+        } else if score >= 50.0 {
+            GapSeverity::Acceptable
+        } else {
+            GapSeverity::Development
+        };
 
         Ok(AxisMatch {
             axis_code: "work_style".to_string(),
@@ -167,7 +210,11 @@ impl MatchingEngine {
         })
     }
 
-    fn match_growth_motivation_axis(&self, _graph: &PositionGraph, _candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
+    fn match_growth_motivation_axis(
+        &self,
+        _graph: &PositionGraph,
+        _candidate: &CandidateProfile,
+    ) -> Result<AxisMatch, AppError> {
         Ok(AxisMatch {
             axis_code: "growth_motivation".to_string(),
             match_percentage: Score::new(60.0).unwrap_or_default(),
@@ -211,7 +258,11 @@ impl MatchingEngine {
 
     // ─── Risk Flags ───
 
-    fn identify_risk_flags(&self, work_style: &AxisMatch, candidate: &CandidateProfile) -> Vec<RiskFlag> {
+    fn identify_risk_flags(
+        &self,
+        work_style: &AxisMatch,
+        candidate: &CandidateProfile,
+    ) -> Vec<RiskFlag> {
         let mut flags = Vec::new();
 
         if work_style.match_percentage.is_low() {
@@ -249,7 +300,10 @@ impl MatchingEngine {
         })
     }
 
-    async fn load_candidate_profile(&self, candidate_id: Uuid) -> Result<CandidateProfile, AppError> {
+    async fn load_candidate_profile(
+        &self,
+        candidate_id: Uuid,
+    ) -> Result<CandidateProfile, AppError> {
         // Load from DB — simplified for now
         Ok(CandidateProfile {
             candidate_id,
@@ -260,6 +314,7 @@ impl MatchingEngine {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn save_match(
         &self,
         position_id: Uuid,
@@ -274,7 +329,7 @@ impl MatchingEngine {
         let match_id = Uuid::new_v4();
 
         sqlx::query(
-            "INSERT INTO job_matches (id, position_id, candidate_id, capability_match, output_kpi_match, business_gap_match, work_style_alignment, growth_motivation_match, composite_index, confidence_score, status, human_review_required, calculated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"
+            "INSERT INTO job_matches (id, position_id, candidate_id, capability_match_score, output_kpi_match_score, business_gap_match_score, work_style_alignment_score, growth_motivation_match_score, composite_match_index, confidence_score, status, human_review_required, calculated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"
         )
             .bind(match_id)
             .bind(position_id)

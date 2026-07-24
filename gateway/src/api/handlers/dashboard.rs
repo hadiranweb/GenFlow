@@ -1,11 +1,11 @@
 //! Dashboard Analytics Handlers
 
-use std::sync::Arc;
-use axum::extract::{State, Path};
-use axum::Json;
-use uuid::Uuid;
-use crate::state::AppState;
 use crate::error_response::ApiError;
+use crate::state::AppState;
+use axum::extract::{Path, State};
+use axum::Json;
+use std::sync::Arc;
+use uuid::Uuid;
 
 pub async fn get_dashboard(
     State(state): State<Arc<AppState>>,

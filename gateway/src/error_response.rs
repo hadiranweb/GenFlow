@@ -3,8 +3,8 @@
 //! AppError is a pure domain error (no axum dependency in shared-infra).
 //! The gateway provides this newtype wrapper to satisfy the orphan rule.
 
-use axum::response::{IntoResponse, Response};
 use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use genflow_shared_infra::error::AppError;
 

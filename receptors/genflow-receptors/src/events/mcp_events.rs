@@ -1,8 +1,8 @@
 //! MCP Events — Published by mcp-registry island
 
+use crate::events::common::{DomainEvent, EventSource};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::events::common::{DomainEvent, EventSource};
 
 /// MCP resolved for an analysis
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -16,8 +16,12 @@ pub struct McpResolvedEvent {
 }
 
 impl DomainEvent for McpResolvedEvent {
-    fn event_type(&self) -> &'static str { "mcp.resolved" }
-    fn source(&self) -> EventSource { EventSource::McpRegistry }
+    fn event_type(&self) -> &'static str {
+        "mcp.resolved"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::McpRegistry
+    }
 }
 
 /// New MCP context created
@@ -30,8 +34,12 @@ pub struct McpCreatedEvent {
 }
 
 impl DomainEvent for McpCreatedEvent {
-    fn event_type(&self) -> &'static str { "mcp.created" }
-    fn source(&self) -> EventSource { EventSource::McpRegistry }
+    fn event_type(&self) -> &'static str {
+        "mcp.created"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::McpRegistry
+    }
 }
 
 /// MCP cache invalidated
@@ -42,6 +50,10 @@ pub struct McpCacheInvalidatedEvent {
 }
 
 impl DomainEvent for McpCacheInvalidatedEvent {
-    fn event_type(&self) -> &'static str { "mcp.cache_invalidated" }
-    fn source(&self) -> EventSource { EventSource::McpRegistry }
+    fn event_type(&self) -> &'static str {
+        "mcp.cache_invalidated"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::McpRegistry
+    }
 }

@@ -2,10 +2,10 @@
 //!
 //! Big Five, RIASEC, and skill mapping — inputs to the 5-axis matching engine.
 
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::domain::score::Score;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use uuid::Uuid;
 
 /// پروفایل کامل کاندیدا (برای matching engine)
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,13 +1,12 @@
 //! McpResolver — Orchestrator for MCP resolution (Cache → DB → Build fallback)
 
+use crate::traits::{McpBuilder, McpCache, McpRepository, McpRuntimeError};
+use genflow_receptors::{
+    McpBundle, McpContext, McpContextBuilder, McpScope, McpStatus, McpType, ResolutionMetadata,
+};
 use std::sync::Arc;
 use std::time::Instant;
 use uuid::Uuid;
-use genflow_receptors::{
-    McpContext, McpType, McpScope, McpBundle, ResolutionMetadata,
-    McpContextBuilder, McpStatus,
-};
-use crate::traits::{McpRepository, McpCache, McpBuilder, McpRuntimeError};
 
 pub struct McpResolver<R, C, B>
 where
@@ -27,7 +26,11 @@ where
     B: McpBuilder,
 {
     pub fn new(repo: Arc<R>, cache: Arc<C>, builder: Arc<B>) -> Self {
-        Self { repo, cache, builder }
+        Self {
+            repo,
+            cache,
+            builder,
+        }
     }
 
     /// Find MCP by ID (delegates to repository)
@@ -43,7 +46,12 @@ where
         code: &str,
         meta: &mut ResolutionMetadata,
     ) -> Result<Option<McpContext>, McpRuntimeError> {
-        let cache_key = format!("mcp:ctx:{}:{}:{}:active", mcp_type.as_db_str(), scope.as_db_str(), code);
+        let cache_key = format!(
+            "mcp:ctx:{}:{}:{}:active",
+            mcp_type.as_db_str(),
+            scope.as_db_str(),
+            code
+        );
 
         // 1. Try cache
         if let Some(mcp) = self.cache.get(&cache_key).await? {
@@ -71,14 +79,17 @@ where
         industry_code: Option<&str>,
         process_codes: &[String],
         position_hints: &[String],
-        analysis_id: Uuid,
+        _analysis_id: Uuid,
     ) -> Result<McpBundle, McpRuntimeError> {
         let start = Instant::now();
         let mut meta = ResolutionMetadata::default();
 
         // 1. Industry MCP
         let industry_mcp = if let Some(code) = industry_code {
-            match self.resolve_cached(McpType::Industry, McpScope::Industry, code, &mut meta).await? {
+            match self
+                .resolve_cached(McpType::Industry, McpScope::Industry, code, &mut meta)
+                .await?
+            {
                 Some(mcp) => Some(mcp),
                 None => {
                     meta.drafts_created += 1;
@@ -92,11 +103,21 @@ where
         // 2. Process MCPs
         let mut process_mcps = Vec::new();
         for code in process_codes {
-            let mcp = match self.resolve_cached(McpType::BusinessProcess, McpScope::Industry, code, &mut meta).await? {
+            let mcp = match self
+                .resolve_cached(
+                    McpType::BusinessProcess,
+                    McpScope::Industry,
+                    code,
+                    &mut meta,
+                )
+                .await?
+            {
                 Some(mcp) => mcp,
                 None => {
                     meta.drafts_created += 1;
-                    self.builder.build_process_draft(code, industry_code).await?
+                    self.builder
+                        .build_process_draft(code, industry_code)
+                        .await?
                 }
             };
             process_mcps.push(mcp);
@@ -105,7 +126,10 @@ where
         // 3. Standard Position MCPs
         let mut standard_position_mcps = Vec::new();
         for hint in position_hints {
-            let mcp = match self.resolve_cached(McpType::StandardPosition, McpScope::Global, hint, &mut meta).await? {
+            let mcp = match self
+                .resolve_cached(McpType::StandardPosition, McpScope::Global, hint, &mut meta)
+                .await?
+            {
                 Some(mcp) => mcp,
                 None => {
                     meta.drafts_created += 1;
@@ -122,12 +146,15 @@ where
         }
 
         // 4. Organization Context MCP
-        let organization_context_mcp = match self.resolve_cached(
-            McpType::OrganizationContext,
-            McpScope::Tenant,
-            &org_id.to_string(),
-            &mut meta,
-        ).await? {
+        let organization_context_mcp = match self
+            .resolve_cached(
+                McpType::OrganizationContext,
+                McpScope::Tenant,
+                &org_id.to_string(),
+                &mut meta,
+            )
+            .await?
+        {
             Some(mcp) => Some(mcp),
             None => {
                 meta.drafts_created += 1;

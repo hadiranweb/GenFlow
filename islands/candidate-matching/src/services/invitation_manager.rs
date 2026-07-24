@@ -1,10 +1,10 @@
 //! Invitation Manager — Creates and manages position invitations for candidates
 
+use chrono::{Duration, Utc};
+use genflow_receptors::{InviteStatus, PositionInvite};
+use genflow_shared_infra::error::AppError;
 use sqlx::PgPool;
 use uuid::Uuid;
-use chrono::{Utc, Duration};
-use genflow_receptors::{PositionInvite, InviteStatus};
-use genflow_shared_infra::error::AppError;
 
 pub struct InvitationManager {
     pool: PgPool,

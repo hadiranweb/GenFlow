@@ -6,12 +6,12 @@
 //! Example: When MCP resolved + Position generated + Candidate invited
 //! all happen for the same organization, trigger a dashboard metrics update.
 
+use chrono::{DateTime, Utc};
+use genflow_receptors::events::EventEnvelope;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use genflow_receptors::events::EventEnvelope;
 
 /// Convergence pattern — a set of event types that must occur
 /// for a composite action to trigger
@@ -34,9 +34,12 @@ pub enum ConvergenceAction {
 /// State of a convergence tracking session
 #[derive(Debug)]
 struct ConvergenceState {
+    #[allow(dead_code)]
     correlation_id: Uuid,
+    #[allow(dead_code)]
     organization_id: Option<Uuid>,
     received_events: HashMap<String, DateTime<Utc>>,
+    #[allow(dead_code)]
     pattern_id: String,
 }
 
@@ -68,17 +71,23 @@ impl ConvergenceTracker {
             let key = format!("{}:{}", pattern.pattern_id, correlation_id);
 
             let mut states = self.states.write().await;
-            let state = states.entry(key.clone()).or_insert_with(|| ConvergenceState {
-                correlation_id,
-                organization_id: None,
-                received_events: HashMap::new(),
-                pattern_id: pattern.pattern_id.clone(),
-            });
+            let state = states
+                .entry(key.clone())
+                .or_insert_with(|| ConvergenceState {
+                    correlation_id,
+                    organization_id: None,
+                    received_events: HashMap::new(),
+                    pattern_id: pattern.pattern_id.clone(),
+                });
 
-            state.received_events.insert(event_type.clone(), envelope.timestamp);
+            state
+                .received_events
+                .insert(event_type.clone(), envelope.timestamp);
 
             // Check if all required events have been received
-            let all_received = pattern.required_events.iter()
+            let all_received = pattern
+                .required_events
+                .iter()
                 .all(|req| state.received_events.contains_key(req));
 
             if all_received {
@@ -103,8 +112,7 @@ impl ConvergenceTracker {
         let mut states = self.states.write().await;
         states.retain(|_, state| {
             // Keep states that are not older than 1 hour
-            let oldest = state.received_events.values().min()
-                .unwrap_or(&now);
+            let oldest = state.received_events.values().min().unwrap_or(&now);
             now.signed_duration_since(*oldest).num_hours() < 1
         });
     }
@@ -115,10 +123,7 @@ impl ConvergenceTracker {
             // When position is generated AND MCP resolved → trigger candidate pipeline setup
             ConvergencePattern {
                 pattern_id: "position_pipeline_init".to_string(),
-                required_events: vec![
-                    "mcp.resolved".to_string(),
-                    "position.generated".to_string(),
-                ],
+                required_events: vec!["mcp.resolved".to_string(), "position.generated".to_string()],
                 timeout_seconds: 3600,
                 action: ConvergenceAction::TriggerCalculation {
                     calculation_type: "candidate_pipeline_setup".to_string(),

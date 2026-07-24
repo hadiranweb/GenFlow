@@ -1,9 +1,15 @@
 //! Business Need Discovery — Identifies business needs from analysis input
 
-use genflow_receptors::{BusinessNeed, BusinessNeedType, NeedUrgency};
 use genflow_receptors::BusinessAnalysisRequest;
+use genflow_receptors::{BusinessNeed, BusinessNeedType, NeedUrgency};
 
 pub struct BusinessNeedDiscovery;
+
+impl Default for BusinessNeedDiscovery {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BusinessNeedDiscovery {
     pub fn new() -> Self {
@@ -15,7 +21,11 @@ impl BusinessNeedDiscovery {
         let mut needs = Vec::new();
 
         match &request.input_mode {
-            genflow_receptors::BusinessInputMode::Swot { weaknesses, opportunities, .. } => {
+            genflow_receptors::BusinessInputMode::Swot {
+                weaknesses,
+                opportunities,
+                ..
+            } => {
                 for weakness in weaknesses {
                     needs.push(BusinessNeed::new(
                         BusinessNeedType::CapabilityGap,
@@ -40,7 +50,11 @@ impl BusinessNeedDiscovery {
                     ));
                 }
             }
-            genflow_receptors::BusinessInputMode::DirectRequest { requested_title, reason, .. } => {
+            genflow_receptors::BusinessInputMode::DirectRequest {
+                requested_title,
+                reason,
+                ..
+            } => {
                 needs.push(BusinessNeed::new(
                     BusinessNeedType::DirectPositionRequest,
                     format!("{} — {}", requested_title, reason),

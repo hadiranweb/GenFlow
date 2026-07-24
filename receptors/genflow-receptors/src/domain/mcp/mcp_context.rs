@@ -50,12 +50,12 @@ impl McpType {
     /// TTL پیش‌فرض در Redis (ثانیه)
     pub fn default_cache_ttl_seconds(&self) -> u64 {
         match self {
-            Self::PlatformPolicy => 7 * 24 * 3600,      // 7 روز
-            Self::Industry => 24 * 3600,                 // 24 ساعت
-            Self::BusinessProcess => 24 * 3600,          // 24 ساعت
-            Self::StandardPosition => 24 * 3600,         // 24 ساعت
-            Self::OrganizationContext => 3600,            // 1 ساعت
-            Self::CaseTemporary => 1800,                  // 30 دقیقه
+            Self::PlatformPolicy => 7 * 24 * 3600, // 7 روز
+            Self::Industry => 24 * 3600,           // 24 ساعت
+            Self::BusinessProcess => 24 * 3600,    // 24 ساعت
+            Self::StandardPosition => 24 * 3600,   // 24 ساعت
+            Self::OrganizationContext => 3600,     // 1 ساعت
+            Self::CaseTemporary => 1800,           // 30 دقیقه
         }
     }
 
@@ -68,6 +68,18 @@ impl McpType {
             Self::StandardPosition => "standard_position",
             Self::OrganizationContext => "organization_context",
             Self::CaseTemporary => "case_temporary",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "platform_policy" => Some(Self::PlatformPolicy),
+            "industry" => Some(Self::Industry),
+            "business_process" => Some(Self::BusinessProcess),
+            "standard_position" => Some(Self::StandardPosition),
+            "organization_context" => Some(Self::OrganizationContext),
+            "case_temporary" => Some(Self::CaseTemporary),
+            _ => None,
         }
     }
 }
@@ -95,6 +107,16 @@ impl McpScope {
             Self::Industry => "industry",
             Self::Tenant => "tenant",
             Self::Case => "case",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "global" => Some(Self::Global),
+            "industry" => Some(Self::Industry),
+            "tenant" => Some(Self::Tenant),
+            "case" => Some(Self::Case),
+            _ => None,
         }
     }
 }
@@ -126,6 +148,18 @@ impl McpStatus {
             Self::Active => "active",
             Self::Deprecated => "deprecated",
             Self::Archived => "archived",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "draft" => Some(Self::Draft),
+            "review_ready" => Some(Self::ReviewReady),
+            "approved" => Some(Self::Approved),
+            "active" => Some(Self::Active),
+            "deprecated" => Some(Self::Deprecated),
+            "archived" => Some(Self::Archived),
+            _ => None,
         }
     }
 
@@ -278,7 +312,9 @@ impl McpContext {
             McpType::PlatformPolicy => self.scope == McpScope::Global,
             McpType::Industry => matches!(self.scope, McpScope::Global | McpScope::Industry),
             McpType::BusinessProcess => matches!(self.scope, McpScope::Global | McpScope::Industry),
-            McpType::StandardPosition => matches!(self.scope, McpScope::Global | McpScope::Industry),
+            McpType::StandardPosition => {
+                matches!(self.scope, McpScope::Global | McpScope::Industry)
+            }
             McpType::OrganizationContext => self.scope == McpScope::Tenant,
             McpType::CaseTemporary => self.scope == McpScope::Case,
         };
@@ -293,7 +329,7 @@ impl McpContext {
         // case_temporary نباید reusable باشد
         if self.mcp_type == McpType::CaseTemporary && self.reusable {
             return Err(McpError::Validation(
-                "case_temporary MCP must have reusable=false".to_string()
+                "case_temporary MCP must have reusable=false".to_string(),
             ));
         }
 
@@ -302,7 +338,7 @@ impl McpContext {
 
     /// محاسبه SHA-256 hash محتوا
     pub fn compute_hash(content: &serde_json::Value) -> String {
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let json_str = serde_json::to_string(content).unwrap_or_default();
         let mut hasher = Sha256::new();
         hasher.update(json_str.as_bytes());
@@ -326,11 +362,17 @@ impl McpBundle {
     /// تمام MCPهای استفاده‌شده
     pub fn all_mcps(&self) -> Vec<&McpContext> {
         let mut all = Vec::new();
-        if let Some(ref m) = self.industry_mcp { all.push(m); }
+        if let Some(ref m) = self.industry_mcp {
+            all.push(m);
+        }
         all.extend(self.process_mcps.iter());
         all.extend(self.standard_position_mcps.iter());
-        if let Some(ref m) = self.organization_context_mcp { all.push(m); }
-        if let Some(ref m) = self.case_mcp { all.push(m); }
+        if let Some(ref m) = self.organization_context_mcp {
+            all.push(m);
+        }
+        if let Some(ref m) = self.case_mcp {
+            all.push(m);
+        }
         all.extend(self.policy_guardrails.iter());
         all
     }
@@ -341,7 +383,11 @@ impl McpBundle {
         let industry = self.industry_mcp.as_ref().map(|_| 1000).unwrap_or(0);
         let processes = self.process_mcps.len() * 800;
         let positions = self.standard_position_mcps.len() * 1200;
-        let org = self.organization_context_mcp.as_ref().map(|_| 1500).unwrap_or(0);
+        let org = self
+            .organization_context_mcp
+            .as_ref()
+            .map(|_| 1500)
+            .unwrap_or(0);
 
         base + industry + processes + positions + org
     }
@@ -400,7 +446,10 @@ mod tests {
 
     #[test]
     fn test_mcp_ttl() {
-        assert_eq!(McpType::PlatformPolicy.default_cache_ttl_seconds(), 7 * 24 * 3600);
+        assert_eq!(
+            McpType::PlatformPolicy.default_cache_ttl_seconds(),
+            7 * 24 * 3600
+        );
         assert_eq!(McpType::Industry.default_cache_ttl_seconds(), 24 * 3600);
         assert_eq!(McpType::CaseTemporary.default_cache_ttl_seconds(), 1800);
     }
@@ -411,19 +460,21 @@ mod tests {
             .title("خرده‌فروشی")
             .build();
 
-        assert_eq!(
-            mcp.cache_key(),
-            "mcp:ctx:industry:industry:retail:0.1.0"
-        );
+        assert_eq!(mcp.cache_key(), "mcp:ctx:industry:industry:retail:0.1.0");
     }
 
     #[test]
     fn test_bundle_token_savings() {
         let bundle = McpBundle {
-            industry_mcp: Some(McpContextBuilder::new(McpType::Industry, McpScope::Industry, "retail").build()),
-            process_mcps: vec![
-                McpContextBuilder::new(McpType::BusinessProcess, McpScope::Industry, "inventory").build()
-            ],
+            industry_mcp: Some(
+                McpContextBuilder::new(McpType::Industry, McpScope::Industry, "retail").build(),
+            ),
+            process_mcps: vec![McpContextBuilder::new(
+                McpType::BusinessProcess,
+                McpScope::Industry,
+                "inventory",
+            )
+            .build()],
             standard_position_mcps: vec![],
             organization_context_mcp: None,
             case_mcp: None,
@@ -437,10 +488,13 @@ mod tests {
 
     #[test]
     fn test_validate_scope() {
-        let valid = McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Global, "fairness").build();
+        let valid =
+            McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Global, "fairness").build();
         assert!(valid.validate_scope().is_ok());
 
-        let valid2 = McpContextBuilder::new(McpType::OrganizationContext, McpScope::Tenant, "org-ctx").build();
+        let valid2 =
+            McpContextBuilder::new(McpType::OrganizationContext, McpScope::Tenant, "org-ctx")
+                .build();
         assert!(valid2.validate_scope().is_ok());
 
         // Invalid: platform_policy with tenant scope

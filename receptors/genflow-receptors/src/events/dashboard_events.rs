@@ -1,8 +1,8 @@
 //! Dashboard Events — Published by dashboard-analytics island
 
+use crate::events::common::{DomainEvent, EventSource};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::events::common::{DomainEvent, EventSource};
 
 /// Dashboard metrics updated
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -13,8 +13,12 @@ pub struct DashboardMetricsUpdatedEvent {
 }
 
 impl DomainEvent for DashboardMetricsUpdatedEvent {
-    fn event_type(&self) -> &'static str { "dashboard.metrics_updated" }
-    fn source(&self) -> EventSource { EventSource::DashboardAnalytics }
+    fn event_type(&self) -> &'static str {
+        "dashboard.metrics_updated"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::DashboardAnalytics
+    }
 }
 
 /// Dashboard alert triggered
@@ -27,8 +31,12 @@ pub struct DashboardAlertTriggeredEvent {
 }
 
 impl DomainEvent for DashboardAlertTriggeredEvent {
-    fn event_type(&self) -> &'static str { "dashboard.alert_triggered" }
-    fn source(&self) -> EventSource { EventSource::DashboardAnalytics }
+    fn event_type(&self) -> &'static str {
+        "dashboard.alert_triggered"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::DashboardAnalytics
+    }
 }
 
 /// Notification sent
@@ -41,6 +49,10 @@ pub struct NotificationSentEvent {
 }
 
 impl DomainEvent for NotificationSentEvent {
-    fn event_type(&self) -> &'static str { "dashboard.notification_sent" }
-    fn source(&self) -> EventSource { EventSource::DashboardAnalytics }
+    fn event_type(&self) -> &'static str {
+        "dashboard.notification_sent"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::DashboardAnalytics
+    }
 }

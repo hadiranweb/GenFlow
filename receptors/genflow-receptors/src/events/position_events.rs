@@ -1,8 +1,8 @@
 //! Position Generation Events — Published by position-generation island
 
+use crate::events::common::{DomainEvent, EventSource};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::events::common::{DomainEvent, EventSource};
 
 /// Business analysis completed
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,8 +14,12 @@ pub struct BusinessAnalysisCompletedEvent {
 }
 
 impl DomainEvent for BusinessAnalysisCompletedEvent {
-    fn event_type(&self) -> &'static str { "position.analysis_completed" }
-    fn source(&self) -> EventSource { EventSource::PositionGeneration }
+    fn event_type(&self) -> &'static str {
+        "position.analysis_completed"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::PositionGeneration
+    }
 }
 
 /// New position generated
@@ -29,8 +33,12 @@ pub struct PositionGeneratedEvent {
 }
 
 impl DomainEvent for PositionGeneratedEvent {
-    fn event_type(&self) -> &'static str { "position.generated" }
-    fn source(&self) -> EventSource { EventSource::PositionGeneration }
+    fn event_type(&self) -> &'static str {
+        "position.generated"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::PositionGeneration
+    }
 }
 
 /// Position graph built
@@ -42,6 +50,10 @@ pub struct PositionGraphBuiltEvent {
 }
 
 impl DomainEvent for PositionGraphBuiltEvent {
-    fn event_type(&self) -> &'static str { "position.graph_built" }
-    fn source(&self) -> EventSource { EventSource::PositionGeneration }
+    fn event_type(&self) -> &'static str {
+        "position.graph_built"
+    }
+    fn source(&self) -> EventSource {
+        EventSource::PositionGeneration
+    }
 }

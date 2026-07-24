@@ -4,7 +4,4 @@
 
 pub mod services;
 
-pub use services::{
-    DashboardEngine,
-    NotificationService,
-};
+pub use services::{DashboardEngine, NotificationService};

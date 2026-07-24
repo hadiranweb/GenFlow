@@ -2,11 +2,11 @@
 //!
 //! tokio mpsc (in-process) + Redis pub/sub (cross-container)
 
+use genflow_receptors::events::{DomainEvent, EventEnvelope};
+use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::RedisPool;
 use std::sync::Arc;
 use tokio::sync::broadcast;
-use genflow_receptors::events::{EventEnvelope, DomainEvent};
-use genflow_shared_infra::RedisPool;
-use genflow_shared_infra::error::AppError;
 
 /// Channel capacity for the internal broadcast channel
 const INTERNAL_CHANNEL_CAPACITY: usize = 1024;

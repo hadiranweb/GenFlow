@@ -5,9 +5,6 @@
 pub mod services;
 
 pub use services::{
-    BusinessAnalysisEngine,
-    BusinessNeedDiscovery,
-    PositionGraphBuilder,
+    BusinessAnalysisEngine, BusinessNeedDiscovery, PositionGenerationEngine, PositionGraphBuilder,
     RepresentativeCalibrator,
-    PositionGenerationEngine,
 };

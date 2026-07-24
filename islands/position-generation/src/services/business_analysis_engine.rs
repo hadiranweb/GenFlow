@@ -1,14 +1,12 @@
 //! Business Analysis Engine — Orchestrator for business analysis pipeline
 
-use sqlx::PgPool;
-use uuid::Uuid;
-use genflow_receptors::{
-    BusinessAnalysisRequest, BusinessAnalysisResult, ResolutionMetadata,
-};
 use genflow_mcp_registry::McpResolver;
+use genflow_receptors::{BusinessAnalysisRequest, BusinessAnalysisResult};
 use genflow_shared_infra::error::AppError;
+use sqlx::PgPool;
 
 pub struct BusinessAnalysisEngine {
+    #[allow(dead_code)]
     pool: PgPool,
 }
 
@@ -29,13 +27,15 @@ impl BusinessAnalysisEngine {
         B: genflow_mcp_registry::McpBuilder,
     {
         // 1. Resolve MCP bundle
-        let bundle = resolver.resolve_for_analysis(
-            request.organization_id,
-            request.industry_code.as_deref(),
-            &request.process_codes,
-            &request.position_hints,
-            request.analysis_id,
-        ).await
+        let bundle = resolver
+            .resolve_for_analysis(
+                request.organization_id,
+                request.industry_code.as_deref(),
+                &request.process_codes,
+                &request.position_hints,
+                request.analysis_id,
+            )
+            .await
             .map_err(|e| AppError::Infrastructure(e.to_string()))?;
 
         // 2. Store analysis result

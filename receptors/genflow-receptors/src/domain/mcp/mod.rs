@@ -4,13 +4,13 @@
 //! mcp-registry island. Here we only define domain types and the
 //! non-async error type.
 
+pub mod mcp_builder;
 pub mod mcp_context;
 pub mod mcp_error;
-pub mod mcp_builder;
 
+pub use mcp_builder::McpContextBuilder;
 pub use mcp_context::{
-    McpType, McpScope, McpStatus, McpLinkType, FragmentRole,
-    McpContext, McpBundle, ResolutionMetadata, McpPromptFragment, McpContextLink,
+    FragmentRole, McpBundle, McpContext, McpContextLink, McpLinkType, McpPromptFragment, McpScope,
+    McpStatus, McpType, ResolutionMetadata,
 };
 pub use mcp_error::McpError;
-pub use mcp_builder::McpContextBuilder;

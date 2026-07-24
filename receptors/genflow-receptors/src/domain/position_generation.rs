@@ -2,13 +2,13 @@
 //!
 //! Business analysis → Need discovery → Graph → Calibration → Position generation
 
+use crate::domain::mcp::ResolutionMetadata;
+use crate::domain::score::Score;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::domain::score::Score;
-use crate::domain::mcp::ResolutionMetadata;
 
 /// ورودی درخواست تحلیل
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BusinessAnalysisRequest {
     pub analysis_id: Uuid,
     pub organization_id: Uuid,

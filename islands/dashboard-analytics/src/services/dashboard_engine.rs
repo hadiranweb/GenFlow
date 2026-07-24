@@ -1,12 +1,11 @@
 //! Dashboard Engine — Aggregates metrics and produces dashboard views
 
-use sqlx::{PgPool, Row};
-use uuid::Uuid;
 use genflow_receptors::{
-    DashboardOverview, KeyMetrics,
-    ActivityItem, ActivityAction, DashboardAlert,
+    ActivityAction, ActivityItem, DashboardAlert, DashboardOverview, KeyMetrics,
 };
 use genflow_shared_infra::error::AppError;
+use sqlx::{PgPool, Row};
+use uuid::Uuid;
 
 pub struct DashboardEngine {
     pool: PgPool,
@@ -33,19 +32,18 @@ impl DashboardEngine {
 
     async fn fetch_metrics(&self, org_id: Uuid) -> Result<KeyMetrics, AppError> {
         // Count positions
-        let total_positions: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM job_positions WHERE organization_id = $1"
-        )
-            .bind(org_id)
-            .fetch_one(&self.pool)
-            .await?;
+        let total_positions: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM job_positions WHERE organization_id = $1")
+                .bind(org_id)
+                .fetch_one(&self.pool)
+                .await?;
 
         let active_positions: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM job_positions WHERE organization_id = $1 AND status = 'active'"
+            "SELECT COUNT(*) FROM job_positions WHERE organization_id = $1 AND status = 'active'",
         )
-            .bind(org_id)
-            .fetch_one(&self.pool)
-            .await?;
+        .bind(org_id)
+        .fetch_one(&self.pool)
+        .await?;
 
         // Count candidates
         let total_invited: i64 = sqlx::query_scalar(
@@ -70,21 +68,28 @@ impl DashboardEngine {
 
     async fn fetch_recent_activity(&self, org_id: Uuid) -> Result<Vec<ActivityItem>, AppError> {
         let rows = sqlx::query(
-            "SELECT * FROM dashboard_activity WHERE organization_id = $1 ORDER BY timestamp DESC LIMIT 20"
+            "SELECT * FROM activity_logs WHERE organization_id = $1 ORDER BY created_at DESC LIMIT 20"
         )
             .bind(org_id)
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(rows.iter().map(|row| ActivityItem {
-            id: row.get("id"),
-            actor_name: row.get("actor_name"),
-            action: ActivityAction::from_db_str(&row.get::<String, _>("action")),
-            entity_type: row.get("entity_type"),
-            entity_title: row.get("entity_title"),
-            timestamp: row.get("timestamp"),
-            metadata: row.get("metadata"),
-        }).collect())
+        Ok(rows
+            .iter()
+            .map(|row| ActivityItem {
+                id: row.get("id"),
+                actor_name: format!("Representative {}", row.get::<Uuid, _>("actor_id")),
+                action: ActivityAction::from_db_str(&row.get::<String, _>("action")),
+                entity_type: row.get("entity_type"),
+                entity_title: format!(
+                    "{} {}",
+                    row.get::<String, _>("entity_type"),
+                    row.get::<Uuid, _>("entity_id")
+                ),
+                timestamp: row.get("created_at"),
+                metadata: row.get("metadata"),
+            })
+            .collect())
     }
 
     async fn fetch_alerts(&self, _org_id: Uuid) -> Result<Vec<DashboardAlert>, AppError> {

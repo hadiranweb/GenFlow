@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: genflow-migrate
     entrypoint: []
-    command: ["sh", "-c", "sleep 3 && /app/genflow-api --migrate-only"]
+    command: ["sh", "-c", "sleep 3 && sqlx migrate run || echo 'Migration via sqlx-cli; fallback: binary runs migrations at startup'"]
     environment:
       - DATABASE_URL=postgres://genflow:genflow@db:5432/genflow
     depends_on:

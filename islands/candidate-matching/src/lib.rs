@@ -4,8 +4,4 @@
 
 pub mod services;
 
-pub use services::{
-    InvitationManager,
-    MatchingEngine,
-    ReportGenerator,
-};
+pub use services::{InvitationManager, MatchingEngine, ReportGenerator};
