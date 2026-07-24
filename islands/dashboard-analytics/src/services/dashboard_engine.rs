@@ -31,27 +31,23 @@ impl DashboardEngine {
     }
 
     async fn fetch_metrics(&self, org_id: Uuid) -> Result<KeyMetrics, AppError> {
-        // Count positions
-        let total_positions: i64 =
-            sqlx::query_scalar("SELECT COUNT(*) FROM job_positions WHERE organization_id = $1")
-                .bind(org_id)
-                .fetch_one(&self.pool)
-                .await?;
-
-        let active_positions: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM job_positions WHERE organization_id = $1 AND status = 'active'",
+        let row = sqlx::query(
+            r#"
+            SELECT 
+                COUNT(*) as total_positions,
+                COUNT(*) FILTER (WHERE status = 'active') as active_positions,
+                (SELECT COUNT(*) FROM position_invites WHERE position_id IN (SELECT id FROM job_positions WHERE organization_id = $1)) as total_candidates_invited
+            FROM job_positions 
+            WHERE organization_id = $1
+            "#
         )
         .bind(org_id)
         .fetch_one(&self.pool)
         .await?;
 
-        // Count candidates
-        let total_invited: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM position_invites WHERE position_id IN (SELECT id FROM job_positions WHERE organization_id = $1)"
-        )
-            .bind(org_id)
-            .fetch_one(&self.pool)
-            .await?;
+        let total_positions: i64 = row.get("total_positions");
+        let active_positions: i64 = row.get("active_positions");
+        let total_invited: i64 = row.get("total_candidates_invited");
 
         Ok(KeyMetrics {
             total_positions: total_positions as u32,

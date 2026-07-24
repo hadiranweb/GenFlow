@@ -549,4 +549,25 @@ impl MatchingEngine {
 
         Ok(match_id)
     }
+
+    /// Record hiring decision on a match
+    pub async fn record_decision(
+        &self,
+        match_id: Uuid,
+        decided_by: Uuid,
+        decision: MatchStatus,
+        note: Option<String>,
+    ) -> Result<(), AppError> {
+        sqlx::query(
+            "UPDATE job_matches SET status = $1, decision_made_by_user_id = $2, decision_made_at = NOW(), decision_note = $3 WHERE id = $4"
+        )
+        .bind(decision.as_db_str())
+        .bind(decided_by)
+        .bind(note)
+        .bind(match_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
 }

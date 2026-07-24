@@ -3,7 +3,7 @@
 use chrono::{Duration, Utc};
 use genflow_receptors::{InviteStatus, PositionInvite};
 use genflow_shared_infra::error::AppError;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
 pub struct InvitationManager {
@@ -68,13 +68,52 @@ impl InvitationManager {
         invite_code: &str,
         candidate_id: Uuid,
     ) -> Result<(), AppError> {
-        sqlx::query(
-            "UPDATE position_invites SET candidate_id = $1, status = 'accepted' WHERE invite_code = $2 AND status IN ('created', 'sent')"
+        let mut tx = self.pool.begin().await?;
+
+        // 1. Fetch invitation details
+        let invite_row = sqlx::query(
+            "SELECT email, phone FROM position_invites WHERE invite_code = $1 AND status IN ('created', 'sent')"
         )
-            .bind(candidate_id)
-            .bind(invite_code)
-            .execute(&self.pool)
-            .await?;
+        .bind(invite_code)
+        .fetch_optional(&mut *tx)
+        .await?;
+
+        let (email, phone) = match invite_row {
+            Some(row) => (
+                row.get::<Option<String>, _>("email"),
+                row.get::<Option<String>, _>("phone")
+            ),
+            None => {
+                return Err(AppError::NotFound(format!("Active invitation with code {} not found", invite_code)));
+            }
+        };
+
+        // 2. Create Candidate first to satisfy foreign key constraint
+        sqlx::query(
+            "INSERT INTO candidates (id, email, phone, analysis_status) VALUES ($1, $2, $3, 'registered') ON CONFLICT DO NOTHING"
+        )
+        .bind(candidate_id)
+        .bind(&email)
+        .bind(&phone)
+        .execute(&mut *tx)
+        .await?;
+
+        // 3. Update the invitation row
+        sqlx::query(
+            "UPDATE position_invites SET candidate_id = $1, status = 'accepted', accepted_at = NOW() WHERE invite_code = $2"
+        )
+        .bind(candidate_id)
+        .bind(invite_code)
+        .execute(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        tracing::info!(
+            candidate_id = %candidate_id,
+            code = %invite_code,
+            "Invitation accepted and candidate record initialized"
+        );
 
         Ok(())
     }

@@ -59,9 +59,9 @@ pub async fn generate_report(
     State(state): State<Arc<AppState>>,
     Path(match_id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::MatchReport>, ApiError> {
-    // Load the match from DB to get its details
+    // Load the match from DB to get its details, casting DECIMAL fields to FLOAT8 to avoid SQLx type mismatch panic
     let row = sqlx::query(
-        "SELECT id, position_id, candidate_id, composite_match_index, confidence_score, status, human_review_required FROM job_matches WHERE id = $1"
+        "SELECT id, position_id, candidate_id, composite_match_index::FLOAT8 as composite_match_index, confidence_score::FLOAT8 as confidence_score, status, human_review_required, calculated_at FROM job_matches WHERE id = $1"
     )
         .bind(match_id)
         .fetch_optional(&state.db_pool)
@@ -105,10 +105,10 @@ pub async fn generate_report(
                     details: vec![],
                 },
                 composite_index: genflow_receptors::Score::new_unchecked(
-                    row.get::<f32, _>("composite_match_index"),
+                    row.get::<Option<f64>, _>("composite_match_index").unwrap_or(0.0) as f32,
                 ),
                 confidence_score: genflow_receptors::Score::new_unchecked(
-                    row.get::<f32, _>("confidence_score"),
+                    row.get::<Option<f64>, _>("confidence_score").unwrap_or(0.0) as f32,
                 ),
                 status: genflow_receptors::MatchStatus::from_db_str(
                     &row.get::<String, _>("status"),
@@ -129,4 +129,33 @@ pub async fn generate_report(
             match_id
         )))),
     }
+}
+
+#[derive(serde::Deserialize)]
+pub struct RecordDecisionRequest {
+    pub decision: String, // "shortlisted" | "not_selected" | "selected" | "under_review" | "withdrawn"
+    pub decided_by: Uuid,
+    pub note: Option<String>,
+}
+
+pub async fn record_decision(
+    State(state): State<Arc<AppState>>,
+    Path(match_id): Path<Uuid>,
+    Json(payload): Json<RecordDecisionRequest>,
+) -> Result<axum::http::StatusCode, ApiError> {
+    let status = match payload.decision.as_str() {
+        "pending_review" => genflow_receptors::MatchStatus::PendingReview,
+        "under_review" => genflow_receptors::MatchStatus::UnderReview,
+        "shortlisted" => genflow_receptors::MatchStatus::Shortlisted,
+        "not_selected" => genflow_receptors::MatchStatus::NotSelected,
+        "selected" => genflow_receptors::MatchStatus::Selected,
+        "withdrawn" => genflow_receptors::MatchStatus::Withdrawn,
+        _ => return Err(ApiError(AppError::Business("Invalid decision status".to_string()))),
+    };
+
+    state.matching_engine
+        .record_decision(match_id, payload.decided_by, status, payload.note)
+        .await?;
+
+    Ok(axum::http::StatusCode::OK)
 }
