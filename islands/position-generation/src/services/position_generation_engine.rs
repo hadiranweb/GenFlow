@@ -5,7 +5,7 @@ use uuid::Uuid;
 use genflow_receptors::{
     BusinessAnalysisRequest, GeneratedPositionProfile, JobPosition,
     PositionStatus, PositionGenerationMethod, PositionGenerationEvidence,
-    AxisWeights,
+    AxisWeights, Score,
 };
 use genflow_shared_infra::error::AppError;
 use crate::services::{

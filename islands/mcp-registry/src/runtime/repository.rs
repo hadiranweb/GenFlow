@@ -1,7 +1,7 @@
 //! PgMcpRepository — PostgreSQL implementation of McpRepository trait
 
 use async_trait::async_trait;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 use genflow_receptors::{
     McpContext, McpType, McpScope, McpPromptFragment,
@@ -153,7 +153,7 @@ impl McpRepository for PgMcpRepository {
             id: row.get("id"),
             mcp_context_id: row.get("mcp_context_id"),
             fragment_key: row.get("fragment_key"),
-            fragment_role: FragmentRole::from_db_str(row.get::<String, _>("fragment_role"))
+            fragment_role: FragmentRole::from_db_str(&row.get::<String, _>("fragment_role"))
                 .unwrap_or(FragmentRole::PromptInstruction),
             content: row.get("content"),
             token_estimate: row.get::<i32, _>("token_estimate") as usize,

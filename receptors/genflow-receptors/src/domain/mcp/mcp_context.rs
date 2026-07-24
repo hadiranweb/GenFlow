@@ -311,7 +311,7 @@ impl McpContext {
 }
 
 /// بسته MCP برای یک تحلیل — Synaptic convergence result
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpBundle {
     pub industry_mcp: Option<McpContext>,
     pub process_mcps: Vec<McpContext>,

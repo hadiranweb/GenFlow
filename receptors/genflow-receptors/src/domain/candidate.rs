@@ -36,7 +36,7 @@ impl CandidateStatus {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositionInvite {
     pub id: Uuid,
     pub position_id: Uuid,
@@ -49,7 +49,7 @@ pub struct PositionInvite {
     pub expires_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum InviteStatus {
     Created,
     Sent,
@@ -57,6 +57,19 @@ pub enum InviteStatus {
     Accepted,
     Expired,
     Revoked,
+}
+
+impl InviteStatus {
+    pub fn as_db_str(&self) -> &'static str {
+        match self {
+            Self::Created => "created",
+            Self::Sent => "sent",
+            Self::Viewed => "viewed",
+            Self::Accepted => "accepted",
+            Self::Expired => "expired",
+            Self::Revoked => "revoked",
+        }
+    }
 }
 
 impl PositionInvite {

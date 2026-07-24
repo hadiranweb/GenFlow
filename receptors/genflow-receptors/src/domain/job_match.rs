@@ -1,11 +1,11 @@
 //! Job Match Domain — 5-Axis Matching
 
-use crate::domain::score::Score;
 use serde::{Deserialize, Serialize};
+use crate::domain::score::Score;
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JobMatch {
     pub id: Uuid,
     pub position_id: Uuid,
@@ -26,7 +26,7 @@ pub struct JobMatch {
     pub calculated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AxisMatch {
     pub axis_code: String,
     pub match_percentage: Score,
@@ -34,7 +34,7 @@ pub struct AxisMatch {
     pub details: Vec<DimensionMatchDetail>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GapSeverity {
     Aligned,
     Acceptable,
@@ -42,7 +42,7 @@ pub enum GapSeverity {
     Misaligned,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DimensionMatchDetail {
     pub dimension_code: String,
     pub required_range: (Score, Score),
@@ -50,7 +50,7 @@ pub struct DimensionMatchDetail {
     pub match_percentage: Score,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MatchStatus {
     PendingReview,
     UnderReview,
@@ -73,7 +73,7 @@ impl MatchStatus {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatchReport {
     pub id: Uuid,
     pub job_match_id: Uuid,
@@ -87,7 +87,7 @@ pub struct MatchReport {
     pub disclaimers: Vec<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ReportType {
     ForEmployer,
     ForCandidate,
@@ -103,7 +103,7 @@ impl ReportType {
 }
 
 /// Risk Flag (غیرانگ‌زننده)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RiskFlag {
     pub code: String,
     pub severity: FlagSeverity,
@@ -111,7 +111,7 @@ pub struct RiskFlag {
     pub mitigation: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FlagSeverity {
     Info,
     Attention,

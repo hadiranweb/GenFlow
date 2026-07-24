@@ -83,7 +83,7 @@ impl MatchingEngine {
     fn match_capability_axis(&self, graph: &PositionGraph, candidate: &CandidateProfile) -> Result<AxisMatch, AppError> {
         let axis = graph.axes.iter()
             .find(|a| a.code == genflow_receptors::AxisCode::Capability)
-            .ok_or(AppError::Business("Missing capability axis"))?;
+            .ok_or(AppError::Business("Missing capability axis".to_string()))?;
 
         let mut details = Vec::new();
         let mut total_percentage = 0.0;

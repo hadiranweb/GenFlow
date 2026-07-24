@@ -1,6 +1,6 @@
 //! Telemetry Setup — tracing + metrics
 
-use tracing_subscriber::{EnvFilter, fmt, layer};
+use tracing_subscriber::{EnvFilter, fmt};
 use crate::config::LoggingConfig;
 
 /// Initialize tracing based on config

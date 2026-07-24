@@ -1,26 +1,30 @@
 //! RedisMcpCache — Redis implementation of McpCache trait
 
 use async_trait::async_trait;
-use redis::aio::MultiplexedConnection;
-use genflow_receptors::{McpContext, McpType};
-use crate::traits::{McpCache, McpRuntimeError};
+use genflow_receptors::McpContext;
+use crate::traits::McpRuntimeError;
+use genflow_shared_infra::RedisPool;
+use std::sync::Arc;
 
 pub struct RedisMcpCache {
-    conn: MultiplexedConnection,
+    redis: Arc<RedisPool>,
 }
 
 impl RedisMcpCache {
-    pub fn new(conn: MultiplexedConnection) -> Self {
-        Self { conn }
+    pub fn new(redis: Arc<RedisPool>) -> Self {
+        Self { redis }
     }
 }
 
 #[async_trait]
-impl McpCache for RedisMcpCache {
+impl crate::traits::McpCache for RedisMcpCache {
     async fn get(&self, key: &str) -> Result<Option<McpContext>, McpRuntimeError> {
+        let mut conn = self.redis.connection().await
+            .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
+
         let result: Option<String> = redis::cmd("GET")
             .arg(key)
-            .query_async(&mut self.conn.clone())
+            .query_async::<_, Option<String>>(&mut conn)
             .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
@@ -38,11 +42,14 @@ impl McpCache for RedisMcpCache {
         let json = serde_json::to_string(value)
             .map_err(|e| McpRuntimeError::Cache(format!("Serialization: {}", e)))?;
 
+        let mut conn = self.redis.connection().await
+            .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
+
         redis::cmd("SETEX")
             .arg(key)
             .arg(ttl_seconds)
             .arg(&json)
-            .query_async::<String>(&mut self.conn.clone())
+            .query_async::<_, ()>(&mut conn)
             .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
@@ -50,9 +57,12 @@ impl McpCache for RedisMcpCache {
     }
 
     async fn invalidate(&self, key: &str) -> Result<(), McpRuntimeError> {
+        let mut conn = self.redis.connection().await
+            .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
+
         redis::cmd("DEL")
             .arg(key)
-            .query_async::<i64>(&mut self.conn.clone())
+            .query_async::<_, ()>(&mut conn)
             .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 

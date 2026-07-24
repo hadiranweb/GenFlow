@@ -30,14 +30,18 @@ where
         Self { repo, cache, builder }
     }
 
-    /// Resolution with fallback: Cache → DB → Build
-    async fn resolve_with_fallback(
+    /// Find MCP by ID (delegates to repository)
+    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<McpContext>, McpRuntimeError> {
+        self.repo.find_by_id(id).await
+    }
+
+    /// Try to resolve from cache → DB (no build fallback)
+    async fn resolve_cached(
         &self,
         mcp_type: McpType,
         scope: McpScope,
         code: &str,
         meta: &mut ResolutionMetadata,
-        build_fn: impl FnOnce() -> Result<McpContext, McpRuntimeError>,
     ) -> Result<Option<McpContext>, McpRuntimeError> {
         let cache_key = format!("mcp:ctx:{}:{}:{}:active", mcp_type.as_db_str(), scope.as_db_str(), code);
 
@@ -57,11 +61,7 @@ where
             return Ok(Some(mcp));
         }
 
-        // 3. Build draft (fallback)
-        meta.drafts_created += 1;
-        let mcp = build_fn()?;
-        tracing::debug!(code = %code, "MCP draft built as fallback");
-        Ok(Some(mcp))
+        Ok(None)
     }
 
     /// Full resolution for Business Analysis
@@ -78,13 +78,13 @@ where
 
         // 1. Industry MCP
         let industry_mcp = if let Some(code) = industry_code {
-            self.resolve_with_fallback(
-                McpType::Industry,
-                McpScope::Industry,
-                code,
-                &mut meta,
-                || self.builder.build_industry_draft(code),
-            ).await?
+            match self.resolve_cached(McpType::Industry, McpScope::Industry, code, &mut meta).await? {
+                Some(mcp) => Some(mcp),
+                None => {
+                    meta.drafts_created += 1;
+                    Some(self.builder.build_industry_draft(code).await?)
+                }
+            }
         } else {
             None
         };
@@ -92,46 +92,48 @@ where
         // 2. Process MCPs
         let mut process_mcps = Vec::new();
         for code in process_codes {
-            let mcp = self.resolve_with_fallback(
-                McpType::BusinessProcess,
-                McpScope::Industry,
-                code,
-                &mut meta,
-                || self.builder.build_process_draft(code, industry_code),
-            ).await?;
-            if let Some(mcp) = mcp {
-                process_mcps.push(mcp);
-            }
+            let mcp = match self.resolve_cached(McpType::BusinessProcess, McpScope::Industry, code, &mut meta).await? {
+                Some(mcp) => mcp,
+                None => {
+                    meta.drafts_created += 1;
+                    self.builder.build_process_draft(code, industry_code).await?
+                }
+            };
+            process_mcps.push(mcp);
         }
 
         // 3. Standard Position MCPs
         let mut standard_position_mcps = Vec::new();
         for hint in position_hints {
-            let mcp = self.resolve_with_fallback(
-                McpType::StandardPosition,
-                McpScope::Global,
-                hint,
-                &mut meta,
-                || async {
-                    // No specific builder for standard positions — return default
-                    Ok(McpContextBuilder::new(McpType::StandardPosition, McpScope::Global, hint)
-                        .title(format!("Position: {}", hint))
-                        .build())
-                }.await,
-            ).await?;
-            if let Some(mcp) = mcp {
-                standard_position_mcps.push(mcp);
-            }
+            let mcp = match self.resolve_cached(McpType::StandardPosition, McpScope::Global, hint, &mut meta).await? {
+                Some(mcp) => mcp,
+                None => {
+                    meta.drafts_created += 1;
+                    // Build a simple standard position MCP (no specific builder method for this)
+                    McpContext {
+                        status: McpStatus::ReviewReady,
+                        ..McpContextBuilder::new(McpType::StandardPosition, McpScope::Global, hint)
+                            .title(format!("Position: {}", hint))
+                            .build()
+                    }
+                }
+            };
+            standard_position_mcps.push(mcp);
         }
 
         // 4. Organization Context MCP
-        let organization_context_mcp = self.resolve_with_fallback(
+        let organization_context_mcp = match self.resolve_cached(
             McpType::OrganizationContext,
             McpScope::Tenant,
             &org_id.to_string(),
             &mut meta,
-            || self.builder.build_case_draft(org_id),
-        ).await?;
+        ).await? {
+            Some(mcp) => Some(mcp),
+            None => {
+                meta.drafts_created += 1;
+                Some(self.builder.build_case_draft(org_id).await?)
+            }
+        };
 
         // 5. Policy Guardrails (always resolve global platform policies)
         let policy_guardrails = Vec::new(); // TODO: resolve policy MCPs

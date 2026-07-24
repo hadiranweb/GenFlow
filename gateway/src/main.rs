@@ -2,17 +2,13 @@
 //!
 //! Hybrid Island Architecture: Gateway routes to all Island services.
 //! Single binary, single deploy, workspace-aware.
-//!
-//! ## Architecture
-//! Gateway → Islands (lib crates) → Receptors (shared types)
-//!                              → Synaptic Hub (event bus)
-//!                              → Shared Infra (DB, Redis, Auth)
 
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
 mod state;
 mod api;
+mod error_response;
 
 use state::AppState;
 use genflow_shared_infra::telemetry;
@@ -35,17 +31,16 @@ async fn main() -> anyhow::Result<()> {
 
     // 3. Connect to infrastructure
     let db_pool = DatabasePool::connect(&config.database).await?;
-    let redis_pool = RedisPool::connect(&config.redis).await?;
+    let redis_pool = Arc::new(RedisPool::connect(&config.redis).await?);
 
     // 4. Run migrations
     db_pool.run_migrations().await?;
 
     // 5. Initialize island services
     let pg_pool = db_pool.pool().clone();
-    let redis_conn = redis_pool.connection().clone();
 
     let mcp_repo = Arc::new(genflow_mcp_registry::PgMcpRepository::new(pg_pool.clone()));
-    let mcp_cache = Arc::new(genflow_mcp_registry::RedisMcpCache::new(redis_conn));
+    let mcp_cache = Arc::new(genflow_mcp_registry::RedisMcpCache::new(redis_pool.clone()));
     let mcp_builder = Arc::new(genflow_mcp_registry::McpBuilderImpl::new());
     let mcp_resolver = Arc::new(genflow_mcp_registry::McpResolver::new(
         mcp_repo.clone(),
@@ -62,14 +57,16 @@ async fn main() -> anyhow::Result<()> {
 
     // 6. Initialize Synaptic Hub
     let synaptic_bus = Arc::new(genflow_synaptic_hub::SynapticBus::new(
-        Arc::new(redis_pool.clone()),
+        redis_pool.clone(),
     ));
 
     // 7. Build application state
+    let host = config.server.host.clone();
+    let port = config.server.port;
     let jwt_auth = JwtAuth::new(config.jwt.clone());
-    let health_checker = HealthChecker::new(pg_pool.clone(), redis_pool);
+    let health_checker = HealthChecker::new(pg_pool.clone(), redis_pool.clone());
 
-    let state = AppState {
+    let state = Arc::new(AppState {
         config,
         db_pool: pg_pool,
         mcp_resolver,
@@ -82,17 +79,17 @@ async fn main() -> anyhow::Result<()> {
         jwt_auth,
         synaptic_bus,
         health_checker,
-    };
+        redis_pool,
+    });
 
     // 8. Build Axum router
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{}:{}", state.config.server.host, state.config.server.port))
+    let listener = TcpListener::bind(format!("{}:{}", host, port))
         .await?;
 
-    tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", 
-        state.config.server.host, state.config.server.port);
+    tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

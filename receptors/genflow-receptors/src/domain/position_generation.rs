@@ -5,8 +5,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::domain::score::Score;
-use crate::domain::business_need::BusinessNeed;
-use crate::domain::mcp::McpBundle;
 use crate::domain::mcp::ResolutionMetadata;
 
 /// ورودی درخواست تحلیل
@@ -22,7 +20,8 @@ pub struct BusinessAnalysisRequest {
     pub representative_context: Option<RepresentativeContextInput>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum BusinessInputMode {
     Swot {
         strengths: Vec<String>,
@@ -42,13 +41,13 @@ pub enum BusinessInputMode {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapabilityLevel {
     pub capability: String,
     pub level: u8,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RepresentativeContextInput {
     pub use_personality: bool,
     pub requested_weight: f32,
@@ -87,7 +86,7 @@ impl Default for AxisWeights {
 }
 
 /// تطبیق با استاندارد صنعت
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StandardPositionMatch {
     pub mcp_context_id: Option<Uuid>,
     pub position_code: String,
@@ -150,7 +149,7 @@ pub struct DimensionRequirement {
 }
 
 /// نیازمندی نهایی پوزیشن
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositionRequirement {
     pub axis_code: AxisCode,
     pub requirement_type: RequirementType,
@@ -161,7 +160,7 @@ pub struct PositionRequirement {
     pub score_range: Option<(Score, Score, Score)>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum RequirementType {
     Knowledge,
     Skill,
@@ -171,14 +170,14 @@ pub enum RequirementType {
     Certification,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum RequirementImportance {
     Critical,
     Important,
     NiceToHave,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RequirementSource {
     BusinessNeed { need_id: String },
     IndustryStandard { standard_ref: String },
@@ -187,7 +186,7 @@ pub enum RequirementSource {
 }
 
 /// نتیجه نهایی تولید
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GeneratedPositionProfile {
     pub position: JobPosition,
     pub graph: PositionGraph,
@@ -257,7 +256,7 @@ pub struct PositionGenerationEvidence {
     pub rationale: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GenerationWarning {
     pub code: String,
     pub severity: WarningSeverity,
@@ -265,7 +264,7 @@ pub struct GenerationWarning {
     pub mitigation: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum WarningSeverity {
     Info,
     Warning,
@@ -273,7 +272,7 @@ pub enum WarningSeverity {
 }
 
 /// نتیجه تحلیل کسب‌وکار (intermediate)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BusinessAnalysisResult {
     pub analysis_id: Uuid,
     pub organization_id: Uuid,

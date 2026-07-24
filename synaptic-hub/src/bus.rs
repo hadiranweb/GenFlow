@@ -3,7 +3,7 @@
 //! tokio mpsc (in-process) + Redis pub/sub (cross-container)
 
 use std::sync::Arc;
-use tokio::sync::{mpsc, broadcast};
+use tokio::sync::broadcast;
 use genflow_receptors::events::{EventEnvelope, DomainEvent};
 use genflow_shared_infra::RedisPool;
 use genflow_shared_infra::error::AppError;
@@ -32,17 +32,18 @@ impl SynapticBus {
     /// Publish an event to both layers (tokio + Redis)
     pub async fn publish(&self, envelope: EventEnvelope) -> Result<(), AppError> {
         // Layer 1: tokio broadcast (in-process)
-        self.internal.send(envelope.clone()).ok(); // silent fail if no receivers
+        self.internal.send(envelope.clone()).ok();
 
         // Layer 2: Redis pub/sub (cross-container)
         let channel = envelope.channel_name();
         let payload = serde_json::to_string(&envelope)
             .map_err(|e| AppError::Internal(format!("Event serialization: {}", e)))?;
 
+        let mut conn = self.redis.connection().await?;
         redis::cmd("PUBLISH")
             .arg(&channel)
             .arg(&payload)
-            .query_async::<i64>(&mut self.redis.connection().clone())
+            .query_async::<_, ()>(&mut conn)
             .await
             .map_err(|e| AppError::Infrastructure(format!("Redis publish: {}", e)))?;
 
@@ -62,21 +63,7 @@ impl SynapticBus {
     }
 
     /// Subscribe to internal channel (Layer 1: in-process)
-    /// Returns a broadcast receiver for the given event types
     pub fn subscribe_internal(&self) -> broadcast::Receiver<EventEnvelope> {
         self.internal.subscribe()
-    }
-
-    /// Subscribe to Redis channel (Layer 2: cross-container)
-    /// Returns a pub/sub connection for the given channels
-    pub async fn subscribe_redis(&self, channels: &[String]) -> Result<redis::aio::PubSub, AppError> {
-        let mut pubsub = self.redis.pubsub_connection().await?;
-
-        for channel in channels {
-            pubsub.subscribe(channel).await
-                .map_err(|e| AppError::Infrastructure(format!("Redis subscribe: {}", e)))?;
-        }
-
-        Ok(pubsub)
     }
 }

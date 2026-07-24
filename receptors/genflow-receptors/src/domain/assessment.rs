@@ -78,22 +78,25 @@ pub struct RiasecScores {
 
 impl RiasecScores {
     pub fn top_codes(&self) -> Vec<(String, f32)> {
-        let codes = [
+        let codes: Vec<(String, f32)> = [
             ("R", self.realistic.value()),
             ("I", self.investigative.value()),
             ("A", self.artistic.value()),
             ("S", self.social.value()),
             ("E", self.enterprising.value()),
             ("C", self.conventional.value()),
-        ];
-        let mut sorted: Vec<_> = codes.to_vec();
+        ]
+        .iter()
+        .map(|(k, v)| (k.to_string(), *v))
+        .collect();
+        let mut sorted = codes;
         sorted.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         sorted.into_iter().take(3).collect()
     }
 }
 
 /// Assessment Method Codes
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AssessmentMethod {
     BigFive,
     Riasec,

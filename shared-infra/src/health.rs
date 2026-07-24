@@ -1,8 +1,8 @@
 //! Health Check Utilities
 
+use std::sync::Arc;
 use sqlx::PgPool;
 use crate::RedisPool;
-use crate::error::AppError;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -21,11 +21,11 @@ pub struct ComponentHealth {
 
 pub struct HealthChecker {
     db: PgPool,
-    redis: RedisPool,
+    redis: Arc<RedisPool>,
 }
 
 impl HealthChecker {
-    pub fn new(db: PgPool, redis: RedisPool) -> Self {
+    pub fn new(db: PgPool, redis: Arc<RedisPool>) -> Self {
         Self { db, redis }
     }
 
@@ -43,7 +43,7 @@ impl HealthChecker {
             status: overall.to_string(),
             database: db_health,
             redis: redis_health,
-            version: env!("CARGO_PKG_VERSION"),
+            version: "2.0.0".to_string(),
         }
     }
 

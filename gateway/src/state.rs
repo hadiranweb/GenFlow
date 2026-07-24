@@ -3,12 +3,14 @@
 use std::sync::Arc;
 use sqlx::PgPool;
 use genflow_shared_infra::{
-    AppConfig, JwtAuth, HealthChecker,
+    AppConfig, JwtAuth, HealthChecker, RedisPool,
 };
 use genflow_mcp_registry::McpResolver;
 use genflow_synaptic_hub::SynapticBus;
 
 /// AppState — holds references to all island services and infrastructure
+///
+/// Wrapped in Arc for axum's Clone requirement on state.
 pub struct AppState {
     pub config: AppConfig,
     pub db_pool: PgPool,
@@ -38,4 +40,5 @@ pub struct AppState {
     pub jwt_auth: JwtAuth,
     pub synaptic_bus: Arc<SynapticBus>,
     pub health_checker: HealthChecker,
+    pub redis_pool: Arc<RedisPool>,
 }

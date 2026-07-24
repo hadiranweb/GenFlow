@@ -1,55 +1,58 @@
 //! Redis Pool — Connection and pub/sub helpers
 
-use redis::aio::MultiplexedConnection;
 use redis::Client;
+use redis::aio::MultiplexedConnection;
 use crate::config::RedisConfig;
 use crate::error::AppError;
 
 pub struct RedisPool {
     client: Client,
-    connection: MultiplexedConnection,
 }
 
 impl RedisPool {
-    /// Create Redis connection from config
+    /// Create Redis client from config and verify connection
     pub async fn connect(config: &RedisConfig) -> Result<Self, AppError> {
         let client = Client::open(config.url.clone())
             .map_err(|e| AppError::Infrastructure(format!("Redis client creation failed: {}", e)))?;
 
-        let connection = client
+        let mut conn = client
             .get_multiplexed_async_connection()
             .await
             .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {}", e)))?;
 
+        // Verify connection with PING
+        let result: String = redis::cmd("PING")
+            .query_async(&mut conn)
+            .await
+            .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {}", e)))?;
+
+        if result != "PONG" {
+            return Err(AppError::Infrastructure("Redis ping did not return PONG".to_string()));
+        }
+
         tracing::info!("Redis pool connected to {}", config.url);
 
-        Ok(Self { client, connection })
+        Ok(Self { client })
     }
 
-    /// Get a reference to the async connection
-    pub fn connection(&self) -> &MultiplexedConnection {
-        &self.connection
+    /// Get a fresh async connection for operations
+    pub async fn connection(&self) -> Result<MultiplexedConnection, AppError> {
+        self.client
+            .get_multiplexed_async_connection()
+            .await
+            .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {}", e)))
     }
 
-    /// Get the client (for creating new pub/sub connections)
+    /// Get the client (for creating new connections)
     pub fn client(&self) -> &Client {
         &self.client
     }
 
-    /// Create a new pub/sub connection for event consumption
-    pub async fn pubsub_connection(&self) -> Result<redis::aio::PubSub, AppError> {
-        let pubsub = self.client
-            .get_async_pubsub()
-            .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis pub/sub connection failed: {}", e)))?;
-
-        Ok(pubsub)
-    }
-
     /// Ping check for health
     pub async fn ping(&self) -> Result<(), AppError> {
-        redis::cmd("PING")
-            .query_async::<String>(&mut self.connection.clone())
+        let mut conn = self.connection().await?;
+        let _: String = redis::cmd("PING")
+            .query_async(&mut conn)
             .await
             .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {}", e)))?;
         Ok(())

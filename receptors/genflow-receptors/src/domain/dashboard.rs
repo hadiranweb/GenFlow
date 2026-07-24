@@ -5,7 +5,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::domain::score::Score;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DashboardOverview {
     pub organization_id: Uuid,
     pub metrics: KeyMetrics,
@@ -29,7 +29,7 @@ pub struct KeyMetrics {
     pub positions_expiring_soon: Vec<PositionAlert>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositionAlert {
     pub position_id: Uuid,
     pub title: String,
@@ -38,7 +38,7 @@ pub struct PositionAlert {
     pub urgency: AlertUrgency,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AlertUrgency {
     Low,
     Medium,
@@ -46,7 +46,7 @@ pub enum AlertUrgency {
     Critical,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ActivityItem {
     pub id: Uuid,
     pub actor_name: String,
@@ -57,7 +57,7 @@ pub struct ActivityItem {
     pub metadata: serde_json::Value,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActivityAction {
     PositionCreated,
     CandidateInvited,
@@ -83,7 +83,7 @@ impl ActivityAction {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositionDashboardDetail {
     pub position: PositionSummary,
     pub pipeline: PipelineStats,
@@ -91,7 +91,7 @@ pub struct PositionDashboardDetail {
     pub recent_activity: Vec<ActivityItem>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositionSummary {
     pub id: Uuid,
     pub title: String,
@@ -101,7 +101,7 @@ pub struct PositionSummary {
     pub requirements_count: u32,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PipelineStats {
     pub invited: u32,
     pub registered: u32,
@@ -112,7 +112,7 @@ pub struct PipelineStats {
     pub rejected: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatchSummary {
     pub match_id: Uuid,
     pub candidate_name: String,
@@ -123,14 +123,14 @@ pub struct MatchSummary {
     pub status: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RiskLevel {
     Low,
     Medium,
     High,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DashboardAlert {
     pub alert_type: AlertType,
     pub message: String,
@@ -138,7 +138,7 @@ pub struct DashboardAlert {
     pub severity: AlertUrgency,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AlertType {
     HighMatchFound,
     PositionExpiring,

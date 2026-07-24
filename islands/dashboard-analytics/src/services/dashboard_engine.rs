@@ -1,10 +1,10 @@
 //! Dashboard Engine — Aggregates metrics and produces dashboard views
 
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 use genflow_receptors::{
-    DashboardOverview, KeyMetrics, PositionAlert, AlertUrgency,
-    ActivityItem, ActivityAction, DashboardAlert, AlertType,
+    DashboardOverview, KeyMetrics,
+    ActivityItem, ActivityAction, DashboardAlert,
 };
 use genflow_shared_infra::error::AppError;
 
@@ -79,7 +79,7 @@ impl DashboardEngine {
         Ok(rows.iter().map(|row| ActivityItem {
             id: row.get("id"),
             actor_name: row.get("actor_name"),
-            action: ActivityAction::from_db_str(row.get::<String, _>("action")),
+            action: ActivityAction::from_db_str(&row.get::<String, _>("action")),
             entity_type: row.get("entity_type"),
             entity_title: row.get("entity_title"),
             timestamp: row.get("timestamp"),

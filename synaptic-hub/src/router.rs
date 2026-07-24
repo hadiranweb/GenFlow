@@ -3,7 +3,6 @@
 //! Routes events to the appropriate island based on event type.
 //! Implements the "convergence patterns" from pema-platform-v2 architecture.
 
-use genflow_receptors::events::EventEnvelope;
 use genflow_receptors::events::EventSource;
 use std::collections::HashMap;
 

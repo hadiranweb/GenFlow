@@ -52,8 +52,8 @@ impl JwtAuth {
 
     /// Validate a JWT token and return claims
     pub fn validate_token(&self, token: &str) -> Result<AuthClaims, AppError> {
-        let validation = Validation::default();
-        validation.iss = Some(vec![self.config.issuer.clone()]);
+        let mut validation = Validation::default();
+        validation.set_issuer(&[self.config.issuer.clone()]);
 
         decode(token, &self.decoding_key, &validation)
             .map(|data| data.claims)
