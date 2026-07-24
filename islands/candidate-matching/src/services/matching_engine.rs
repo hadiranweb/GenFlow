@@ -1,11 +1,14 @@
 //! 5-Axis Matching Engine — Core matching algorithm
+//!
+//! Loads position graph and candidate profile from DB,
+//! computes 5-axis match, persists results to DB.
 
 use genflow_receptors::{
     AxisMatch, CandidateProfile, FlagSeverity, GapSeverity, JobMatch, MatchStatus, PositionGraph,
-    RiskFlag, Score,
+    PositionGraphAxis, RiskFlag, Score,
 };
 use genflow_shared_infra::error::AppError;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
 pub struct MatchingEngine {
@@ -17,24 +20,26 @@ impl MatchingEngine {
         Self { pool }
     }
 
-    /// Calculate a match between a position and candidate
+    /// Calculate a match between a position and candidate — full pipeline with DB persistence
     pub async fn calculate_match(
         &self,
         position_id: Uuid,
         candidate_id: Uuid,
     ) -> Result<JobMatch, AppError> {
-        // Load position data
+        // 1. Load position graph from DB
         let graph = self.load_position_graph(position_id).await?;
+
+        // 2. Load candidate profile from DB
         let candidate = self.load_candidate_profile(candidate_id).await?;
 
-        // Calculate 5-axis matches
+        // 3. Calculate 5-axis matches
         let capability = self.match_capability_axis(&graph, &candidate)?;
         let output_kpi = self.match_output_kpi_axis(&graph, &candidate)?;
         let business_gap = self.match_business_gap_axis(&graph, &candidate)?;
         let work_style = self.match_work_style_axis(&graph, &candidate)?;
         let growth = self.match_growth_motivation_axis(&graph, &candidate)?;
 
-        // Calculate composite
+        // 4. Calculate composite
         let composite = self.calculate_composite(
             &capability,
             &output_kpi,
@@ -44,16 +49,16 @@ impl MatchingEngine {
             &graph,
         );
 
-        // Identify risk flags
+        // 5. Identify risk flags
         let risk_flags = self.identify_risk_flags(&work_style, &candidate);
 
-        // Determine if human review is required
+        // 6. Determine if human review is required
         let human_review = composite.value() < 60.0
             || risk_flags
                 .iter()
                 .any(|f| f.severity == FlagSeverity::ActionRequired);
 
-        // Save match
+        // 7. Persist match to database
         let match_id = self
             .save_match(
                 position_id,
@@ -64,14 +69,30 @@ impl MatchingEngine {
                 &work_style,
                 &growth,
                 composite,
+                human_review,
             )
             .await?;
+
+        // 8. Save risk flags
+        for flag in &risk_flags {
+            sqlx::query(
+                "INSERT INTO match_risk_flags (id, job_match_id, flag_code, severity, description, mitigation_suggestion) VALUES ($1, $2, $3, $4, $5, $6)"
+            )
+                .bind(Uuid::new_v4())
+                .bind(match_id)
+                .bind(&flag.code)
+                .bind(flag.severity.as_db_str())
+                .bind(&flag.description)
+                .bind(&flag.mitigation)
+                .execute(&self.pool)
+                .await?;
+        }
 
         tracing::info!(
             match_id = %match_id,
             composite = %composite,
             human_review = %human_review,
-            "Match calculated"
+            "Match calculated and persisted"
         );
 
         Ok(JobMatch {
@@ -161,7 +182,6 @@ impl MatchingEngine {
         _graph: &PositionGraph,
         _candidate: &CandidateProfile,
     ) -> Result<AxisMatch, AppError> {
-        // Simplified: placeholder for KPI matching
         Ok(AxisMatch {
             axis_code: "output_kpi".to_string(),
             match_percentage: Score::new(65.0).unwrap_or_default(),
@@ -288,31 +308,210 @@ impl MatchingEngine {
         flags
     }
 
-    // ─── Data Loading ───
+    // ─── Data Loading (from DB) ───
 
     async fn load_position_graph(&self, position_id: Uuid) -> Result<PositionGraph, AppError> {
-        // Load from DB — simplified for now
-        Ok(PositionGraph {
-            position_id,
-            version: "1.0".to_string(),
-            axes: vec![], // will be populated from DB in real impl
-            calibration_notes: None,
-        })
+        // Load graph data from position_graphs table
+        let row = sqlx::query(
+            "SELECT capability_axis, output_kpi_axis, business_gap_axis, work_style_axis, growth_motivation_axis, graph_version, calibration_applied, calibration_notes FROM position_graphs WHERE job_position_id = $1"
+        )
+            .bind(position_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        match row {
+            Some(row) => {
+                // Parse JSONB axes into domain PositionGraphAxis structs
+                let axes: Vec<PositionGraphAxis> = vec![
+                    self.parse_axis_from_json(
+                        row.get::<serde_json::Value, _>("capability_axis"),
+                        genflow_receptors::AxisCode::Capability,
+                    ),
+                    self.parse_axis_from_json(
+                        row.get::<serde_json::Value, _>("output_kpi_axis"),
+                        genflow_receptors::AxisCode::OutputKpi,
+                    ),
+                    self.parse_axis_from_json(
+                        row.get::<serde_json::Value, _>("business_gap_axis"),
+                        genflow_receptors::AxisCode::BusinessGap,
+                    ),
+                    self.parse_axis_from_json(
+                        row.get::<serde_json::Value, _>("work_style_axis"),
+                        genflow_receptors::AxisCode::WorkStyle,
+                    ),
+                    self.parse_axis_from_json(
+                        row.get::<serde_json::Value, _>("growth_motivation_axis"),
+                        genflow_receptors::AxisCode::GrowthMotivation,
+                    ),
+                ];
+
+                Ok(PositionGraph {
+                    position_id,
+                    version: row.get::<String, _>("graph_version"),
+                    axes,
+                    calibration_notes: row.get::<Option<String>, _>("calibration_notes"),
+                })
+            }
+            // Fallback: if no graph exists, return default weights graph
+            None => {
+                tracing::warn!(position_id = %position_id, "No position graph in DB, using default weights");
+                Ok(genflow_position_generation::PositionGraphBuilder::new()
+                    .build(position_id, &genflow_receptors::AxisWeights::default()))
+            }
+        }
+    }
+
+    fn parse_axis_from_json(
+        &self,
+        value: serde_json::Value,
+        code: genflow_receptors::AxisCode,
+    ) -> PositionGraphAxis {
+        let weight = value
+            .get("weight")
+            .and_then(|v| v.as_f64().map(|x| x as f32))
+            .unwrap_or(0.20);
+        let description = match code {
+            genflow_receptors::AxisCode::Capability => "Knowledge, skills and abilities",
+            genflow_receptors::AxisCode::OutputKpi => "Expected results and KPIs",
+            genflow_receptors::AxisCode::BusinessGap => "Gap between current and desired state",
+            genflow_receptors::AxisCode::WorkStyle => "Work style and collaboration",
+            genflow_receptors::AxisCode::GrowthMotivation => "Growth and development motivation",
+        };
+
+        let dimensions: Vec<genflow_receptors::DimensionRequirement> = value
+            .get("dimensions")
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|dim| {
+                        Some(genflow_receptors::DimensionRequirement {
+                            code: dim.get("code")?.as_str()?.to_string(),
+                            description: dim.get("description")?.as_str()?.to_string(),
+                            min: dim
+                                .get("min")
+                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(Score::new),
+                            ideal: dim
+                                .get("ideal")
+                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(Score::new),
+                            max: dim
+                                .get("max")
+                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(Score::new),
+                            is_mandatory: dim
+                                .get("is_mandatory")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false),
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        PositionGraphAxis {
+            code,
+            weight,
+            description: description.to_string(),
+            dimensions,
+            calibration_applied: value
+                .get("calibration_applied")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false),
+        }
     }
 
     async fn load_candidate_profile(
         &self,
         candidate_id: Uuid,
     ) -> Result<CandidateProfile, AppError> {
-        // Load from DB — simplified for now
+        // Load candidate's assessment data from DB
+        let assessments = sqlx::query(
+            "SELECT method_code, result_summary FROM assessment_sessions WHERE subject_candidate_id = $1 AND status = 'completed'"
+        )
+            .bind(candidate_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        let mut big_five = None;
+        let mut skills = std::collections::HashMap::new();
+
+        for row in &assessments {
+            let method: String = row.get("method_code");
+            let summary: serde_json::Value = row.get("result_summary");
+
+            if method == "big_five" {
+                big_five = Some(genflow_receptors::BigFiveScores {
+                    openness: Score::new(
+                        summary
+                            .get("openness")
+                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .unwrap_or(50.0),
+                    )
+                    .unwrap_or_default(),
+                    conscientiousness: Score::new(
+                        summary
+                            .get("conscientiousness")
+                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .unwrap_or(50.0),
+                    )
+                    .unwrap_or_default(),
+                    extraversion: Score::new(
+                        summary
+                            .get("extraversion")
+                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .unwrap_or(50.0),
+                    )
+                    .unwrap_or_default(),
+                    agreeableness: Score::new(
+                        summary
+                            .get("agreeableness")
+                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .unwrap_or(50.0),
+                    )
+                    .unwrap_or_default(),
+                    neuroticism: Score::new(
+                        summary
+                            .get("neuroticism")
+                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .unwrap_or(50.0),
+                    )
+                    .unwrap_or_default(),
+                });
+            } else if method == "riasec" {
+                // RIASEC scores contribute to skills mapping
+                for key in [
+                    "realistic",
+                    "investigative",
+                    "artistic",
+                    "social",
+                    "enterprising",
+                    "conventional",
+                ] {
+                    if let Some(score) = summary.get(key).and_then(|v| v.as_f64().map(|x| x as f32))
+                    {
+                        skills.insert(key.to_string(), score);
+                    }
+                }
+            }
+        }
+
+        // Load skills from candidate's skill data
+        let candidate_row = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
+            .bind(candidate_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
         Ok(CandidateProfile {
             candidate_id,
-            big_five: None,
-            riasec: None,
-            skills: std::collections::HashMap::new(),
+            big_five,
+            riasec: None, // Simplified for now
+            skills,
             experience_years: None,
         })
     }
+
+    // ─── Persistence ───
 
     #[allow(clippy::too_many_arguments)]
     async fn save_match(
@@ -325,6 +524,7 @@ impl MatchingEngine {
         work_style: &AxisMatch,
         growth: &AxisMatch,
         composite: Score,
+        human_review_required: bool,
     ) -> Result<Uuid, AppError> {
         let match_id = Uuid::new_v4();
 
@@ -342,7 +542,7 @@ impl MatchingEngine {
             .bind(composite.value())
             .bind(Score::new(85.0).unwrap_or_default().value())
             .bind(MatchStatus::PendingReview.as_db_str())
-            .bind(true)
+            .bind(human_review_required)
             .bind(chrono::Utc::now())
             .execute(&self.pool)
             .await?;

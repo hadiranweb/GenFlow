@@ -222,6 +222,15 @@ impl PositionGenerationMethod {
             Self::GapDriven => "gap_driven",
         }
     }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "business_analysis" => Some(Self::BusinessAnalysis),
+            "direct_request" => Some(Self::DirectRequest),
+            "gap_driven" => Some(Self::GapDriven),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -241,6 +250,17 @@ impl PositionStatus {
             Self::Paused => "paused",
             Self::Filled => "filled",
             Self::Archived => "archived",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "draft" => Some(Self::Draft),
+            "active" => Some(Self::Active),
+            "paused" => Some(Self::Paused),
+            "filled" => Some(Self::Filled),
+            "archived" => Some(Self::Archived),
+            _ => None,
         }
     }
 }

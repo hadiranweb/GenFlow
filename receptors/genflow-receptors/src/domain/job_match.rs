@@ -71,6 +71,18 @@ impl MatchStatus {
             Self::Withdrawn => "withdrawn",
         }
     }
+
+    pub fn from_db_str(s: &str) -> Option<Self> {
+        match s {
+            "pending_review" => Some(Self::PendingReview),
+            "under_review" => Some(Self::UnderReview),
+            "shortlisted" => Some(Self::Shortlisted),
+            "not_selected" => Some(Self::NotSelected),
+            "selected" => Some(Self::Selected),
+            "withdrawn" => Some(Self::Withdrawn),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -40,10 +40,20 @@ pub async fn generate_position(
 }
 
 pub async fn get_position(
-    State(_state): State<Arc<AppState>>,
-    Path(_id): Path<Uuid>,
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::JobPosition>, ApiError> {
-    Err(ApiError(AppError::NotFound(
-        "Position not yet implemented".to_string(),
-    )))
+    let position = state
+        .position_engine
+        .get_position(id)
+        .await
+        .map_err(ApiError::from)?;
+
+    match position {
+        Some(pos) => Ok(Json(pos)),
+        None => Err(ApiError(AppError::NotFound(format!(
+            "Position {} not found",
+            id
+        )))),
+    }
 }

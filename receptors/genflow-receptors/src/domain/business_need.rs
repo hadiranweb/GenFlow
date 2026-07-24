@@ -5,18 +5,40 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BusinessNeedType {
-    CapabilityGap,         // کمبود توانایی
-    ProcessBottleneck,     // گلوگاه فرایند
-    GrowthOpportunity,     // فرصت رشد
-    RiskMitigation,        // کاهش ریسک
-    DirectPositionRequest, // درخواست مستقیم
+    CapabilityGap,
+    ProcessBottleneck,
+    GrowthOpportunity,
+    RiskMitigation,
+    DirectPositionRequest,
+}
+
+impl BusinessNeedType {
+    pub fn as_db_str(&self) -> &'static str {
+        match self {
+            Self::CapabilityGap => "capability_gap",
+            Self::ProcessBottleneck => "process_bottleneck",
+            Self::GrowthOpportunity => "growth_opportunity",
+            Self::RiskMitigation => "risk_mitigation",
+            Self::DirectPositionRequest => "direct_position_request",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NeedUrgency {
-    Immediate,  // بلوکه‌کننده (Blocker)
-    ShortTerm,  // ۱-۳ ماه
-    MediumTerm, // ۳-۱۲ ماه
+    Immediate,
+    ShortTerm,
+    MediumTerm,
+}
+
+impl NeedUrgency {
+    pub fn as_db_str(&self) -> &'static str {
+        match self {
+            Self::Immediate => "immediate",
+            Self::ShortTerm => "short_term",
+            Self::MediumTerm => "medium_term",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,7 +71,6 @@ impl BusinessNeed {
         }
     }
 
-    /// آیا این نیاز مستقیماً به یک پوزیشن شغلی ختم می‌شود؟
     pub fn implies_position(&self) -> bool {
         matches!(
             self.need_type,
@@ -59,7 +80,6 @@ impl BusinessNeed {
         )
     }
 
-    /// اولویت عددی برای sorting (هرچه کمتر، فوری‌تر)
     pub fn priority_score(&self) -> u8 {
         match self.urgency {
             NeedUrgency::Immediate => 1,

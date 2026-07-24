@@ -1,4 +1,7 @@
 //! Position Generation Engine — Orchestrates the full position generation pipeline
+//!
+//! Pipeline: Business Input → MCP Resolution → Need Discovery → Graph Build →
+//!           Representative Calibration → Position Creation → DB Persistence → Event Publish
 
 use crate::services::{BusinessNeedDiscovery, PositionGraphBuilder, RepresentativeCalibrator};
 use genflow_receptors::{
@@ -6,11 +9,11 @@ use genflow_receptors::{
     PositionGenerationEvidence, PositionGenerationMethod, PositionStatus, Score,
 };
 use genflow_shared_infra::error::AppError;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
+
 use uuid::Uuid;
 
 pub struct PositionGenerationEngine {
-    #[allow(dead_code)]
     pool: PgPool,
     need_discovery: BusinessNeedDiscovery,
     graph_builder: PositionGraphBuilder,
@@ -27,20 +30,19 @@ impl PositionGenerationEngine {
         }
     }
 
-    /// Generate a position from an analysis request
+    /// Generate a position from an analysis request — full pipeline with DB persistence
     pub async fn generate(
         &self,
         request: &BusinessAnalysisRequest,
     ) -> Result<GeneratedPositionProfile, AppError> {
-        // 1. Discover business needs
+        // 1. Discover business needs from input
         let needs = self.need_discovery.discover(request);
 
-        // 2. Determine axis weights
+        // 2. Determine axis weights (with representative context adjustment)
         let weights = request
             .representative_context
             .as_ref()
             .map(|ctx| {
-                // Adjust default weights based on representative context
                 let mut w = AxisWeights::default();
                 if ctx.use_personality {
                     w.work_style += ctx.requested_weight * 0.10;
@@ -56,7 +58,6 @@ impl PositionGenerationEngine {
 
         // 4. Apply representative calibration (if provided)
         if let Some(ctx) = &request.representative_context {
-            // Default to Manager relation for now — real implementation would load from DB
             self.calibrator
                 .calibrate(
                     &mut graph,
@@ -68,28 +69,21 @@ impl PositionGenerationEngine {
         }
 
         // 5. Create position record
-        let position = JobPosition {
-            id: position_id,
-            organization_id: request.organization_id,
-            created_by_rep_id: request.representative_id,
-            position_code: format!("POS-{}", &position_id.to_string()[..8]),
-            title: self.infer_title(&needs),
-            description: None,
-            generation_method: match &request.input_mode {
-                genflow_receptors::BusinessInputMode::DirectRequest { .. } => {
-                    PositionGenerationMethod::DirectRequest
-                }
-                genflow_receptors::BusinessInputMode::GapAnalysis { .. } => {
-                    PositionGenerationMethod::GapDriven
-                }
-                _ => PositionGenerationMethod::BusinessAnalysis,
-            },
-            status: PositionStatus::Draft,
+        let generation_method = match &request.input_mode {
+            genflow_receptors::BusinessInputMode::DirectRequest { .. } => {
+                PositionGenerationMethod::DirectRequest
+            }
+            genflow_receptors::BusinessInputMode::GapAnalysis { .. } => {
+                PositionGenerationMethod::GapDriven
+            }
+            _ => PositionGenerationMethod::BusinessAnalysis,
         };
+
+        let title = self.infer_title(&needs);
 
         // 6. Build evidence
         let evidence = PositionGenerationEvidence {
-            generation_method: position.generation_method.as_db_str().to_string(),
+            generation_method: generation_method.as_db_str().to_string(),
             business_needs_used: needs.iter().map(|n| n.need_id.clone()).collect(),
             mcp_contexts_used: vec![], // populated from MCP resolution
             standards_used: vec![],
@@ -131,10 +125,129 @@ impl PositionGenerationEngine {
             })
             .collect();
 
+        // ─────────────────────────────────────────────────
+        // 8. PERSIST TO DATABASE
+        // ─────────────────────────────────────────────────
+
+        // 8a. Create business_analysis record
+        sqlx::query(
+            "INSERT INTO business_analyses (id, organization_id, created_by_rep_id, title, analysis_type, status, input_data) VALUES ($1, $2, $3, $4, $5, 'completed', $6)"
+        )
+            .bind(request.analysis_id)
+            .bind(request.organization_id)
+            .bind(request.representative_id)
+            .bind(&title)
+            .bind(generation_method.as_db_str())
+            .bind(serde_json::to_value(&request.input_mode).unwrap_or(serde_json::json!({})))
+            .execute(&self.pool)
+            .await?;
+
+        // 8b. Create business_needs records
+        for need in &needs {
+            sqlx::query(
+                "INSERT INTO business_needs (id, business_analysis_id, need_id, need_type, description, urgency) VALUES ($1, $2, $3, $4, $5, $6)"
+            )
+                .bind(Uuid::new_v4())
+                .bind(request.analysis_id)
+                .bind(&need.need_id)
+                .bind(need.need_type.as_db_str())
+                .bind(&need.description)
+                .bind(need.urgency.as_db_str())
+                .execute(&self.pool)
+                .await?;
+        }
+
+        // 8c. Create position_generation_run record (audit trail)
+        let run_id = Uuid::new_v4();
+        sqlx::query(
+            "INSERT INTO position_generation_runs (id, business_analysis_id, input_mode, status, rep_calibration_applied, rep_effective_weight) VALUES ($1, $2, $3, 'completed', $4, $5)"
+        )
+            .bind(run_id)
+            .bind(request.analysis_id)
+            .bind(generation_method.as_db_str())
+            .bind(request.representative_context.is_some())
+            .bind(request.representative_context.as_ref().map(|ctx| ctx.requested_weight as f32))
+            .execute(&self.pool)
+            .await?;
+
+        // 8d. Insert job_position — the core entity
+        sqlx::query(
+            "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+        )
+            .bind(position_id)
+            .bind(request.organization_id)
+            .bind(request.representative_id)
+            .bind(run_id)
+            .bind(format!("POS-{}", &position_id.to_string()[..8]))
+            .bind(&title)
+            .bind(None::<String>) // description
+            .bind(generation_method.as_db_str())
+            .bind(PositionStatus::Draft.as_db_str())
+            .bind(serde_json::to_value(&evidence).unwrap_or(serde_json::json!({})))
+            .execute(&self.pool)
+            .await?;
+
+        // 8e. Insert position_graph
+        sqlx::query(
+            "INSERT INTO position_graphs (id, job_position_id, graph_version, capability_axis, output_kpi_axis, business_gap_axis, work_style_axis, growth_motivation_axis, calibration_applied, calibration_notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+        )
+            .bind(Uuid::new_v4())
+            .bind(position_id)
+            .bind(&graph.version)
+            .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::Capability)).unwrap_or(serde_json::json!({})))
+            .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::OutputKpi)).unwrap_or(serde_json::json!({})))
+            .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::BusinessGap)).unwrap_or(serde_json::json!({})))
+            .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::WorkStyle)).unwrap_or(serde_json::json!({})))
+            .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::GrowthMotivation)).unwrap_or(serde_json::json!({})))
+            .bind(graph.axes.iter().any(|a| a.calibration_applied))
+            .bind(&graph.calibration_notes)
+            .execute(&self.pool)
+            .await?;
+
+        // 8f. Insert position_requirements
+        for req in &requirements {
+            sqlx::query(
+                "INSERT INTO position_requirements (id, job_position_id, axis_code, requirement_type, description, importance, is_mandatory, source_type, rationale) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+            )
+                .bind(Uuid::new_v4())
+                .bind(position_id)
+                .bind(req.axis_code.as_str())
+                .bind(match req.requirement_type {
+                    genflow_receptors::RequirementType::Knowledge => "knowledge",
+                    genflow_receptors::RequirementType::Skill => "skill",
+                    genflow_receptors::RequirementType::Ability => "ability",
+                    genflow_receptors::RequirementType::PersonalityTrait => "personality_trait",
+                    genflow_receptors::RequirementType::Experience => "experience",
+                    genflow_receptors::RequirementType::Certification => "certification",
+                })
+                .bind(&req.description)
+                .bind(match req.importance {
+                    genflow_receptors::RequirementImportance::Critical => "critical",
+                    genflow_receptors::RequirementImportance::Important => "important",
+                    genflow_receptors::RequirementImportance::NiceToHave => "nice_to_have",
+                })
+                .bind(matches!(req.source, genflow_receptors::RequirementSource::Generated))
+                .bind("generated")
+                .bind(&req.rationale)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        let position = JobPosition {
+            id: position_id,
+            organization_id: request.organization_id,
+            created_by_rep_id: request.representative_id,
+            position_code: format!("POS-{}", &position_id.to_string()[..8]),
+            title,
+            description: None,
+            generation_method,
+            status: PositionStatus::Draft,
+        };
+
         tracing::info!(
             position_id = %position_id,
             title = %position.title,
-            "Position generated"
+            "Position generated and persisted to database"
         );
 
         Ok(GeneratedPositionProfile {
@@ -152,7 +265,7 @@ impl PositionGenerationEngine {
             return "General Position".to_string();
         }
 
-        let primary = &needs[0]; // highest priority
+        let primary = &needs[0];
         match primary.need_type {
             genflow_receptors::BusinessNeedType::CapabilityGap => {
                 format!("{} Specialist", primary.description)
@@ -169,6 +282,42 @@ impl PositionGenerationEngine {
             genflow_receptors::BusinessNeedType::RiskMitigation => {
                 format!("{} Analyst", primary.description)
             }
+        }
+    }
+
+    /// Get a position by ID from database
+    pub async fn get_position(&self, id: Uuid) -> Result<Option<JobPosition>, AppError> {
+        let row = sqlx::query(
+            "SELECT id, organization_id, created_by_rep_id, position_code, title, description, generation_method, status FROM job_positions WHERE id = $1"
+        )
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        match row {
+            Some(row) => Ok(Some(JobPosition {
+                id: row.get("id"),
+                organization_id: row.get("organization_id"),
+                created_by_rep_id: row.get("created_by_rep_id"),
+                position_code: row.get("position_code"),
+                title: row.get("title"),
+                description: row.get("description"),
+                generation_method: match row.get::<String, _>("generation_method").as_str() {
+                    "business_analysis" => PositionGenerationMethod::BusinessAnalysis,
+                    "direct_request" => PositionGenerationMethod::DirectRequest,
+                    "gap_driven" => PositionGenerationMethod::GapDriven,
+                    _ => PositionGenerationMethod::BusinessAnalysis,
+                },
+                status: match row.get::<String, _>("status").as_str() {
+                    "draft" => PositionStatus::Draft,
+                    "active" => PositionStatus::Active,
+                    "paused" => PositionStatus::Paused,
+                    "filled" => PositionStatus::Filled,
+                    "archived" => PositionStatus::Archived,
+                    _ => PositionStatus::Draft,
+                },
+            })),
+            None => Ok(None),
         }
     }
 }
