@@ -84,11 +84,7 @@ pub async fn get_position(
         .await
         .map_err(ApiError::from)?;
 
-    match position {
-        Some(pos) => Ok(Json(pos)),
-        None => Err(ApiError(AppError::NotFound(format!(
-            "Position {} not found",
-            id
-        )))),
-    }
+    position
+        .map(Json)
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("Position {id} not found"))))
 }

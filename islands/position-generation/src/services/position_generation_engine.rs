@@ -43,12 +43,16 @@ impl PositionGenerationEngine {
             .representative_context
             .as_ref()
             .map(|ctx| {
-                let mut w = AxisWeights::default();
+                let default_w = AxisWeights::default();
                 if ctx.use_personality {
-                    w.work_style += ctx.requested_weight * 0.10;
-                    w.capability -= ctx.requested_weight * 0.05;
+                    AxisWeights {
+                        work_style: default_w.work_style + ctx.requested_weight * 0.10,
+                        capability: default_w.capability - ctx.requested_weight * 0.05,
+                        ..default_w
+                    }
+                } else {
+                    default_w
                 }
-                w
             })
             .unwrap_or_default();
 
@@ -301,8 +305,8 @@ impl PositionGenerationEngine {
             .fetch_optional(&self.pool)
             .await?;
 
-        match row {
-            Some(row) => Ok(Some(JobPosition {
+        if let Some(row) = row {
+            Ok(Some(JobPosition {
                 id: row.get("id"),
                 organization_id: row.get("organization_id"),
                 created_by_rep_id: row.get("created_by_rep_id"),
@@ -323,8 +327,9 @@ impl PositionGenerationEngine {
                     "archived" => PositionStatus::Archived,
                     _ => PositionStatus::Draft,
                 },
-            })),
-            None => Ok(None),
+            }))
+        } else {
+            Ok(None)
         }
     }
 }

@@ -18,13 +18,8 @@ pub async fn get_mcp(
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
-    match mcp {
-        Some(ctx) => Ok(Json(ctx)),
-        None => Err(ApiError(AppError::NotFound(format!(
-            "MCP {} not found",
-            id
-        )))),
-    }
+    mcp.map(Json)
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("MCP {id} not found"))))
 }
 
 #[derive(serde::Deserialize)]

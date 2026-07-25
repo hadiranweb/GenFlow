@@ -31,14 +31,12 @@ impl crate::traits::McpCache for RedisMcpCache {
             .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
-        match result {
-            Some(json_str) => {
-                let mcp: McpContext = serde_json::from_str(&json_str)
-                    .map_err(|e| McpRuntimeError::Cache(format!("Deserialization: {e}")))?;
-                Ok(Some(mcp))
-            }
-            None => Ok(None),
-        }
+        result
+            .map(|json_str| {
+                serde_json::from_str(&json_str)
+                    .map_err(|e| McpRuntimeError::Cache(format!("Deserialization: {e}")))
+            })
+            .transpose()
     }
 
     async fn set(
