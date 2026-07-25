@@ -287,7 +287,7 @@ impl McpContext {
 
     /// آیا این MCP منقضی شده؟
     pub fn is_expired(&self) -> bool {
-        self.expires_at.map(|exp| exp < Utc::now()).unwrap_or(false)
+        self.expires_at.map_or(false, |exp| exp < Utc::now())
     }
 
     /// آیا این MCP برای استفاده در تحلیل مناسب است؟
@@ -380,7 +380,7 @@ impl McpBundle {
     /// برآورد صرفه‌جویی توکن
     pub fn estimated_token_savings(&self) -> usize {
         let base = 500usize;
-        let industry = self.industry_mcp.as_ref().map(|_| 1000).unwrap_or(0);
+        let industry = self.industry_mcp.as_ref().map_or(0, |_| 1000);
         let processes = self.process_mcps.len() * 800;
         let positions = self.standard_position_mcps.len() * 1200;
         let org = self

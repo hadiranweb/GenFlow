@@ -497,7 +497,7 @@ impl MatchingEngine {
         }
 
         // Load skills from candidate's skill data
-        let _candidate_row = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
+        let _ = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
             .bind(candidate_id)
             .fetch_optional(&self.pool)
             .await?;
