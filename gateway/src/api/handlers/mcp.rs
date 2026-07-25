@@ -53,5 +53,18 @@ pub async fn resolve_mcp(
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
+    let mcp_ids = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::McpResolvedEvent {
+            analysis_id,
+            organization_id: req.organization_id,
+            mcp_ids,
+            cache_hits: bundle.resolution_metadata.cache_hits,
+            db_lookups: bundle.resolution_metadata.db_lookups,
+            resolution_time_ms: bundle.resolution_metadata.total_time_ms,
+        })
+        .await;
+
     Ok(Json(bundle))
 }

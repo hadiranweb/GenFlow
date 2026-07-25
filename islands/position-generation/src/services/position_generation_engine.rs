@@ -128,6 +128,10 @@ impl PositionGenerationEngine {
         // ─────────────────────────────────────────────────
         // 8. PERSIST TO DATABASE
         // ─────────────────────────────────────────────────
+        // Multi-table position generation must be atomic: either the analysis,
+        // needs, run, position, graph, and requirements all commit together or
+        // none of them do.
+        let mut tx = self.pool.begin().await?;
 
         // 8a. Create business_analysis record
         sqlx::query(
@@ -139,7 +143,7 @@ impl PositionGenerationEngine {
             .bind(&title)
             .bind(generation_method.as_db_str())
             .bind(serde_json::to_value(&request.input_mode).unwrap_or(serde_json::json!({})))
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
         // 8b. Create business_needs records
@@ -153,7 +157,7 @@ impl PositionGenerationEngine {
                 .bind(need.need_type.as_db_str())
                 .bind(&need.description)
                 .bind(need.urgency.as_db_str())
-                .execute(&self.pool)
+                .execute(&mut *tx)
                 .await?;
         }
 
@@ -167,7 +171,7 @@ impl PositionGenerationEngine {
             .bind(generation_method.as_db_str())
             .bind(request.representative_context.is_some())
             .bind(request.representative_context.as_ref().map(|ctx| ctx.requested_weight as f32))
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
         // 8d. Insert job_position — the core entity
@@ -184,7 +188,7 @@ impl PositionGenerationEngine {
             .bind(generation_method.as_db_str())
             .bind(PositionStatus::Draft.as_db_str())
             .bind(serde_json::to_value(&evidence).unwrap_or(serde_json::json!({})))
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
         // 8e. Insert position_graph
@@ -201,7 +205,7 @@ impl PositionGenerationEngine {
             .bind(serde_json::to_value(graph.axes.iter().find(|a| a.code == genflow_receptors::AxisCode::GrowthMotivation)).unwrap_or(serde_json::json!({})))
             .bind(graph.axes.iter().any(|a| a.calibration_applied))
             .bind(&graph.calibration_notes)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
         // 8f. Insert position_requirements
@@ -229,9 +233,11 @@ impl PositionGenerationEngine {
                 .bind(matches!(req.source, genflow_receptors::RequirementSource::Generated))
                 .bind("generated")
                 .bind(&req.rationale)
-                .execute(&self.pool)
+                .execute(&mut *tx)
                 .await?;
         }
+
+        tx.commit().await?;
 
         let position = JobPosition {
             id: position_id,

@@ -8,7 +8,6 @@ use genflow_shared_infra::error::AppError;
 use sqlx::Row;
 use std::sync::Arc;
 use uuid::Uuid;
-use serde_json;
 
 pub async fn calculate_match(
     State(state): State<Arc<AppState>>,
@@ -18,6 +17,18 @@ pub async fn calculate_match(
         .matching_engine
         .calculate_match(position_id, candidate_id)
         .await?;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
+            match_id: match_result.id,
+            position_id: match_result.position_id,
+            candidate_id: match_result.candidate_id,
+            composite_score: match_result.composite_index.value(),
+            human_review_required: match_result.human_review_required,
+        })
+        .await;
+
     Ok(Json(match_result))
 }
 
@@ -37,6 +48,17 @@ pub async fn create_invitation(
         .invitation_manager
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
         .await?;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
+            invite_id: invite.id,
+            position_id: invite.position_id,
+            candidate_id: invite.candidate_id,
+            email: invite.email.clone(),
+        })
+        .await;
+
     Ok(Json(invite))
 }
 
@@ -123,6 +145,16 @@ pub async fn generate_report(
                 .report_generator
                 .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
                 .await?;
+
+            let _ = state
+                .synaptic_bus
+                .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
+                    report_id: report.id,
+                    match_id: report.job_match_id,
+                    report_type: report.report_type.as_db_str().to_string(),
+                })
+                .await;
+
             Ok(Json(report))
         }
         None => Err(ApiError(AppError::NotFound(format!(

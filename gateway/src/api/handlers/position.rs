@@ -36,6 +36,37 @@ pub async fn generate_position(
     };
 
     let profile = state.position_engine.generate(&analysis_request).await?;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::BusinessAnalysisCompletedEvent {
+            analysis_id: analysis_request.analysis_id,
+            organization_id: analysis_request.organization_id,
+            needs_discovered: profile.evidence.business_needs_used.len() as u32,
+            mcp_ids_used: profile.evidence.mcp_contexts_used.clone(),
+        })
+        .await;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::PositionGraphBuiltEvent {
+            position_id: profile.position.id,
+            axis_count: profile.graph.axes.len() as u32,
+            calibration_applied: profile.graph.axes.iter().any(|axis| axis.calibration_applied),
+        })
+        .await;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::PositionGeneratedEvent {
+            position_id: profile.position.id,
+            organization_id: profile.position.organization_id,
+            position_code: profile.position.position_code.clone(),
+            title: profile.position.title.clone(),
+            generation_method: profile.position.generation_method.as_db_str().to_string(),
+        })
+        .await;
+
     Ok(Json(profile))
 }
 
