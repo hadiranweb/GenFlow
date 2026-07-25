@@ -383,11 +383,7 @@ impl McpBundle {
         let industry = self.industry_mcp.as_ref().map_or(0, |_| 1000);
         let processes = self.process_mcps.len() * 800;
         let positions = self.standard_position_mcps.len() * 1200;
-        let org = self
-            .organization_context_mcp
-            .as_ref()
-            .map(|_| 1500)
-            .unwrap_or(0);
+        let org = self.organization_context_mcp.as_ref().map_or(0, |_| 1500);
 
         base + industry + processes + positions + org
     }
@@ -498,9 +494,8 @@ mod tests {
         assert!(valid2.validate_scope().is_ok());
 
         // Invalid: platform_policy with tenant scope
-        let invalid = McpContext {
-            ..McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Tenant, "bad").build()
-        };
+        let invalid =
+            McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Tenant, "bad").build();
         assert!(invalid.validate_scope().is_err());
     }
 
