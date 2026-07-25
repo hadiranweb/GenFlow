@@ -5,17 +5,12 @@ use async_trait::async_trait;
 use genflow_receptors::{McpContext, McpContextBuilder, McpScope, McpStatus, McpType};
 use uuid::Uuid;
 
+#[derive(Default)]
 pub struct McpBuilderImpl;
 
 impl McpBuilderImpl {
     pub fn new() -> Self {
         Self
-    }
-}
-
-impl Default for McpBuilderImpl {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
