@@ -8,6 +8,7 @@ use genflow_shared_infra::error::AppError;
 use sqlx::Row;
 use std::sync::Arc;
 use uuid::Uuid;
+use serde_json;
 
 pub async fn calculate_match(
     State(state): State<Arc<AppState>>,

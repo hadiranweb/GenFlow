@@ -10,6 +10,7 @@ use genflow_receptors::{
 use genflow_shared_infra::error::AppError;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
+use serde_json;
 
 pub struct MatchingEngine {
     pool: PgPool,
