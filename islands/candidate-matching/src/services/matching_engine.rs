@@ -370,7 +370,8 @@ impl MatchingEngine {
     ) -> PositionGraphAxis {
         let weight = value
             .get("weight")
-            .and_then(|v| v.as_f64().map(|x| x as f32))
+            .and_then(|v| v.as_f64())
+            .map(|x| x as f32)
             .unwrap_or(0.20);
         let description = match code {
             genflow_receptors::AxisCode::Capability => "Knowledge, skills and abilities",
@@ -391,15 +392,18 @@ impl MatchingEngine {
                             description: dim.get("description")?.as_str()?.to_string(),
                             min: dim
                                 .get("min")
-                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(|v| v.as_f64())
+                                .map(|x| x as f32)
                                 .and_then(Score::new),
                             ideal: dim
                                 .get("ideal")
-                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(|v| v.as_f64())
+                                .map(|x| x as f32)
                                 .and_then(Score::new),
                             max: dim
                                 .get("max")
-                                .and_then(|v| v.as_f64().map(|x| x as f32))
+                                .and_then(|v| v.as_f64())
+                                .map(|x| x as f32)
                                 .and_then(Score::new),
                             is_mandatory: dim
                                 .get("is_mandatory")
@@ -447,35 +451,40 @@ impl MatchingEngine {
                     openness: Score::new(
                         summary
                             .get("openness")
-                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .and_then(|v| v.as_f64())
+                            .map(|x| x as f32)
                             .unwrap_or(50.0),
                     )
                     .unwrap_or_default(),
                     conscientiousness: Score::new(
                         summary
                             .get("conscientiousness")
-                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .and_then(|v| v.as_f64())
+                            .map(|x| x as f32)
                             .unwrap_or(50.0),
                     )
                     .unwrap_or_default(),
                     extraversion: Score::new(
                         summary
                             .get("extraversion")
-                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .and_then(|v| v.as_f64())
+                            .map(|x| x as f32)
                             .unwrap_or(50.0),
                     )
                     .unwrap_or_default(),
                     agreeableness: Score::new(
                         summary
                             .get("agreeableness")
-                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .and_then(|v| v.as_f64())
+                            .map(|x| x as f32)
                             .unwrap_or(50.0),
                     )
                     .unwrap_or_default(),
                     neuroticism: Score::new(
                         summary
                             .get("neuroticism")
-                            .and_then(|v| v.as_f64().map(|x| x as f32))
+                            .and_then(|v| v.as_f64())
+                            .map(|x| x as f32)
                             .unwrap_or(50.0),
                     )
                     .unwrap_or_default(),
@@ -490,7 +499,7 @@ impl MatchingEngine {
                     "enterprising",
                     "conventional",
                 ] {
-                    if let Some(score) = summary.get(key).and_then(|v| v.as_f64().map(|x| x as f32))
+                    if let Some(score) = summary.get(key).and_then(|v| v.as_f64()).map(|x| x as f32)
                     {
                         skills.insert(key.to_string(), score);
                     }
