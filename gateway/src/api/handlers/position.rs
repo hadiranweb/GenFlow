@@ -52,7 +52,11 @@ pub async fn generate_position(
         .publish_event(&genflow_receptors::events::PositionGraphBuiltEvent {
             position_id: profile.position.id,
             axis_count: profile.graph.axes.len() as u32,
-            calibration_applied: profile.graph.axes.iter().any(|axis| axis.calibration_applied),
+            calibration_applied: profile
+                .graph
+                .axes
+                .iter()
+                .any(|axis| axis.calibration_applied),
         })
         .await;
 
