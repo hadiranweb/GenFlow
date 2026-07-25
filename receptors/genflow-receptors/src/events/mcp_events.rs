@@ -25,6 +25,7 @@ impl DomainEvent for McpResolvedEvent {
 }
 
 /// New MCP context created
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpCreatedEvent {
     pub mcp_id: Uuid,
@@ -43,6 +44,7 @@ impl DomainEvent for McpCreatedEvent {
 }
 
 /// MCP cache invalidated
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpCacheInvalidatedEvent {
     pub mcp_id: Uuid,

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 /// Dashboard metrics updated
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DashboardMetricsUpdatedEvent {
     pub organization_id: Uuid,
@@ -22,6 +23,7 @@ impl DomainEvent for DashboardMetricsUpdatedEvent {
 }
 
 /// Dashboard alert triggered
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DashboardAlertTriggeredEvent {
     pub organization_id: Uuid,
@@ -40,6 +42,7 @@ impl DomainEvent for DashboardAlertTriggeredEvent {
 }
 
 /// Notification sent
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NotificationSentEvent {
     pub notification_id: Uuid,
