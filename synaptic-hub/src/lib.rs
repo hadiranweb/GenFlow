@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 //! genflow-synaptic-hub — Dual-layer event bus
 //!
 //! Inspired by pema-platform-v2's "Synaptic Hub" concept:

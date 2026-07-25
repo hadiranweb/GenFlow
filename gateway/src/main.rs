@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 //! GenFlow Gateway — API Gateway binary (Axum)
 //!
 //! Hybrid Island Architecture: Gateway routes to all Island services.

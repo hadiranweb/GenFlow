@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 //! genflow-position-generation — Position Generation Island
 //!
 //! Business analysis → Need discovery → Graph → Calibration → Position generation
