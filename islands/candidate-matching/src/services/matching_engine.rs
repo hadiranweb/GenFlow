@@ -294,15 +294,17 @@ impl MatchingEngine {
             });
         }
 
-        if let Some(bf) = &candidate.big_five {
-            if bf.neuroticism.is_high() {
-                flags.push(RiskFlag {
-                    code: "stress_sensitivity".to_string(),
-                    severity: FlagSeverity::Info,
-                    description: "Higher stress sensitivity score".to_string(),
-                    mitigation: "Ensure adequate support structure".to_string(),
-                });
-            }
+        if let Some(bf) = candidate
+            .big_five
+            .as_ref()
+            .filter(|bf| bf.neuroticism.is_high())
+        {
+            flags.push(RiskFlag {
+                code: "stress_sensitivity".to_string(),
+                severity: FlagSeverity::Info,
+                description: "Higher stress sensitivity score".to_string(),
+                mitigation: "Ensure adequate support structure".to_string(),
+            });
         }
 
         flags

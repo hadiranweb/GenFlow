@@ -175,6 +175,7 @@ impl PositionGenerationEngine {
             .await?;
 
         // 8d. Insert job_position — the core entity
+        let position_code = format!("POS-{}", &position_id.to_string()[..8]);
         sqlx::query(
             "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
         )
@@ -182,7 +183,7 @@ impl PositionGenerationEngine {
             .bind(request.organization_id)
             .bind(request.representative_id)
             .bind(run_id)
-            .bind(format!("POS-{}", &position_id.to_string()[..8]))
+            .bind(&position_code)
             .bind(&title)
             .bind(None::<String>) // description
             .bind(generation_method.as_db_str())
@@ -243,7 +244,7 @@ impl PositionGenerationEngine {
             id: position_id,
             organization_id: request.organization_id,
             created_by_rep_id: request.representative_id,
-            position_code: format!("POS-{}", &position_id.to_string()[..8]),
+            position_code,
             title,
             description: None,
             generation_method,
