@@ -46,7 +46,7 @@ impl Score {
 
     /// Is this score considered medium (40–80)?
     pub fn is_medium(&self) -> bool {
-        self.0 >= 40.0 && self.0 < 80.0
+        (40.0..80.0).contains(&self.0)
     }
 
     /// Is this score considered low (< 40)?
