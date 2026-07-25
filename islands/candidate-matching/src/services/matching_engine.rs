@@ -10,7 +10,6 @@ use genflow_receptors::{
 use genflow_shared_infra::error::AppError;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
-use serde_json;
 
 pub struct MatchingEngine {
     pool: PgPool,
@@ -498,7 +497,7 @@ impl MatchingEngine {
         }
 
         // Load skills from candidate's skill data
-        let candidate_row = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
+        let _candidate_row = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
             .bind(candidate_id)
             .fetch_optional(&self.pool)
             .await?;

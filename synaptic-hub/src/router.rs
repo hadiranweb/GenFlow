@@ -11,6 +11,12 @@ pub struct EventRouter {
     routes: HashMap<String, Vec<EventSource>>,
 }
 
+impl Default for EventRouter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EventRouter {
     pub fn new() -> Self {
         let mut routes = HashMap::new();
@@ -79,11 +85,5 @@ impl EventRouter {
     /// Add a custom route
     pub fn add_route(&mut self, event_type: String, targets: Vec<EventSource>) {
         self.routes.insert(event_type, targets);
-    }
-}
-
-impl Default for EventRouter {
-    fn default() -> Self {
-        Self::new()
     }
 }

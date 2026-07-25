@@ -20,6 +20,16 @@ CREATE POLICY organization_isolation ON candidates
         WHERE i.candidate_id = candidates.id  
         AND p.organization_id = current_setting('app.current_org_id', true)::UUID  
     ));  
+
+CREATE POLICY organization_isolation ON business_analyses
+    USING (organization_id = current_setting('app.current_org_id', true)::UUID);
+
+CREATE POLICY organization_isolation ON job_matches
+    USING (EXISTS (
+        SELECT 1 FROM job_positions p
+        WHERE p.id = job_matches.position_id
+        AND p.organization_id = current_setting('app.current_org_id', true)::UUID
+    ));
   
 -- ============================================================  
 -- 2. API Keys (برای دسترسی برنامه‌ای)  
