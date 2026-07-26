@@ -18,13 +18,8 @@ pub async fn get_mcp(
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
-    match mcp {
-        Some(ctx) => Ok(Json(ctx)),
-        None => Err(ApiError(AppError::NotFound(format!(
-            "MCP {} not found",
-            id
-        )))),
-    }
+    mcp.map(Json)
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("MCP {id} not found"))))
 }
 
 #[derive(serde::Deserialize)]
@@ -53,8 +48,8 @@ pub async fn resolve_mcp(
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
-    let mcp_ids = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
-    let _ = state
+    let mcp_ids: Vec<Uuid> = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
+    if let Err(err) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::McpResolvedEvent {
             analysis_id,
@@ -64,7 +59,14 @@ pub async fn resolve_mcp(
             db_lookups: bundle.resolution_metadata.db_lookups,
             resolution_time_ms: bundle.resolution_metadata.total_time_ms,
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %err,
+            analysis_id = %analysis_id,
+            "Failed to publish MCP resolved event"
+        );
+    }
 
     Ok(Json(bundle))
 }

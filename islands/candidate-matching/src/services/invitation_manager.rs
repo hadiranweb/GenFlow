@@ -81,10 +81,13 @@ impl InvitationManager {
         let (email, phone) = match invite_row {
             Some(row) => (
                 row.get::<Option<String>, _>("email"),
-                row.get::<Option<String>, _>("phone")
+                row.get::<Option<String>, _>("phone"),
             ),
             None => {
-                return Err(AppError::NotFound(format!("Active invitation with code {} not found", invite_code)));
+                return Err(AppError::NotFound(format!(
+                    "Active invitation with code {} not found",
+                    invite_code
+                )));
             }
         };
 
