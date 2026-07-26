@@ -57,17 +57,19 @@ where
         if let Some(mcp) = self.cache.get(&cache_key).await? {
             meta.cache_hits += 1;
             tracing::debug!(key = %cache_key, "MCP found in cache");
-            Ok(Some(mcp))
-        } else if let Some(mcp) = self.repo.find_active_by_code(mcp_type, scope, code).await? {
-            // 2. Try database
+            return Ok(Some(mcp));
+        }
+
+        // 2. Try database
+        if let Some(mcp) = self.repo.find_active_by_code(mcp_type, scope, code).await? {
             meta.db_lookups += 1;
             // Populate cache
             let ttl = mcp_type.default_cache_ttl_seconds();
             self.cache.set(&cache_key, &mcp, ttl).await.ok();
-            Ok(Some(mcp))
-        } else {
-            Ok(None)
+            return Ok(Some(mcp));
         }
+
+        Ok(None)
     }
 
     /// Full resolution for Business Analysis

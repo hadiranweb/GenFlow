@@ -287,7 +287,7 @@ impl McpContext {
 
     /// آیا این MCP منقضی شده؟
     pub fn is_expired(&self) -> bool {
-        self.expires_at.map_or(false, |exp| exp < Utc::now())
+        self.expires_at.map(|exp| exp < Utc::now()).unwrap_or(false)
     }
 
     /// آیا این MCP برای استفاده در تحلیل مناسب است؟
@@ -380,10 +380,14 @@ impl McpBundle {
     /// برآورد صرفه‌جویی توکن
     pub fn estimated_token_savings(&self) -> usize {
         let base = 500usize;
-        let industry = self.industry_mcp.as_ref().map_or(0, |_| 1000);
+        let industry = self.industry_mcp.as_ref().map(|_| 1000).unwrap_or(0);
         let processes = self.process_mcps.len() * 800;
         let positions = self.standard_position_mcps.len() * 1200;
-        let org = self.organization_context_mcp.as_ref().map_or(0, |_| 1500);
+        let org = self
+            .organization_context_mcp
+            .as_ref()
+            .map(|_| 1500)
+            .unwrap_or(0);
 
         base + industry + processes + positions + org
     }
@@ -494,8 +498,9 @@ mod tests {
         assert!(valid2.validate_scope().is_ok());
 
         // Invalid: platform_policy with tenant scope
-        let invalid =
-            McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Tenant, "bad").build();
+        let invalid = McpContext {
+            ..McpContextBuilder::new(McpType::PlatformPolicy, McpScope::Tenant, "bad").build()
+        };
         assert!(invalid.validate_scope().is_err());
     }
 

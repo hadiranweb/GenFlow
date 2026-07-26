@@ -37,7 +37,7 @@ pub async fn generate_position(
 
     let profile = state.position_engine.generate(&analysis_request).await?;
 
-    if let Err(err) = state
+    let _ = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::BusinessAnalysisCompletedEvent {
             analysis_id: analysis_request.analysis_id,
@@ -45,36 +45,18 @@ pub async fn generate_position(
             needs_discovered: profile.evidence.business_needs_used.len() as u32,
             mcp_ids_used: profile.evidence.mcp_contexts_used.clone(),
         })
-        .await
-    {
-        tracing::warn!(
-            error = %err,
-            analysis_id = %analysis_request.analysis_id,
-            "Failed to publish business analysis completed event"
-        );
-    }
+        .await;
 
-    if let Err(err) = state
+    let _ = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::PositionGraphBuiltEvent {
             position_id: profile.position.id,
             axis_count: profile.graph.axes.len() as u32,
-            calibration_applied: profile
-                .graph
-                .axes
-                .iter()
-                .any(|axis| axis.calibration_applied),
+            calibration_applied: profile.graph.axes.iter().any(|axis| axis.calibration_applied),
         })
-        .await
-    {
-        tracing::warn!(
-            error = %err,
-            position_id = %profile.position.id,
-            "Failed to publish position graph built event"
-        );
-    }
+        .await;
 
-    if let Err(err) = state
+    let _ = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::PositionGeneratedEvent {
             position_id: profile.position.id,
@@ -83,14 +65,7 @@ pub async fn generate_position(
             title: profile.position.title.clone(),
             generation_method: profile.position.generation_method.as_db_str().to_string(),
         })
-        .await
-    {
-        tracing::warn!(
-            error = %err,
-            position_id = %profile.position.id,
-            "Failed to publish position generated event"
-        );
-    }
+        .await;
 
     Ok(Json(profile))
 }
@@ -105,7 +80,11 @@ pub async fn get_position(
         .await
         .map_err(ApiError::from)?;
 
-    position
-        .map(Json)
-        .ok_or_else(|| ApiError(AppError::NotFound(format!("Position {id} not found"))))
+    match position {
+        Some(pos) => Ok(Json(pos)),
+        None => Err(ApiError(AppError::NotFound(format!(
+            "Position {} not found",
+            id
+        )))),
+    }
 }

@@ -43,16 +43,12 @@ impl PositionGenerationEngine {
             .representative_context
             .as_ref()
             .map(|ctx| {
-                let default_w = AxisWeights::default();
+                let mut w = AxisWeights::default();
                 if ctx.use_personality {
-                    AxisWeights {
-                        work_style: default_w.work_style + ctx.requested_weight * 0.10,
-                        capability: default_w.capability - ctx.requested_weight * 0.05,
-                        ..default_w
-                    }
-                } else {
-                    default_w
+                    w.work_style += ctx.requested_weight * 0.10;
+                    w.capability -= ctx.requested_weight * 0.05;
                 }
+                w
             })
             .unwrap_or_default();
 
@@ -179,7 +175,6 @@ impl PositionGenerationEngine {
             .await?;
 
         // 8d. Insert job_position — the core entity
-        let position_code = format!("POS-{}", &position_id.to_string()[..8]);
         sqlx::query(
             "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
         )
@@ -187,7 +182,7 @@ impl PositionGenerationEngine {
             .bind(request.organization_id)
             .bind(request.representative_id)
             .bind(run_id)
-            .bind(&position_code)
+            .bind(format!("POS-{}", &position_id.to_string()[..8]))
             .bind(&title)
             .bind(None::<String>) // description
             .bind(generation_method.as_db_str())
@@ -248,7 +243,7 @@ impl PositionGenerationEngine {
             id: position_id,
             organization_id: request.organization_id,
             created_by_rep_id: request.representative_id,
-            position_code,
+            position_code: format!("POS-{}", &position_id.to_string()[..8]),
             title,
             description: None,
             generation_method,
@@ -305,8 +300,8 @@ impl PositionGenerationEngine {
             .fetch_optional(&self.pool)
             .await?;
 
-        if let Some(row) = row {
-            Ok(Some(JobPosition {
+        match row {
+            Some(row) => Ok(Some(JobPosition {
                 id: row.get("id"),
                 organization_id: row.get("organization_id"),
                 created_by_rep_id: row.get("created_by_rep_id"),
@@ -327,9 +322,8 @@ impl PositionGenerationEngine {
                     "archived" => PositionStatus::Archived,
                     _ => PositionStatus::Draft,
                 },
-            }))
-        } else {
-            Ok(None)
+            })),
+            None => Ok(None),
         }
     }
 }

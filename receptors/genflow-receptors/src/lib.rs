@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 //! genflow-receptors — Shared domain types and event definitions
 //!
 //! Pure Rust types with NO database or async dependencies.

@@ -3,8 +3,13 @@
 use genflow_receptors::BusinessAnalysisRequest;
 use genflow_receptors::{BusinessNeed, BusinessNeedType, NeedUrgency};
 
-#[derive(Default)]
 pub struct BusinessNeedDiscovery;
+
+impl Default for BusinessNeedDiscovery {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BusinessNeedDiscovery {
     pub fn new() -> Self {
