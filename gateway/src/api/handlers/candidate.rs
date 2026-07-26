@@ -1,5 +1,6 @@
 //! Candidate Matching Handlers
 
+use crate::auth_context::TenantAuth;
 use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::{Path, State};
@@ -10,9 +11,11 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 pub async fn calculate_match(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path((position_id, candidate_id)): Path<(Uuid, Uuid)>,
 ) -> Result<Json<genflow_receptors::JobMatch>, ApiError> {
+    require_position_tenant(&state, &auth, position_id).await?;
     let match_result = state
         .matching_engine
         .calculate_match(position_id, candidate_id)
@@ -48,9 +51,11 @@ pub struct CreateInvitationRequest {
 }
 
 pub async fn create_invitation(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Json(req): Json<CreateInvitationRequest>,
 ) -> Result<Json<genflow_receptors::PositionInvite>, ApiError> {
+    require_position_tenant(&state, &auth, req.position_id).await?;
     let invite = state
         .invitation_manager
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
@@ -94,14 +99,16 @@ pub async fn accept_invitation(
 }
 
 pub async fn generate_report(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path(match_id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::MatchReport>, ApiError> {
     // Load the match from DB to get its details, casting DECIMAL fields to FLOAT8 to avoid SQLx type mismatch panic
     let row = sqlx::query(
-        "SELECT id, position_id, candidate_id, composite_match_index::FLOAT8 as composite_match_index, confidence_score::FLOAT8 as confidence_score, status, human_review_required, calculated_at FROM job_matches WHERE id = $1"
+        "SELECT job_match.id, job_match.position_id, job_match.candidate_id, job_match.composite_match_index::FLOAT8 as composite_match_index, job_match.confidence_score::FLOAT8 as confidence_score, job_match.status, job_match.human_review_required, job_match.calculated_at FROM job_matches job_match JOIN job_positions position ON position.id = job_match.position_id WHERE job_match.id = $1 AND position.organization_id = $2"
     )
         .bind(match_id)
+        .bind(auth.organization_id())
         .fetch_optional(&state.db_pool)
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
@@ -161,14 +168,21 @@ pub async fn generate_report(
                 .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
                 .await?;
 
-            let _ = state
+            if let Err(error) = state
                 .synaptic_bus
                 .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
                     report_id: report.id,
                     match_id: report.job_match_id,
                     report_type: report.report_type.as_db_str().to_string(),
                 })
-                .await;
+                .await
+            {
+                tracing::warn!(
+                    error = %error,
+                    report_id = %report.id,
+                    "Failed to publish report generated event"
+                );
+            }
 
             Ok(Json(report))
         }
@@ -187,10 +201,18 @@ pub struct RecordDecisionRequest {
 }
 
 pub async fn record_decision(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path(match_id): Path<Uuid>,
     Json(payload): Json<RecordDecisionRequest>,
 ) -> Result<axum::http::StatusCode, ApiError> {
+    require_match_tenant(&state, &auth, match_id).await?;
+    if payload.decided_by != auth.user_id() {
+        return Err(ApiError(AppError::Auth(
+            "Decision actor does not match the authenticated user".to_string(),
+        )));
+    }
+
     let status = match payload.decision.as_str() {
         "pending_review" => genflow_receptors::MatchStatus::PendingReview,
         "under_review" => genflow_receptors::MatchStatus::UnderReview,
@@ -206,4 +228,35 @@ pub async fn record_decision(
         .await?;
 
     Ok(axum::http::StatusCode::OK)
+}
+
+async fn require_position_tenant(
+    state: &Arc<AppState>,
+    auth: &TenantAuth,
+    position_id: Uuid,
+) -> Result<(), ApiError> {
+    let position = state
+        .position_engine
+        .get_position(position_id)
+        .await?
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("Position {position_id} not found"))))?;
+    auth.require_organization(position.organization_id)
+}
+
+async fn require_match_tenant(
+    state: &Arc<AppState>,
+    auth: &TenantAuth,
+    match_id: Uuid,
+) -> Result<(), ApiError> {
+    let row = sqlx::query(
+        "SELECT position.organization_id FROM job_matches job_match JOIN job_positions position ON position.id = job_match.position_id WHERE job_match.id = $1",
+    )
+    .bind(match_id)
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|error| ApiError(AppError::Infrastructure(error.to_string())))?;
+    let organization_id = row
+        .map(|row| row.get("organization_id"))
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("Match {match_id} not found"))))?;
+    auth.require_organization(organization_id)
 }

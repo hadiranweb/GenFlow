@@ -1,5 +1,6 @@
 //! Position Generation Handlers
 
+use crate::auth_context::TenantAuth;
 use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::{Path, State};
@@ -21,9 +22,11 @@ pub struct GeneratePositionRequest {
 }
 
 pub async fn generate_position(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Json(req): Json<GeneratePositionRequest>,
 ) -> Result<Json<genflow_receptors::GeneratedPositionProfile>, ApiError> {
+    auth.require_organization(req.organization_id)?;
     let analysis_request = BusinessAnalysisRequest {
         analysis_id: Uuid::new_v4(),
         organization_id: req.organization_id,
@@ -141,6 +144,7 @@ pub async fn generate_position(
 }
 
 pub async fn get_position(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::JobPosition>, ApiError> {
@@ -151,7 +155,10 @@ pub async fn get_position(
         .map_err(ApiError::from)?;
 
     match position {
-        Some(pos) => Ok(Json(pos)),
+        Some(pos) => {
+            auth.require_organization(pos.organization_id)?;
+            Ok(Json(pos))
+        }
         None => Err(ApiError(AppError::NotFound(format!(
             "Position {} not found",
             id

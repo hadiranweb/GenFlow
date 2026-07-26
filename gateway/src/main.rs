@@ -7,6 +7,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 
 mod api;
+mod auth_context;
 mod error_response;
 mod state;
 
