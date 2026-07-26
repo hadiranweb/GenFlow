@@ -35,9 +35,58 @@ pub async fn generate_position(
         representative_context: req.representative_context,
     };
 
-    let profile = state.position_engine.generate(&analysis_request).await?;
+    // MCPs enrich the generated evidence but are deliberately not a hard
+    // availability dependency for position generation. A resolver outage is
+    // observable and falls back to the deterministic generation pipeline.
+    let mcp_bundle = match state
+        .mcp_resolver
+        .resolve_for_analysis(
+            analysis_request.organization_id,
+            analysis_request.industry_code.as_deref(),
+            &analysis_request.process_codes,
+            &analysis_request.position_hints,
+            analysis_request.analysis_id,
+        )
+        .await
+    {
+        Ok(bundle) => {
+            let mcp_ids: Vec<Uuid> = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
+            if let Err(error) = state
+                .synaptic_bus
+                .publish_event(&genflow_receptors::events::McpResolvedEvent {
+                    analysis_id: analysis_request.analysis_id,
+                    organization_id: analysis_request.organization_id,
+                    mcp_ids,
+                    cache_hits: bundle.resolution_metadata.cache_hits,
+                    db_lookups: bundle.resolution_metadata.db_lookups,
+                    resolution_time_ms: bundle.resolution_metadata.total_time_ms,
+                })
+                .await
+            {
+                tracing::warn!(
+                    error = %error,
+                    analysis_id = %analysis_request.analysis_id,
+                    "Failed to publish MCP resolved event during position generation"
+                );
+            }
+            Some(bundle)
+        }
+        Err(error) => {
+            tracing::warn!(
+                error = %error,
+                analysis_id = %analysis_request.analysis_id,
+                "MCP resolution failed during position generation; continuing with deterministic defaults"
+            );
+            None
+        }
+    };
 
-    let _ = state
+    let profile = state
+        .position_engine
+        .generate_with_mcp_bundle(&analysis_request, mcp_bundle.as_ref())
+        .await?;
+
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::BusinessAnalysisCompletedEvent {
             analysis_id: analysis_request.analysis_id,
@@ -45,18 +94,32 @@ pub async fn generate_position(
             needs_discovered: profile.evidence.business_needs_used.len() as u32,
             mcp_ids_used: profile.evidence.mcp_contexts_used.clone(),
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            analysis_id = %analysis_request.analysis_id,
+            "Failed to publish business analysis completed event"
+        );
+    }
 
-    let _ = state
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::PositionGraphBuiltEvent {
             position_id: profile.position.id,
             axis_count: profile.graph.axes.len() as u32,
             calibration_applied: profile.graph.axes.iter().any(|axis| axis.calibration_applied),
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            position_id = %profile.position.id,
+            "Failed to publish position graph built event"
+        );
+    }
 
-    let _ = state
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::PositionGeneratedEvent {
             position_id: profile.position.id,
@@ -65,7 +128,14 @@ pub async fn generate_position(
             title: profile.position.title.clone(),
             generation_method: profile.position.generation_method.as_db_str().to_string(),
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            position_id = %profile.position.id,
+            "Failed to publish position generated event"
+        );
+    }
 
     Ok(Json(profile))
 }

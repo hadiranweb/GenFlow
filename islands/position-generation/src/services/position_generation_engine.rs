@@ -5,10 +5,10 @@
 
 use crate::services::{BusinessNeedDiscovery, PositionGraphBuilder, RepresentativeCalibrator};
 use genflow_receptors::{
-    AxisWeights, BusinessAnalysisRequest, GeneratedPositionProfile, JobPosition,
+    AxisWeights, BusinessAnalysisRequest, GeneratedPositionProfile, JobPosition, McpBundle,
     PositionGenerationEvidence, PositionGenerationMethod, PositionStatus, Score,
 };
-use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::{db::set_transaction_org_context, error::AppError};
 use sqlx::{PgPool, Row};
 
 use uuid::Uuid;
@@ -30,10 +30,23 @@ impl PositionGenerationEngine {
         }
     }
 
-    /// Generate a position from an analysis request — full pipeline with DB persistence
+    /// Generate a position without a pre-resolved MCP bundle.
+    ///
+    /// This compatibility entry point is useful for isolated development flows.
+    /// Gateway requests should prefer `generate_with_mcp_bundle` so the resolved
+    /// context is retained as generation evidence.
     pub async fn generate(
         &self,
         request: &BusinessAnalysisRequest,
+    ) -> Result<GeneratedPositionProfile, AppError> {
+        self.generate_with_mcp_bundle(request, None).await
+    }
+
+    /// Generate a position and persist the resolved MCP context as auditable evidence.
+    pub async fn generate_with_mcp_bundle(
+        &self,
+        request: &BusinessAnalysisRequest,
+        mcp_bundle: Option<&McpBundle>,
     ) -> Result<GeneratedPositionProfile, AppError> {
         // 1. Discover business needs from input
         let needs = self.need_discovery.discover(request);
@@ -65,7 +78,13 @@ impl PositionGenerationEngine {
                     ctx.requested_weight,
                     ctx.use_personality,
                 )
-                .ok(); // silent fail for calibration — non-critical
+                .unwrap_or_else(|error| {
+                    tracing::warn!(
+                        error = %error,
+                        organization_id = %request.organization_id,
+                        "Representative calibration was rejected; continuing without calibration"
+                    );
+                });
         }
 
         // 5. Create position record
@@ -81,19 +100,43 @@ impl PositionGenerationEngine {
 
         let title = self.infer_title(&needs);
 
-        // 6. Build evidence
+        // 6. Build evidence. MCP resolution is optional for resilience, but when
+        // available it is persisted both in the immutable run snapshot and the
+        // position evidence returned to API consumers.
+        let mcp_contexts_used = mcp_bundle
+            .map(|bundle| bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect())
+            .unwrap_or_default();
+        let standards_used = mcp_bundle
+            .map(|bundle| {
+                bundle
+                    .standard_position_mcps
+                    .iter()
+                    .map(|mcp| mcp.code.clone())
+                    .collect()
+            })
+            .unwrap_or_default();
+        let mut rationale: Vec<String> = needs.iter().map(|need| need.description.clone()).collect();
+        if let Some(bundle) = mcp_bundle {
+            rationale.push(format!(
+                "MCP resolution retained {} contexts (cache_hits={}, db_lookups={}, drafts_created={})",
+                bundle.all_mcps().len(),
+                bundle.resolution_metadata.cache_hits,
+                bundle.resolution_metadata.db_lookups,
+                bundle.resolution_metadata.drafts_created,
+            ));
+        }
         let evidence = PositionGenerationEvidence {
             generation_method: generation_method.as_db_str().to_string(),
-            business_needs_used: needs.iter().map(|n| n.need_id.clone()).collect(),
-            mcp_contexts_used: vec![], // populated from MCP resolution
-            standards_used: vec![],
+            business_needs_used: needs.iter().map(|need| need.need_id.clone()).collect(),
+            mcp_contexts_used,
+            standards_used,
             representative_calibration_used: request.representative_context.is_some(),
             representative_effective_weight: request
                 .representative_context
                 .as_ref()
                 .map(|ctx| ctx.requested_weight)
                 .unwrap_or(0.0),
-            rationale: needs.iter().map(|n| n.description.clone()).collect(),
+            rationale,
         };
 
         // 7. Build requirements from graph dimensions
@@ -128,10 +171,17 @@ impl PositionGenerationEngine {
         // ─────────────────────────────────────────────────
         // 8. PERSIST TO DATABASE
         // ─────────────────────────────────────────────────
+        // Fail explicitly rather than dropping audit evidence if the MCP snapshot
+        // cannot be serialized for the immutable generation-run record.
+        let mcp_bundle_snapshot = serde_json::to_value(mcp_bundle).map_err(|error| {
+            AppError::Internal(format!("Could not serialize MCP bundle snapshot: {error}"))
+        })?;
+
         // Multi-table position generation must be atomic: either the analysis,
         // needs, run, position, graph, and requirements all commit together or
         // none of them do.
         let mut tx = self.pool.begin().await?;
+        set_transaction_org_context(&mut tx, request.organization_id).await?;
 
         // 8a. Create business_analysis record
         sqlx::query(
@@ -164,30 +214,35 @@ impl PositionGenerationEngine {
         // 8c. Create position_generation_run record (audit trail)
         let run_id = Uuid::new_v4();
         sqlx::query(
-            "INSERT INTO position_generation_runs (id, business_analysis_id, input_mode, status, rep_calibration_applied, rep_effective_weight) VALUES ($1, $2, $3, 'completed', $4, $5)"
+            "INSERT INTO position_generation_runs (id, business_analysis_id, input_mode, mcp_bundle_snapshot, discovered_needs_count, selected_hypothesis_title, status, rep_calibration_applied, rep_effective_weight, completed_at) VALUES ($1, $2, $3, $4, $5, $6, 'completed', $7, $8, NOW())"
         )
             .bind(run_id)
             .bind(request.analysis_id)
             .bind(generation_method.as_db_str())
+            .bind(&mcp_bundle_snapshot)
+            .bind(needs.len() as i32)
+            .bind(&title)
             .bind(request.representative_context.is_some())
-            .bind(request.representative_context.as_ref().map(|ctx| ctx.requested_weight as f32))
+            .bind(request.representative_context.as_ref().map(|ctx| ctx.requested_weight))
             .execute(&mut *tx)
             .await?;
 
         // 8d. Insert job_position — the core entity
+        let position_code = format!("POS-{}", &position_id.to_string()[..8]);
         sqlx::query(
-            "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+            "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence, standards_used) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
         )
             .bind(position_id)
             .bind(request.organization_id)
             .bind(request.representative_id)
             .bind(run_id)
-            .bind(format!("POS-{}", &position_id.to_string()[..8]))
+            .bind(&position_code)
             .bind(&title)
             .bind(None::<String>) // description
             .bind(generation_method.as_db_str())
             .bind(PositionStatus::Draft.as_db_str())
             .bind(serde_json::to_value(&evidence).unwrap_or(serde_json::json!({})))
+            .bind(serde_json::to_value(&evidence.standards_used).unwrap_or(serde_json::json!([])))
             .execute(&mut *tx)
             .await?;
 
@@ -243,7 +298,7 @@ impl PositionGenerationEngine {
             id: position_id,
             organization_id: request.organization_id,
             created_by_rep_id: request.representative_id,
-            position_code: format!("POS-{}", &position_id.to_string()[..8]),
+            position_code,
             title,
             description: None,
             generation_method,
