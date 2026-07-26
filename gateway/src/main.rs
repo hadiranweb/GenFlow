@@ -28,7 +28,7 @@ async fn main() -> anyhow::Result<()> {
     telemetry::init_tracing(&config.logging);
 
     tracing::info!("GenFlow v2 Gateway starting...");
-    tracing::info!("Server: {}:{}", config.server.host, config.server.port);
+    tracing::info!(host = %config.server.host, port = config.server.port, "Server configured");
 
     // 3. Connect to infrastructure
     let db_pool = DatabasePool::connect(&config.database).await?;
@@ -44,9 +44,9 @@ async fn main() -> anyhow::Result<()> {
     let mcp_cache = Arc::new(genflow_mcp_registry::RedisMcpCache::new(redis_pool.clone()));
     let mcp_builder = Arc::new(genflow_mcp_registry::McpBuilderImpl::new());
     let mcp_resolver = Arc::new(genflow_mcp_registry::McpResolver::new(
-        mcp_repo.clone(),
-        mcp_cache.clone(),
-        mcp_builder.clone(),
+        mcp_repo,
+        mcp_cache,
+        mcp_builder,
     ));
 
     let position_engine =
@@ -87,9 +87,9 @@ async fn main() -> anyhow::Result<()> {
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{}:{}", host, port)).await?;
+    let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
-    tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
+    tracing::info!("GenFlow v2 Gateway ready — listening on {host}:{port}");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

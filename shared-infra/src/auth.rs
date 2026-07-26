@@ -18,7 +18,6 @@ pub struct AuthClaims {
     pub iat: i64,     // issued at timestamp
 }
 
-
 /// Roles accepted by the current Gateway contract.
 ///
 /// Parsing roles at the boundary prevents arbitrary JWT strings from becoming
@@ -36,9 +35,7 @@ impl AccessRole {
             "admin" => Ok(Self::Admin),
             "analyst" => Ok(Self::Analyst),
             "representative" => Ok(Self::Representative),
-            _ => Err(AppError::Authorization(format!(
-                "Unsupported role: {role}"
-            ))),
+            _ => Err(AppError::Authorization(format!("Unsupported role: {role}"))),
         }
     }
 
@@ -108,17 +105,20 @@ impl JwtAuth {
         role: &str,
     ) -> Result<String, AppError> {
         let now = Utc::now();
+        let expiration_hours = i64::try_from(self.config.expiration_hours).map_err(|_| {
+            AppError::Validation("JWT expiration hours exceeds supported range".to_string())
+        })?;
         let claims = AuthClaims {
             sub: user_id,
             org_id,
             role: role.to_string(),
             iss: self.config.issuer.clone(),
-            exp: (now + Duration::hours(self.config.expiration_hours as i64)).timestamp(),
+            exp: (now + Duration::hours(expiration_hours)).timestamp(),
             iat: now.timestamp(),
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)
-            .map_err(|e| AppError::Auth(format!("Token generation failed: {}", e)))
+            .map_err(|e| AppError::Auth(format!("Token generation failed: {e}")))
     }
 
     /// Validate a JWT token and return claims
@@ -128,7 +128,7 @@ impl JwtAuth {
 
         decode(token, &self.decoding_key, &validation)
             .map(|data| data.claims)
-            .map_err(|e| AppError::Auth(format!("Token validation failed: {}", e)))
+            .map_err(|e| AppError::Auth(format!("Token validation failed: {e}")))
     }
 }
 

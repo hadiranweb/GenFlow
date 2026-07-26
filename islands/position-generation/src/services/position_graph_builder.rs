@@ -5,13 +5,8 @@ use genflow_receptors::{
 };
 use uuid::Uuid;
 
+#[derive(Default)]
 pub struct PositionGraphBuilder;
-
-impl Default for PositionGraphBuilder {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 impl PositionGraphBuilder {
     pub fn new() -> Self {
@@ -49,13 +44,17 @@ impl PositionGraphBuilder {
             AxisCode::GrowthMotivation => "انگیزه رشد و توسعه",
         };
 
+        let code_str = code.as_str();
+        let dimension_code = format!("{code_str}_primary");
+        let dimension_description = format!("Primary dimension for {code_str}");
+
         PositionGraphAxis {
             code,
             weight,
             description: description.to_string(),
             dimensions: vec![DimensionRequirement {
-                code: format!("{}_primary", code.as_str()),
-                description: format!("Primary dimension for {}", code.as_str()),
+                code: dimension_code,
+                description: dimension_description,
                 min: Some(Score::new(40.0).unwrap()),
                 ideal: Some(Score::new(70.0).unwrap()),
                 max: Some(Score::new(95.0).unwrap()),

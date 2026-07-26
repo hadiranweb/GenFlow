@@ -80,7 +80,9 @@ impl PositionInvite {
         let code: String = (0..8)
             .map(|_| CHARSET[rng.gen_range(0..CHARSET.len())] as char)
             .collect();
-        format!("GF-{}-{}", &code[..4], &code[4..])
+        let prefix = &code[..4];
+        let suffix = &code[4..];
+        format!("GF-{prefix}-{suffix}")
     }
 
     pub fn is_valid(&self) -> bool {
