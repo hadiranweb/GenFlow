@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 //! genflow-mcp-registry — MCP Registry Island
 //!
 //! Ultra-fine-grained MCP: each MCP Type as an independent Cell.

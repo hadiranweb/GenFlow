@@ -4,8 +4,13 @@ use genflow_receptors::{
     AxisCode, PositionGraph, RepresentativeInfluencePolicy, RepresentativeRelation,
 };
 
-#[derive(Default)]
 pub struct RepresentativeCalibrator;
+
+impl Default for RepresentativeCalibrator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl RepresentativeCalibrator {
     pub fn new() -> Self {

@@ -5,8 +5,13 @@ use genflow_receptors::{
 };
 use uuid::Uuid;
 
-#[derive(Default)]
 pub struct PositionGraphBuilder;
+
+impl Default for PositionGraphBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl PositionGraphBuilder {
     pub fn new() -> Self {

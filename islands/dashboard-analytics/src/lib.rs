@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 //! genflow-dashboard-analytics — Dashboard Analytics Island
 //!
 //! Business dashboard, metrics, alerts, notifications

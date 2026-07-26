@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 //! genflow-shared-infra — Database, Redis, config, error, telemetry utilities
 //!
 //! Infrastructure shared across all islands and the gateway.

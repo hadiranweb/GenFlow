@@ -110,7 +110,7 @@ impl AppConfig {
     pub fn from_env() -> Self {
         Self {
             server: ServerConfig {
-                host: std::env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
+                host: std::env::var("SERVER_HOST").unwrap_or_default(),
                 port: std::env::var("SERVER_PORT")
                     .ok()
                     .and_then(|v| v.parse().ok())

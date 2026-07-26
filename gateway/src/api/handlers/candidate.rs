@@ -18,7 +18,7 @@ pub async fn calculate_match(
         .calculate_match(position_id, candidate_id)
         .await?;
 
-    if let Err(err) = state
+    let _ = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
             match_id: match_result.id,
@@ -27,14 +27,7 @@ pub async fn calculate_match(
             composite_score: match_result.composite_index.value(),
             human_review_required: match_result.human_review_required,
         })
-        .await
-    {
-        tracing::warn!(
-            error = %err,
-            match_id = %match_result.id,
-            "Failed to publish match calculated event"
-        );
-    }
+        .await;
 
     Ok(Json(match_result))
 }
@@ -56,7 +49,7 @@ pub async fn create_invitation(
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
         .await?;
 
-    if let Err(err) = state
+    let _ = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
             invite_id: invite.id,
@@ -64,14 +57,7 @@ pub async fn create_invitation(
             candidate_id: invite.candidate_id,
             email: invite.email.clone(),
         })
-        .await
-    {
-        tracing::warn!(
-            error = %err,
-            invite_id = %invite.id,
-            "Failed to publish candidate invited event"
-        );
-    }
+        .await;
 
     Ok(Json(invite))
 }
@@ -142,8 +128,7 @@ pub async fn generate_report(
                     details: vec![],
                 },
                 composite_index: genflow_receptors::Score::new_unchecked(
-                    row.get::<Option<f64>, _>("composite_match_index")
-                        .unwrap_or(0.0) as f32,
+                    row.get::<Option<f64>, _>("composite_match_index").unwrap_or(0.0) as f32,
                 ),
                 confidence_score: genflow_receptors::Score::new_unchecked(
                     row.get::<Option<f64>, _>("confidence_score").unwrap_or(0.0) as f32,
@@ -161,21 +146,14 @@ pub async fn generate_report(
                 .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
                 .await?;
 
-            if let Err(err) = state
+            let _ = state
                 .synaptic_bus
                 .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
                     report_id: report.id,
                     match_id: report.job_match_id,
                     report_type: report.report_type.as_db_str().to_string(),
                 })
-                .await
-            {
-                tracing::warn!(
-                    error = %err,
-                    report_id = %report.id,
-                    "Failed to publish report generated event"
-                );
-            }
+                .await;
 
             Ok(Json(report))
         }
@@ -205,15 +183,10 @@ pub async fn record_decision(
         "not_selected" => genflow_receptors::MatchStatus::NotSelected,
         "selected" => genflow_receptors::MatchStatus::Selected,
         "withdrawn" => genflow_receptors::MatchStatus::Withdrawn,
-        _ => {
-            return Err(ApiError(AppError::Business(
-                "Invalid decision status".to_string(),
-            )))
-        }
+        _ => return Err(ApiError(AppError::Business("Invalid decision status".to_string()))),
     };
 
-    state
-        .matching_engine
+    state.matching_engine
         .record_decision(match_id, payload.decided_by, status, payload.note)
         .await?;
 

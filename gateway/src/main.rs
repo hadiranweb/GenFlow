@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 //! GenFlow Gateway — API Gateway binary (Axum)
 //!
 //! Hybrid Island Architecture: Gateway routes to all Island services.
@@ -88,9 +86,9 @@ async fn main() -> anyhow::Result<()> {
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{host}:{port}")).await?;
+    let listener = TcpListener::bind(format!("{}:{}", host, port)).await?;
 
-    tracing::info!("GenFlow v2 Gateway ready — listening on {host}:{port}");
+    tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
