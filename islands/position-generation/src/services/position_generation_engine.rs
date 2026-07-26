@@ -8,7 +8,7 @@ use genflow_receptors::{
     AxisWeights, BusinessAnalysisRequest, GeneratedPositionProfile, JobPosition, McpBundle,
     PositionGenerationEvidence, PositionGenerationMethod, PositionStatus, Score,
 };
-use genflow_shared_infra::{db::set_transaction_org_context, error::AppError};
+use genflow_shared_infra::{db::begin_organization_transaction, error::AppError};
 use sqlx::{PgPool, Row};
 
 use uuid::Uuid;
@@ -180,8 +180,8 @@ impl PositionGenerationEngine {
         // Multi-table position generation must be atomic: either the analysis,
         // needs, run, position, graph, and requirements all commit together or
         // none of them do.
-        let mut tx = self.pool.begin().await?;
-        set_transaction_org_context(&mut tx, request.organization_id).await?;
+        let mut tx =
+            begin_organization_transaction(&self.pool, request.organization_id).await?;
 
         // 8a. Create business_analysis record
         sqlx::query(

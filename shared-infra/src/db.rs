@@ -72,3 +72,17 @@ pub async fn set_transaction_org_context(
 
     Ok(())
 }
+
+/// Begin a transaction already bound to one organization.
+///
+/// Islands use this instead of manually opening a transaction and remembering
+/// to set RLS state. It is the shared infrastructure boundary between pooled
+/// database connections and tenant-owned bounded contexts.
+pub async fn begin_organization_transaction(
+    pool: &PgPool,
+    organization_id: Uuid,
+) -> Result<Transaction<'_, Postgres>, AppError> {
+    let mut tx = pool.begin().await?;
+    set_transaction_org_context(&mut tx, organization_id).await?;
+    Ok(tx)
+}

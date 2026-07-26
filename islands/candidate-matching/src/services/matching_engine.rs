@@ -7,7 +7,7 @@ use genflow_receptors::{
     AxisMatch, CandidateProfile, FlagSeverity, GapSeverity, JobMatch, MatchStatus, PositionGraph,
     PositionGraphAxis, RiskFlag, Score,
 };
-use genflow_shared_infra::{db::set_transaction_org_context, error::AppError};
+use genflow_shared_infra::{db::begin_organization_transaction, error::AppError};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
@@ -533,8 +533,7 @@ impl MatchingEngine {
     ) -> Result<(Uuid, MatchStatus, chrono::DateTime<chrono::Utc>), AppError> {
         let organization_id = self.position_organization_id(position_id).await?;
         let calculated_at = chrono::Utc::now();
-        let mut tx = self.pool.begin().await?;
-        set_transaction_org_context(&mut tx, organization_id).await?;
+        let mut tx = begin_organization_transaction(&self.pool, organization_id).await?;
 
         let row = sqlx::query(
             r#"
