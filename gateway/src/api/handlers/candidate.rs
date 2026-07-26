@@ -56,7 +56,7 @@ pub async fn create_invitation(
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
         .await?;
 
-    let _ = state
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
             invite_id: invite.id,
@@ -64,25 +64,33 @@ pub async fn create_invitation(
             candidate_id: invite.candidate_id,
             email: invite.email.clone(),
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            invite_id = %invite.id,
+            "Failed to publish candidate invited event"
+        );
+    }
 
     Ok(Json(invite))
+}
+
+#[derive(serde::Serialize)]
+pub struct AcceptInvitationResponse {
+    pub status: &'static str,
+    pub candidate_id: Uuid,
 }
 
 pub async fn accept_invitation(
     State(state): State<Arc<AppState>>,
     Path(code): Path<String>,
-) -> Result<Json<serde_json::Value>, ApiError> {
-    // Candidate ID would come from auth context in real implementation
-    let candidate_id = Uuid::new_v4();
-    state
-        .invitation_manager
-        .accept_invitation(&code, candidate_id)
-        .await?;
-    Ok(Json(serde_json::json!({
-        "status": "accepted",
-        "code": code
-    })))
+) -> Result<Json<AcceptInvitationResponse>, ApiError> {
+    let candidate_id = state.invitation_manager.accept_invitation(&code).await?;
+    Ok(Json(AcceptInvitationResponse {
+        status: "accepted",
+        candidate_id,
+    }))
 }
 
 pub async fn generate_report(
