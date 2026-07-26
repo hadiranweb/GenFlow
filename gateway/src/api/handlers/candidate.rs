@@ -18,7 +18,7 @@ pub async fn calculate_match(
         .calculate_match(position_id, candidate_id)
         .await?;
 
-    let _ = state
+    if let Err(err) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
             match_id: match_result.id,
@@ -27,7 +27,14 @@ pub async fn calculate_match(
             composite_score: match_result.composite_index.value(),
             human_review_required: match_result.human_review_required,
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %err,
+            match_id = %match_result.id,
+            "Failed to publish match calculated event"
+        );
+    }
 
     Ok(Json(match_result))
 }
@@ -49,7 +56,7 @@ pub async fn create_invitation(
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
         .await?;
 
-    let _ = state
+    if let Err(err) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
             invite_id: invite.id,
@@ -57,7 +64,14 @@ pub async fn create_invitation(
             candidate_id: invite.candidate_id,
             email: invite.email.clone(),
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %err,
+            invite_id = %invite.id,
+            "Failed to publish candidate invited event"
+        );
+    }
 
     Ok(Json(invite))
 }
@@ -147,14 +161,21 @@ pub async fn generate_report(
                 .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
                 .await?;
 
-            let _ = state
+            if let Err(err) = state
                 .synaptic_bus
                 .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
                     report_id: report.id,
                     match_id: report.job_match_id,
                     report_type: report.report_type.as_db_str().to_string(),
                 })
-                .await;
+                .await
+            {
+                tracing::warn!(
+                    error = %err,
+                    report_id = %report.id,
+                    "Failed to publish report generated event"
+                );
+            }
 
             Ok(Json(report))
         }
