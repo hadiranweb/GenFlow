@@ -1,0 +1,80 @@
+# GenFlow v2 — docker-compose.yml
+#
+# Services: api (gateway) + db (PostgreSQL) + redis + migrate
+
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genflow-api
+    ports:
+      - "3000:3000"
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=3000
+      - DATABASE_URL=postgres://genflow:genflow@db:5432/genflow
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-genflow-production-secret}
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: genflow-db
+    environment:
+      - POSTGRES_USER=genflow
+      - POSTGRES_PASSWORD=genflow
+      - POSTGRES_DB=genflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U genflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: genflow-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genflow-migrate
+    entrypoint: []
+    command: ["sh", "-c", "sleep 3 && sqlx migrate run || echo 'Migration via sqlx-cli; fallback: binary runs migrations at startup'"]
+    environment:
+      - DATABASE_URL=postgres://genflow:genflow@db:5432/genflow
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:

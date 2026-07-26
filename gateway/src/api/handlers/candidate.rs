@@ -1,0 +1,194 @@
+//! Candidate Matching Handlers
+
+use crate::error_response::ApiError;
+use crate::state::AppState;
+use axum::extract::{Path, State};
+use axum::Json;
+use genflow_shared_infra::error::AppError;
+use sqlx::Row;
+use std::sync::Arc;
+use uuid::Uuid;
+
+pub async fn calculate_match(
+    State(state): State<Arc<AppState>>,
+    Path((position_id, candidate_id)): Path<(Uuid, Uuid)>,
+) -> Result<Json<genflow_receptors::JobMatch>, ApiError> {
+    let match_result = state
+        .matching_engine
+        .calculate_match(position_id, candidate_id)
+        .await?;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
+            match_id: match_result.id,
+            position_id: match_result.position_id,
+            candidate_id: match_result.candidate_id,
+            composite_score: match_result.composite_index.value(),
+            human_review_required: match_result.human_review_required,
+        })
+        .await;
+
+    Ok(Json(match_result))
+}
+
+#[derive(serde::Deserialize)]
+pub struct CreateInvitationRequest {
+    pub position_id: Uuid,
+    pub invited_by_rep_id: Uuid,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+}
+
+pub async fn create_invitation(
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<CreateInvitationRequest>,
+) -> Result<Json<genflow_receptors::PositionInvite>, ApiError> {
+    let invite = state
+        .invitation_manager
+        .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
+        .await?;
+
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
+            invite_id: invite.id,
+            position_id: invite.position_id,
+            candidate_id: invite.candidate_id,
+            email: invite.email.clone(),
+        })
+        .await;
+
+    Ok(Json(invite))
+}
+
+pub async fn accept_invitation(
+    State(state): State<Arc<AppState>>,
+    Path(code): Path<String>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    // Candidate ID would come from auth context in real implementation
+    let candidate_id = Uuid::new_v4();
+    state
+        .invitation_manager
+        .accept_invitation(&code, candidate_id)
+        .await?;
+    Ok(Json(serde_json::json!({
+        "status": "accepted",
+        "code": code
+    })))
+}
+
+pub async fn generate_report(
+    State(state): State<Arc<AppState>>,
+    Path(match_id): Path<Uuid>,
+) -> Result<Json<genflow_receptors::MatchReport>, ApiError> {
+    // Load the match from DB to get its details, casting DECIMAL fields to FLOAT8 to avoid SQLx type mismatch panic
+    let row = sqlx::query(
+        "SELECT id, position_id, candidate_id, composite_match_index::FLOAT8 as composite_match_index, confidence_score::FLOAT8 as confidence_score, status, human_review_required, calculated_at FROM job_matches WHERE id = $1"
+    )
+        .bind(match_id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+    match row {
+        Some(row) => {
+            let job_match = genflow_receptors::JobMatch {
+                id: row.get("id"),
+                position_id: row.get("position_id"),
+                candidate_id: row.get("candidate_id"),
+                capability_match: genflow_receptors::AxisMatch {
+                    axis_code: "capability".to_string(),
+                    match_percentage: genflow_receptors::Score::new_unchecked(0.0), // placeholder — would need JSONB parsing
+                    gap_severity: genflow_receptors::GapSeverity::Aligned,
+                    details: vec![],
+                },
+                output_kpi_match: genflow_receptors::AxisMatch {
+                    axis_code: "output_kpi".to_string(),
+                    match_percentage: genflow_receptors::Score::new_unchecked(0.0),
+                    gap_severity: genflow_receptors::GapSeverity::Aligned,
+                    details: vec![],
+                },
+                business_gap_match: genflow_receptors::AxisMatch {
+                    axis_code: "business_gap".to_string(),
+                    match_percentage: genflow_receptors::Score::new_unchecked(0.0),
+                    gap_severity: genflow_receptors::GapSeverity::Aligned,
+                    details: vec![],
+                },
+                work_style_alignment: genflow_receptors::AxisMatch {
+                    axis_code: "work_style".to_string(),
+                    match_percentage: genflow_receptors::Score::new_unchecked(0.0),
+                    gap_severity: genflow_receptors::GapSeverity::Aligned,
+                    details: vec![],
+                },
+                growth_motivation_match: genflow_receptors::AxisMatch {
+                    axis_code: "growth_motivation".to_string(),
+                    match_percentage: genflow_receptors::Score::new_unchecked(0.0),
+                    gap_severity: genflow_receptors::GapSeverity::Aligned,
+                    details: vec![],
+                },
+                composite_index: genflow_receptors::Score::new_unchecked(
+                    row.get::<Option<f64>, _>("composite_match_index").unwrap_or(0.0) as f32,
+                ),
+                confidence_score: genflow_receptors::Score::new_unchecked(
+                    row.get::<Option<f64>, _>("confidence_score").unwrap_or(0.0) as f32,
+                ),
+                status: genflow_receptors::MatchStatus::from_db_str(
+                    &row.get::<String, _>("status"),
+                )
+                .unwrap_or(genflow_receptors::MatchStatus::PendingReview),
+                human_review_required: row.get("human_review_required"),
+                calculated_at: row.get("calculated_at"),
+            };
+
+            let report = state
+                .report_generator
+                .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
+                .await?;
+
+            let _ = state
+                .synaptic_bus
+                .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
+                    report_id: report.id,
+                    match_id: report.job_match_id,
+                    report_type: report.report_type.as_db_str().to_string(),
+                })
+                .await;
+
+            Ok(Json(report))
+        }
+        None => Err(ApiError(AppError::NotFound(format!(
+            "Match {} not found",
+            match_id
+        )))),
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub struct RecordDecisionRequest {
+    pub decision: String, // "shortlisted" | "not_selected" | "selected" | "under_review" | "withdrawn"
+    pub decided_by: Uuid,
+    pub note: Option<String>,
+}
+
+pub async fn record_decision(
+    State(state): State<Arc<AppState>>,
+    Path(match_id): Path<Uuid>,
+    Json(payload): Json<RecordDecisionRequest>,
+) -> Result<axum::http::StatusCode, ApiError> {
+    let status = match payload.decision.as_str() {
+        "pending_review" => genflow_receptors::MatchStatus::PendingReview,
+        "under_review" => genflow_receptors::MatchStatus::UnderReview,
+        "shortlisted" => genflow_receptors::MatchStatus::Shortlisted,
+        "not_selected" => genflow_receptors::MatchStatus::NotSelected,
+        "selected" => genflow_receptors::MatchStatus::Selected,
+        "withdrawn" => genflow_receptors::MatchStatus::Withdrawn,
+        _ => return Err(ApiError(AppError::Business("Invalid decision status".to_string()))),
+    };
+
+    state.matching_engine
+        .record_decision(match_id, payload.decided_by, status, payload.note)
+        .await?;
+
+    Ok(axum::http::StatusCode::OK)
+}

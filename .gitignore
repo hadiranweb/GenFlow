@@ -9,7 +9,10 @@ node_modules/
 # Rust
 # ===========================================
 **/target/
-Cargo.lock
+# Cargo.lock should NOT be ignored for binary crates — only for pure library crates
+# GenFlow has a binary crate (genflow-gateway) so Cargo.lock MUST be committed
+# (Commented out intentionally)
+# Cargo.lock
 **/deps/
 **/*.rlib
 **/*.so

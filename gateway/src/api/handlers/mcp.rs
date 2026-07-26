@@ -1,0 +1,70 @@
+//! MCP Registry Handlers
+
+use crate::error_response::ApiError;
+use crate::state::AppState;
+use axum::extract::{Path, State};
+use axum::Json;
+use genflow_shared_infra::error::AppError;
+use std::sync::Arc;
+use uuid::Uuid;
+
+pub async fn get_mcp(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<genflow_receptors::McpContext>, ApiError> {
+    let mcp = state
+        .mcp_resolver
+        .find_by_id(id)
+        .await
+        .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+    match mcp {
+        Some(ctx) => Ok(Json(ctx)),
+        None => Err(ApiError(AppError::NotFound(format!(
+            "MCP {} not found",
+            id
+        )))),
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub struct ResolveMcpRequest {
+    pub organization_id: Uuid,
+    pub industry_code: Option<String>,
+    pub process_codes: Vec<String>,
+    pub position_hints: Vec<String>,
+}
+
+pub async fn resolve_mcp(
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<ResolveMcpRequest>,
+) -> Result<Json<genflow_receptors::McpBundle>, ApiError> {
+    let analysis_id = Uuid::new_v4();
+
+    let bundle = state
+        .mcp_resolver
+        .resolve_for_analysis(
+            req.organization_id,
+            req.industry_code.as_deref(),
+            &req.process_codes,
+            &req.position_hints,
+            analysis_id,
+        )
+        .await
+        .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+    let mcp_ids = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
+    let _ = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::McpResolvedEvent {
+            analysis_id,
+            organization_id: req.organization_id,
+            mcp_ids,
+            cache_hits: bundle.resolution_metadata.cache_hits,
+            db_lookups: bundle.resolution_metadata.db_lookups,
+            resolution_time_ms: bundle.resolution_metadata.total_time_ms,
+        })
+        .await;
+
+    Ok(Json(bundle))
+}
