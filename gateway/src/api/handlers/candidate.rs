@@ -18,7 +18,7 @@ pub async fn calculate_match(
         .calculate_match(position_id, candidate_id)
         .await?;
 
-    let _ = state
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
             match_id: match_result.id,
@@ -27,7 +27,14 @@ pub async fn calculate_match(
             composite_score: match_result.composite_index.value(),
             human_review_required: match_result.human_review_required,
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            match_id = %match_result.id,
+            "Failed to publish match calculated event"
+        );
+    }
 
     Ok(Json(match_result))
 }
