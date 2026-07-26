@@ -12,7 +12,7 @@ pub mod health;
 pub mod redis;
 pub mod telemetry;
 
-pub use auth::{AuthClaims, JwtAuth};
+pub use auth::{AccessRole, AuthClaims, JwtAuth, Permission};
 pub use config::AppConfig;
 pub use db::DatabasePool;
 pub use error::{AppError, AppResult};

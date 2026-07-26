@@ -5,7 +5,7 @@ use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
-use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::{error::AppError, Permission};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -14,6 +14,7 @@ pub async fn get_mcp(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::McpContext>, ApiError> {
+    _auth.require_permission(Permission::ReadMcp)?;
     let mcp = state
         .mcp_resolver
         .find_by_id(id)
@@ -42,6 +43,7 @@ pub async fn resolve_mcp(
     State(state): State<Arc<AppState>>,
     Json(req): Json<ResolveMcpRequest>,
 ) -> Result<Json<genflow_receptors::McpBundle>, ApiError> {
+    auth.require_permission(Permission::ResolveMcp)?;
     auth.require_organization(req.organization_id)?;
     let analysis_id = Uuid::new_v4();
 

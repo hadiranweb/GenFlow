@@ -5,7 +5,7 @@ use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
-use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::{error::AppError, Permission};
 use sqlx::Row;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -15,6 +15,7 @@ pub async fn calculate_match(
     State(state): State<Arc<AppState>>,
     Path((position_id, candidate_id)): Path<(Uuid, Uuid)>,
 ) -> Result<Json<genflow_receptors::JobMatch>, ApiError> {
+    auth.require_permission(Permission::CalculateMatch)?;
     require_position_tenant(&state, &auth, position_id).await?;
     let match_result = state
         .matching_engine
@@ -55,6 +56,7 @@ pub async fn create_invitation(
     State(state): State<Arc<AppState>>,
     Json(req): Json<CreateInvitationRequest>,
 ) -> Result<Json<genflow_receptors::PositionInvite>, ApiError> {
+    auth.require_permission(Permission::CreateInvitation)?;
     require_position_tenant(&state, &auth, req.position_id).await?;
     let invite = state
         .invitation_manager
@@ -103,6 +105,7 @@ pub async fn generate_report(
     State(state): State<Arc<AppState>>,
     Path(match_id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::MatchReport>, ApiError> {
+    auth.require_permission(Permission::GenerateReport)?;
     // Load the match from DB to get its details, casting DECIMAL fields to FLOAT8 to avoid SQLx type mismatch panic
     let row = sqlx::query(
         "SELECT job_match.id, job_match.position_id, job_match.candidate_id, job_match.composite_match_index::FLOAT8 as composite_match_index, job_match.confidence_score::FLOAT8 as confidence_score, job_match.status, job_match.human_review_required, job_match.calculated_at FROM job_matches job_match JOIN job_positions position ON position.id = job_match.position_id WHERE job_match.id = $1 AND position.organization_id = $2"
@@ -196,7 +199,10 @@ pub async fn generate_report(
 #[derive(serde::Deserialize)]
 pub struct RecordDecisionRequest {
     pub decision: String, // "shortlisted" | "not_selected" | "selected" | "under_review" | "withdrawn"
-    pub decided_by: Uuid,
+    /// Legacy field retained for a compatibility window. The authenticated JWT
+    /// subject is authoritative and is always used for persistence.
+    #[serde(default)]
+    pub decided_by: Option<Uuid>,
     pub note: Option<String>,
 }
 
@@ -206,11 +212,14 @@ pub async fn record_decision(
     Path(match_id): Path<Uuid>,
     Json(payload): Json<RecordDecisionRequest>,
 ) -> Result<axum::http::StatusCode, ApiError> {
+    auth.require_permission(Permission::RecordDecision)?;
     require_match_tenant(&state, &auth, match_id).await?;
-    if payload.decided_by != auth.user_id() {
-        return Err(ApiError(AppError::Auth(
-            "Decision actor does not match the authenticated user".to_string(),
-        )));
+    if let Some(decided_by) = payload.decided_by {
+        if decided_by != auth.user_id() {
+            return Err(ApiError(AppError::Authorization(
+                "Decision actor does not match the authenticated user".to_string(),
+            )));
+        }
     }
 
     let status = match payload.decision.as_str() {
@@ -224,7 +233,7 @@ pub async fn record_decision(
     };
 
     state.matching_engine
-        .record_decision(match_id, payload.decided_by, status, payload.note)
+        .record_decision(match_id, auth.user_id(), status, payload.note)
         .await?;
 
     Ok(axum::http::StatusCode::OK)

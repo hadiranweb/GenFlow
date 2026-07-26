@@ -13,8 +13,10 @@ pub enum AppError {
     Validation(String),
     /// Not found
     NotFound(String),
-    /// Authorization/authentication error
+    /// Authentication error (missing, expired or invalid credentials)
     Auth(String),
+    /// Authorization error (authenticated actor lacks the required permission)
+    Authorization(String),
     /// Infrastructure error (DB, Redis, network)
     Infrastructure(String),
     /// Business logic error
@@ -37,6 +39,7 @@ impl AppError {
             Self::Validation(_) => 400,
             Self::NotFound(_) => 404,
             Self::Auth(_) => 401,
+            Self::Authorization(_) => 403,
             Self::Infrastructure(_) => 503,
             Self::Business(_) => 409,
             Self::Internal(_) => 500,
@@ -48,6 +51,7 @@ impl AppError {
             Self::Validation(_) => "VALIDATION_ERROR",
             Self::NotFound(_) => "NOT_FOUND",
             Self::Auth(_) => "AUTH_ERROR",
+            Self::Authorization(_) => "AUTHORIZATION_ERROR",
             Self::Infrastructure(_) => "INFRASTRUCTURE_ERROR",
             Self::Business(_) => "BUSINESS_ERROR",
             Self::Internal(_) => "INTERNAL_ERROR",
@@ -69,6 +73,7 @@ impl std::fmt::Display for AppError {
             Self::Validation(msg) => write!(f, "Validation: {}", msg),
             Self::NotFound(msg) => write!(f, "Not found: {}", msg),
             Self::Auth(msg) => write!(f, "Auth: {}", msg),
+            Self::Authorization(msg) => write!(f, "Authorization: {}", msg),
             Self::Infrastructure(msg) => write!(f, "Infrastructure: {}", msg),
             Self::Business(msg) => write!(f, "Business: {}", msg),
             Self::Internal(msg) => write!(f, "Internal: {}", msg),

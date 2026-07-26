@@ -7,7 +7,7 @@ use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::FromRequestParts;
 use axum::http::{header::AUTHORIZATION, request::Parts};
-use genflow_shared_infra::{AuthClaims, AppError};
+use genflow_shared_infra::{AccessRole, AppError, AuthClaims, Permission};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -30,9 +30,21 @@ impl TenantAuth {
         if self.organization_id() == organization_id {
             Ok(())
         } else {
-            Err(ApiError(AppError::Auth(
+            Err(ApiError(AppError::Authorization(
                 "Organization does not match the authenticated tenant".to_string(),
             )))
+        }
+    }
+
+    pub fn require_permission(&self, permission: Permission) -> Result<(), ApiError> {
+        let role = AccessRole::from_claim(&self.0.role).map_err(ApiError)?;
+        if role.allows(permission) {
+            Ok(())
+        } else {
+            Err(ApiError(AppError::Authorization(format!(
+                "Role {:?} is not allowed to perform {:?}",
+                role, permission
+            ))))
         }
     }
 }

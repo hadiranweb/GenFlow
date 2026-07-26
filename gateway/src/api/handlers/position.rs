@@ -6,6 +6,7 @@ use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
 use genflow_receptors::BusinessAnalysisRequest;
+use genflow_shared_infra::Permission;
 use genflow_shared_infra::error::AppError;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -26,6 +27,7 @@ pub async fn generate_position(
     State(state): State<Arc<AppState>>,
     Json(req): Json<GeneratePositionRequest>,
 ) -> Result<Json<genflow_receptors::GeneratedPositionProfile>, ApiError> {
+    auth.require_permission(Permission::GeneratePosition)?;
     auth.require_organization(req.organization_id)?;
     let analysis_request = BusinessAnalysisRequest {
         analysis_id: Uuid::new_v4(),
@@ -148,6 +150,7 @@ pub async fn get_position(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::JobPosition>, ApiError> {
+    auth.require_permission(Permission::ReadPosition)?;
     let position = state
         .position_engine
         .get_position(id)
