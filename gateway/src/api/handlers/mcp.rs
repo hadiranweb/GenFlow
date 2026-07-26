@@ -1,17 +1,20 @@
 //! MCP Registry Handlers
 
+use crate::auth_context::TenantAuth;
 use crate::error_response::ApiError;
 use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
-use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::{error::AppError, Permission};
 use std::sync::Arc;
 use uuid::Uuid;
 
 pub async fn get_mcp(
+    _auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::McpContext>, ApiError> {
+    _auth.require_permission(Permission::ReadMcp)?;
     let mcp = state
         .mcp_resolver
         .find_by_id(id)
@@ -36,9 +39,12 @@ pub struct ResolveMcpRequest {
 }
 
 pub async fn resolve_mcp(
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Json(req): Json<ResolveMcpRequest>,
 ) -> Result<Json<genflow_receptors::McpBundle>, ApiError> {
+    auth.require_permission(Permission::ResolveMcp)?;
+    auth.require_organization(req.organization_id)?;
     let analysis_id = Uuid::new_v4();
 
     let bundle = state
@@ -54,7 +60,7 @@ pub async fn resolve_mcp(
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
     let mcp_ids = bundle.all_mcps().into_iter().map(|mcp| mcp.id).collect();
-    let _ = state
+    if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::McpResolvedEvent {
             analysis_id,
@@ -64,7 +70,14 @@ pub async fn resolve_mcp(
             db_lookups: bundle.resolution_metadata.db_lookups,
             resolution_time_ms: bundle.resolution_metadata.total_time_ms,
         })
-        .await;
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            analysis_id = %analysis_id,
+            "Failed to publish MCP resolved event"
+        );
+    }
 
     Ok(Json(bundle))
 }

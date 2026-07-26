@@ -9,7 +9,8 @@
 # ============================================================
 # Build Stage
 # ============================================================
-FROM rust:stable-slim AS builder
+# Keep the build image aligned with the workspace MSRV for reproducible builds.
+FROM rust:1.88-slim AS builder
 
 WORKDIR /app
 
@@ -51,7 +52,8 @@ COPY islands/dashboard-analytics/Cargo.toml islands/dashboard-analytics/
 COPY gateway/Cargo.toml gateway/
 
 # Build dependencies (cache layer)
-RUN cargo build --release 2>/dev/null || true
+# All manifests and dummy targets exist above, so a failure here is a real build failure.
+RUN cargo build --release -p genflow-gateway --locked
 
 # Now copy real source code
 COPY receptors/ receptors/

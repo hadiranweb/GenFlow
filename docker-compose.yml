@@ -1,6 +1,7 @@
 # GenFlow v2 — docker-compose.yml
 #
-# Services: api (gateway) + db (PostgreSQL) + redis + migrate
+# Services: api (gateway) + db (PostgreSQL) + redis.
+# The gateway applies embedded migrations during startup.
 
 version: "3.9"
 
@@ -61,20 +62,6 @@ services:
       timeout: 3s
       retries: 10
     restart: unless-stopped
-
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: genflow-migrate
-    entrypoint: []
-    command: ["sh", "-c", "sleep 3 && sqlx migrate run || echo 'Migration via sqlx-cli; fallback: binary runs migrations at startup'"]
-    environment:
-      - DATABASE_URL=postgres://genflow:genflow@db:5432/genflow
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: "no"
 
 volumes:
   pgdata:

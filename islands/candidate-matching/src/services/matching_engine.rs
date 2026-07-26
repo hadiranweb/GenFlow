@@ -7,12 +7,27 @@ use genflow_receptors::{
     AxisMatch, CandidateProfile, FlagSeverity, GapSeverity, JobMatch, MatchStatus, PositionGraph,
     PositionGraphAxis, RiskFlag, Score,
 };
-use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::{db::begin_organization_transaction, error::AppError};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
 pub struct MatchingEngine {
     pool: PgPool,
+}
+
+/// Immutable calculation output passed to the persistence boundary.
+///
+/// Keeping this separate from SQL prevents recalculation from changing the
+/// candidate-selection workflow state or losing the score inputs that produced
+/// the persisted match.
+struct MatchSnapshot<'a> {
+    capability: &'a AxisMatch,
+    output_kpi: &'a AxisMatch,
+    business_gap: &'a AxisMatch,
+    work_style: &'a AxisMatch,
+    growth: &'a AxisMatch,
+    composite: Score,
+    human_review_required: bool,
 }
 
 impl MatchingEngine {
@@ -58,41 +73,29 @@ impl MatchingEngine {
                 .iter()
                 .any(|f| f.severity == FlagSeverity::ActionRequired);
 
-        // 7. Persist match to database
-        let match_id = self
-            .save_match(
-                position_id,
-                candidate_id,
-                &capability,
-                &output_kpi,
-                &business_gap,
-                &work_style,
-                &growth,
-                composite,
-                human_review,
-            )
+        // 7. Persist the score snapshot and its derived risk flags atomically.
+        // Recalculation replaces analytical outputs but intentionally preserves a
+        // human workflow decision (for example, `selected` or `not_selected`).
+        let snapshot = MatchSnapshot {
+            capability: &capability,
+            output_kpi: &output_kpi,
+            business_gap: &business_gap,
+            work_style: &work_style,
+            growth: &growth,
+            composite,
+            human_review_required: human_review,
+        };
+        let (match_id, status, calculated_at) = self
+            .persist_calculation(position_id, candidate_id, &snapshot, &risk_flags)
             .await?;
-
-        // 8. Save risk flags
-        for flag in &risk_flags {
-            sqlx::query(
-                "INSERT INTO match_risk_flags (id, job_match_id, flag_code, severity, description, mitigation_suggestion) VALUES ($1, $2, $3, $4, $5, $6)"
-            )
-                .bind(Uuid::new_v4())
-                .bind(match_id)
-                .bind(&flag.code)
-                .bind(flag.severity.as_db_str())
-                .bind(&flag.description)
-                .bind(&flag.mitigation)
-                .execute(&self.pool)
-                .await?;
-        }
 
         tracing::info!(
             match_id = %match_id,
             composite = %composite,
             human_review = %human_review,
-            "Match calculated and persisted"
+            status = %status.as_db_str(),
+            risk_flag_count = risk_flags.len(),
+            "Match calculation and risk flags persisted"
         );
 
         Ok(JobMatch {
@@ -106,9 +109,9 @@ impl MatchingEngine {
             growth_motivation_match: growth,
             composite_index: composite,
             confidence_score: Score::new(85.0).unwrap_or_default(),
-            status: MatchStatus::PendingReview,
+            status,
             human_review_required: human_review,
-            calculated_at: chrono::Utc::now(),
+            calculated_at,
         })
     }
 
@@ -287,7 +290,8 @@ impl MatchingEngine {
 
         if work_style.match_percentage.is_low() {
             flags.push(RiskFlag {
-                code: "work_style_low".to_string(),
+                // Canonical persistence code; the description retains the more specific legacy finding.
+                code: "collaboration_style_gap".to_string(),
                 severity: FlagSeverity::Attention,
                 description: "Work style alignment below threshold".to_string(),
                 mitigation: "Consider team dynamics training or mentorship".to_string(),
@@ -297,9 +301,10 @@ impl MatchingEngine {
         if let Some(bf) = &candidate.big_five {
             if bf.neuroticism.is_high() {
                 flags.push(RiskFlag {
-                    code: "stress_sensitivity".to_string(),
+                    // Canonical persistence code; this is support guidance, not a diagnostic label.
+                    code: "stress_support_needed".to_string(),
                     severity: FlagSeverity::Info,
-                    description: "Higher stress sensitivity score".to_string(),
+                    description: "Additional support may be beneficial in high-pressure situations".to_string(),
                     mitigation: "Ensure adequate support structure".to_string(),
                 });
             }
@@ -513,41 +518,104 @@ impl MatchingEngine {
 
     // ─── Persistence ───
 
-    #[allow(clippy::too_many_arguments)]
-    async fn save_match(
+    /// Atomically upsert a match and replace its derived risk-flag snapshot.
+    ///
+    /// The unique `(position_id, candidate_id)` constraint represents the stable
+    /// business identity of a match. Score fields are recalculated, while status
+    /// and human decision audit fields are intentionally left untouched on
+    /// conflict so automation cannot overwrite a reviewer decision.
+    async fn persist_calculation(
         &self,
         position_id: Uuid,
         candidate_id: Uuid,
-        capability: &AxisMatch,
-        output_kpi: &AxisMatch,
-        business_gap: &AxisMatch,
-        work_style: &AxisMatch,
-        growth: &AxisMatch,
-        composite: Score,
-        human_review_required: bool,
-    ) -> Result<Uuid, AppError> {
-        let match_id = Uuid::new_v4();
+        snapshot: &MatchSnapshot<'_>,
+        risk_flags: &[RiskFlag],
+    ) -> Result<(Uuid, MatchStatus, chrono::DateTime<chrono::Utc>), AppError> {
+        let organization_id = self.position_organization_id(position_id).await?;
+        let calculated_at = chrono::Utc::now();
+        let mut tx = begin_organization_transaction(&self.pool, organization_id).await?;
 
-        sqlx::query(
-            "INSERT INTO job_matches (id, position_id, candidate_id, capability_match_score, output_kpi_match_score, business_gap_match_score, work_style_alignment_score, growth_motivation_match_score, composite_match_index, confidence_score, status, human_review_required, calculated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"
+        let row = sqlx::query(
+            r#"
+            INSERT INTO job_matches (
+                id, position_id, candidate_id,
+                capability_match_score, output_kpi_match_score, business_gap_match_score,
+                work_style_alignment_score, growth_motivation_match_score,
+                composite_match_index, confidence_score, status,
+                human_review_required, calculated_at
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ON CONFLICT (position_id, candidate_id) DO UPDATE SET
+                capability_match_score = EXCLUDED.capability_match_score,
+                output_kpi_match_score = EXCLUDED.output_kpi_match_score,
+                business_gap_match_score = EXCLUDED.business_gap_match_score,
+                work_style_alignment_score = EXCLUDED.work_style_alignment_score,
+                growth_motivation_match_score = EXCLUDED.growth_motivation_match_score,
+                composite_match_index = EXCLUDED.composite_match_index,
+                confidence_score = EXCLUDED.confidence_score,
+                human_review_required = EXCLUDED.human_review_required,
+                calculated_at = EXCLUDED.calculated_at
+            RETURNING id, status
+            "#,
         )
+        .bind(Uuid::new_v4())
+        .bind(position_id)
+        .bind(candidate_id)
+        .bind(snapshot.capability.match_percentage.value())
+        .bind(snapshot.output_kpi.match_percentage.value())
+        .bind(snapshot.business_gap.match_percentage.value())
+        .bind(snapshot.work_style.match_percentage.value())
+        .bind(snapshot.growth.match_percentage.value())
+        .bind(snapshot.composite.value())
+        .bind(Score::new(85.0).unwrap_or_default().value())
+        .bind(MatchStatus::PendingReview.as_db_str())
+        .bind(snapshot.human_review_required)
+        .bind(calculated_at)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        let match_id: Uuid = row.get("id");
+        let status = MatchStatus::from_db_str(row.get::<String, _>("status").as_str())
+            .ok_or_else(|| AppError::Internal(format!("Unknown persisted match status for {match_id}")))?;
+
+        // Risk flags are an analytical snapshot, not a human decision. Replace
+        // them in the same transaction so a failed recalculation leaves the
+        // previous complete snapshot intact.
+        sqlx::query("DELETE FROM match_risk_flags WHERE job_match_id = $1")
             .bind(match_id)
-            .bind(position_id)
-            .bind(candidate_id)
-            .bind(capability.match_percentage.value())
-            .bind(output_kpi.match_percentage.value())
-            .bind(business_gap.match_percentage.value())
-            .bind(work_style.match_percentage.value())
-            .bind(growth.match_percentage.value())
-            .bind(composite.value())
-            .bind(Score::new(85.0).unwrap_or_default().value())
-            .bind(MatchStatus::PendingReview.as_db_str())
-            .bind(human_review_required)
-            .bind(chrono::Utc::now())
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
-        Ok(match_id)
+        for flag in risk_flags {
+            sqlx::query(
+                "INSERT INTO match_risk_flags (id, job_match_id, flag_code, severity, description, mitigation_suggestion) VALUES ($1, $2, $3, $4, $5, $6)",
+            )
+            .bind(Uuid::new_v4())
+            .bind(match_id)
+            .bind(&flag.code)
+            .bind(flag.severity.as_db_str())
+            .bind(&flag.description)
+            .bind(&flag.mitigation)
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        tx.commit().await?;
+        Ok((match_id, status, calculated_at))
+    }
+
+    /// Resolve the owning organization before opening a tenant-scoped write
+    /// transaction. Authentication-derived tenant context will replace this
+    /// lookup when request auth is introduced in the gateway.
+    async fn position_organization_id(&self, position_id: Uuid) -> Result<Uuid, AppError> {
+        let row = sqlx::query("SELECT organization_id FROM job_positions WHERE id = $1")
+            .bind(position_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        row.map(|row| row.get("organization_id")).ok_or_else(|| {
+            AppError::NotFound(format!("Position {position_id} not found while calculating match"))
+        })
     }
 
     /// Record hiring decision on a match
