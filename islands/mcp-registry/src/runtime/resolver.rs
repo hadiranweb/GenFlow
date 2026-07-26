@@ -46,12 +46,9 @@ where
         code: &str,
         meta: &mut ResolutionMetadata,
     ) -> Result<Option<McpContext>, McpRuntimeError> {
-        let cache_key = format!(
-            "mcp:ctx:{}:{}:{}:active",
-            mcp_type.as_db_str(),
-            scope.as_db_str(),
-            code
-        );
+        let mcp_type_key = mcp_type.as_db_str();
+        let scope_key = scope.as_db_str();
+        let cache_key = format!("mcp:ctx:{mcp_type_key}:{scope_key}:{code}:active");
 
         // 1. Try cache
         if let Some(mcp) = self.cache.get(&cache_key).await? {
@@ -65,7 +62,7 @@ where
             meta.db_lookups += 1;
             // Populate cache
             let ttl = mcp_type.default_cache_ttl_seconds();
-            self.cache.set(&cache_key, &mcp, ttl).await.ok();
+            let _ = self.cache.set(&cache_key, &mcp, ttl).await;
             return Ok(Some(mcp));
         }
 
@@ -137,7 +134,7 @@ where
                     McpContext {
                         status: McpStatus::ReviewReady,
                         ..McpContextBuilder::new(McpType::StandardPosition, McpScope::Global, hint)
-                            .title(format!("Position: {}", hint))
+                            .title(format!("Position: {hint}"))
                             .build()
                     }
                 }
@@ -168,7 +165,7 @@ where
         // 6. Build Case MCP
         let case_mcp = self.builder.build_case_draft(org_id).await.ok();
 
-        meta.total_time_ms = start.elapsed().as_millis() as u32;
+        meta.total_time_ms = u32::try_from(start.elapsed().as_millis()).unwrap_or(u32::MAX);
         meta.token_savings_estimate = 0; // Will be calculated based on bundle
 
         Ok(McpBundle {

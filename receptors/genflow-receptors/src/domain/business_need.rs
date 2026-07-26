@@ -60,7 +60,11 @@ impl BusinessNeed {
         urgency: NeedUrgency,
     ) -> Self {
         Self {
-            need_id: format!("NEED-{}", &Uuid::new_v4().to_string()[..8]),
+            need_id: {
+                let id = Uuid::new_v4().to_string();
+                let suffix = &id[..8];
+                format!("NEED-{suffix}")
+            },
             need_type,
             description: description.into(),
             related_process: None,

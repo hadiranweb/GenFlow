@@ -163,8 +163,7 @@ pub async fn get_position(
             Ok(Json(pos))
         }
         None => Err(ApiError(AppError::NotFound(format!(
-            "Position {} not found",
-            id
+            "Position {id} not found"
         )))),
     }
 }

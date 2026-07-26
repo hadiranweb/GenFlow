@@ -10,24 +10,19 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 pub async fn get_mcp(
-    _auth: TenantAuth,
+    auth: TenantAuth,
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<genflow_receptors::McpContext>, ApiError> {
-    _auth.require_permission(Permission::ReadMcp)?;
+    auth.require_permission(Permission::ReadMcp)?;
     let mcp = state
         .mcp_resolver
         .find_by_id(id)
         .await
         .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
 
-    match mcp {
-        Some(ctx) => Ok(Json(ctx)),
-        None => Err(ApiError(AppError::NotFound(format!(
-            "MCP {} not found",
-            id
-        )))),
-    }
+    mcp.map(Json)
+        .ok_or_else(|| ApiError(AppError::NotFound(format!("MCP {id} not found"))))
 }
 
 #[derive(serde::Deserialize)]

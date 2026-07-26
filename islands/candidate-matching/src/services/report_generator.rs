@@ -23,24 +23,22 @@ impl ReportGenerator {
         let report_id = Uuid::new_v4();
 
         let (title, summary, strengths, development_areas) = match report_type {
-            ReportType::ForEmployer => (
-                format!(
-                    "Match Report — Position vs Candidate ({})",
-                    job_match.position_id
-                ),
-                format!(
-                    "Composite score: {:.1}/100",
-                    job_match.composite_index.value()
-                ),
-                vec![
-                    "Capability alignment is strong".to_string(),
-                    "Work style shows good fit".to_string(),
-                ],
-                vec![
-                    "Some KPI targets may need calibration".to_string(),
-                    "Consider structured onboarding".to_string(),
-                ],
-            ),
+            ReportType::ForEmployer => {
+                let position_id = job_match.position_id;
+                let composite = job_match.composite_index.value();
+                (
+                    format!("Match Report — Position vs Candidate ({position_id})"),
+                    format!("Composite score: {composite:.1}/100"),
+                    vec![
+                        "Capability alignment is strong".to_string(),
+                        "Work style shows good fit".to_string(),
+                    ],
+                    vec![
+                        "Some KPI targets may need calibration".to_string(),
+                        "Consider structured onboarding".to_string(),
+                    ],
+                )
+            }
             ReportType::ForCandidate => (
                 "Your Match Profile".to_string(),
                 "This report highlights how your profile aligns with the position requirements."
@@ -63,14 +61,14 @@ impl ReportGenerator {
             report_type,
             title,
             summary,
-            key_findings: vec![format!(
-                "Composite: {:.1}",
-                job_match.composite_index.value()
-            )],
+            key_findings: {
+                let composite = job_match.composite_index.value();
+                vec![format!("Composite: {composite:.1}")]
+            },
             strengths,
             development_areas,
             recommendations: vec![
-                "Schedule a structured interview for deeper evaluation".to_string()
+                "Schedule a structured interview for deeper evaluation".to_string(),
             ],
             disclaimers,
         };

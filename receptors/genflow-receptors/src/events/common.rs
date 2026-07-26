@@ -62,7 +62,8 @@ impl EventEnvelope {
 
     /// Redis channel name for pub/sub routing
     pub fn channel_name(&self) -> String {
-        format!("genflow:events:{}", self.event_type)
+        let event_type = &self.event_type;
+        format!("genflow:events:{event_type}")
     }
 }
 

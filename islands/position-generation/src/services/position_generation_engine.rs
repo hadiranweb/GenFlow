@@ -56,12 +56,16 @@ impl PositionGenerationEngine {
             .representative_context
             .as_ref()
             .map(|ctx| {
-                let mut w = AxisWeights::default();
+                let default_weights = AxisWeights::default();
                 if ctx.use_personality {
-                    w.work_style += ctx.requested_weight * 0.10;
-                    w.capability -= ctx.requested_weight * 0.05;
+                    AxisWeights {
+                        work_style: default_weights.work_style + ctx.requested_weight * 0.10,
+                        capability: default_weights.capability - ctx.requested_weight * 0.05,
+                        ..default_weights
+                    }
+                } else {
+                    default_weights
                 }
-                w
             })
             .unwrap_or_default();
 
@@ -117,12 +121,12 @@ impl PositionGenerationEngine {
             .unwrap_or_default();
         let mut rationale: Vec<String> = needs.iter().map(|need| need.description.clone()).collect();
         if let Some(bundle) = mcp_bundle {
+            let context_count = bundle.all_mcps().len();
+            let cache_hits = bundle.resolution_metadata.cache_hits;
+            let db_lookups = bundle.resolution_metadata.db_lookups;
+            let drafts_created = bundle.resolution_metadata.drafts_created;
             rationale.push(format!(
-                "MCP resolution retained {} contexts (cache_hits={}, db_lookups={}, drafts_created={})",
-                bundle.all_mcps().len(),
-                bundle.resolution_metadata.cache_hits,
-                bundle.resolution_metadata.db_lookups,
-                bundle.resolution_metadata.drafts_created,
+                "MCP resolution retained {context_count} contexts (cache_hits={cache_hits}, db_lookups={db_lookups}, drafts_created={drafts_created})"
             ));
         }
         let evidence = PositionGenerationEvidence {
@@ -144,9 +148,10 @@ impl PositionGenerationEngine {
             .axes
             .iter()
             .flat_map(|axis| {
+                let axis_code = axis.code.as_str();
                 axis.dimensions
                     .iter()
-                    .map(|dim| genflow_receptors::PositionRequirement {
+                    .map(move |dim| genflow_receptors::PositionRequirement {
                         axis_code: axis.code,
                         requirement_type: genflow_receptors::RequirementType::Skill,
                         description: dim.description.clone(),
@@ -156,7 +161,7 @@ impl PositionGenerationEngine {
                             genflow_receptors::RequirementImportance::Important
                         },
                         source: genflow_receptors::RequirementSource::Generated,
-                        rationale: format!("Derived from {} axis", axis.code.as_str()),
+                        rationale: format!("Derived from {axis_code} axis"),
                         score_range: dim.min.map(|m| {
                             (
                                 m,
@@ -228,7 +233,9 @@ impl PositionGenerationEngine {
             .await?;
 
         // 8d. Insert job_position — the core entity
-        let position_code = format!("POS-{}", &position_id.to_string()[..8]);
+        let position_id_string = position_id.to_string();
+        let position_code_suffix = &position_id_string[..8];
+        let position_code = format!("POS-{position_code_suffix}");
         sqlx::query(
             "INSERT INTO job_positions (id, organization_id, created_by_rep_id, generation_run_id, position_code, title, description, generation_method, status, generation_evidence, standards_used) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
         )
@@ -327,21 +334,22 @@ impl PositionGenerationEngine {
         }
 
         let primary = &needs[0];
+        let description = &primary.description;
         match primary.need_type {
             genflow_receptors::BusinessNeedType::CapabilityGap => {
-                format!("{} Specialist", primary.description)
+                format!("{description} Specialist")
             }
             genflow_receptors::BusinessNeedType::ProcessBottleneck => {
-                format!("{} Manager", primary.description)
+                format!("{description} Manager")
             }
             genflow_receptors::BusinessNeedType::GrowthOpportunity => {
-                format!("{} Lead", primary.description)
+                format!("{description} Lead")
             }
             genflow_receptors::BusinessNeedType::DirectPositionRequest => {
                 primary.description.clone()
             }
             genflow_receptors::BusinessNeedType::RiskMitigation => {
-                format!("{} Analyst", primary.description)
+                format!("{description} Analyst")
             }
         }
     }
@@ -355,8 +363,8 @@ impl PositionGenerationEngine {
             .fetch_optional(&self.pool)
             .await?;
 
-        match row {
-            Some(row) => Ok(Some(JobPosition {
+        if let Some(row) = row {
+            Ok(Some(JobPosition {
                 id: row.get("id"),
                 organization_id: row.get("organization_id"),
                 created_by_rep_id: row.get("created_by_rep_id"),
@@ -377,8 +385,9 @@ impl PositionGenerationEngine {
                     "archived" => PositionStatus::Archived,
                     _ => PositionStatus::Draft,
                 },
-            })),
-            None => Ok(None),
+            }))
+        } else {
+            Ok(None)
         }
     }
 }
