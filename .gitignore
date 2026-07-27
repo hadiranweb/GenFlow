@@ -16,7 +16,6 @@ node_modules/
 **/deps/
 **/*.rlib
 **/*.so
-**/.cargo/
 
 # ===========================================
 # Build outputs

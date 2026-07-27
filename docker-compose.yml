@@ -1,7 +1,6 @@
 # GenFlow v2 — docker-compose.yml
 #
-# Services: api (gateway) + db (PostgreSQL) + redis.
-# The gateway applies embedded migrations during startup.
+# Services: api (Rust gateway) + web (Remix frontend) + db (PostgreSQL) + redis
 
 version: "3.9"
 
@@ -32,6 +31,22 @@ services:
       timeout: 3s
       retries: 5
       start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: genflow-web
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://api:3000
+      - NODE_TELEMETRY_DISABLED=1
+    depends_on:
+      api:
+        condition: service_healthy
     restart: unless-stopped
 
   db:
