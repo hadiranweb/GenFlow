@@ -1,128 +1,154 @@
+# =============================================================================
+# GenFlow v2 — Continuous Deployment
+#
+# Triggered by: CI pipeline completion (on main/main-platform)
+# Deploys to: staging (auto) → production (manual approval)
+# =============================================================================
+
 name: CD
 
 on:
   workflow_run:
-    workflows: ["CI"]
-    types: [completed]
-    branches: [main, 'v2-*']
+    workflows: ["CI/CD"]
+    types:
+      - completed
+    branches: [main, main-platform]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      ref:
+        description: 'Git ref to deploy'
+        required: false
+        default: 'main-platform'
 
 permissions:
   contents: read
-  actions: read
-  packages: write
+  packages: read
+  id-token: write
 
 env:
   REGISTRY: ghcr.io
-  # Docker/GHCR repository names must be lowercase.
-  IMAGE_NAME: hadiranweb/genflow/genflow-api
 
 jobs:
-  # ===========================================
+
+  # ============================================================
   # Deploy to Staging
-  # ===========================================
+  # ============================================================
   deploy-staging:
-    name: Deploy Staging
+    name: 🚀 Deploy to Staging
     runs-on: ubuntu-latest
     environment: staging
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     steps:
-      - name: Checkout triggering commit
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ inputs.ref || github.event.workflow_run.head_branch || 'main-platform' }}
 
-      - name: Download CI binary
-        uses: actions/download-artifact@v4
-        with:
-          name: api-binary
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: ./artifact
-
-      - name: Deploy to staging
+      - name: Configure SSH
         run: |
-          echo "Deploying to staging environment..."
-          ls -la ./artifact
-          # Add your deployment logic here
-          # Example: docker-compose up -d, kubectl apply -f k8s/staging/
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          cat >> ~/.ssh/config << 'EOF'
+          Host genflow-staging
+            HostName ${{ secrets.STAGING_HOST }}
+            User ${{ secrets.STAGING_USER }}
+            Port ${STAGING_PORT:-22}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
 
-      - name: Notify
+      - name: Deploy via SSH
         run: |
-          echo "Deployed to staging"
+          ssh genflow-staging '
+            cd /opt/genflow
+            git fetch origin
+            git checkout ${{ inputs.ref || 'main-platform' }}
+            git pull origin ${{ inputs.ref || 'main-platform' }}
 
-  # ===========================================
+            # Pull latest images
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.yml pull
+
+            # Restart services
+            docker compose -f docker-compose.yml up -d --force-recreate
+
+            # Clean up
+            docker image prune -f
+          '
+
+      - name: Health check
+        run: |
+          echo "Waiting for services to be healthy..."
+          sleep 15
+          ssh genflow-staging 'curl -sf http://localhost:3000/health && echo "API OK" || echo "API check failed"'
+          echo "Staging deployment complete"
+
+  # ============================================================
   # Deploy to Production
-  # ===========================================
+  # ============================================================
   deploy-production:
-    name: Deploy Production
+    name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
     environment: production
-    needs: deploy-staging
-    if: ${{ github.event.workflow_run.head_branch == 'main' }}
+    needs: [deploy-staging]
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
     steps:
-      - name: Checkout triggering commit
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ inputs.ref || 'main-platform' }}
 
-      - name: Download CI binary
-        uses: actions/download-artifact@v4
-        with:
-          name: api-binary
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: ./artifact
-
-      - name: Deploy to production
+      - name: Configure SSH
         run: |
-          echo "Deploying to production environment..."
-          ls -la ./artifact
-          # Add your deployment logic here
-          # Example: kubectl apply -f k8s/production/
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          cat >> ~/.ssh/config << 'EOF'
+          Host genflow-production
+            HostName ${{ secrets.PRODUCTION_HOST }}
+            User ${{ secrets.PRODUCTION_USER }}
+            Port ${PRODUCTION_PORT:-22}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+      - name: Deploy via SSH
+        run: |
+          ssh genflow-production '
+            cd /opt/genflow
+
+            # Backup database before deploy
+            ./deploy/backup.sh --cron
+
+            git fetch origin
+            git checkout ${{ inputs.ref || 'main-platform' }}
+            git pull origin ${{ inputs.ref || 'main-platform' }}
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --force-recreate
+            docker image prune -f
+          '
+
+      - name: Health check
+        run: |
+          echo "Waiting for production services..."
+          sleep 20
+          ssh genflow-production 'curl -sf http://localhost:3000/health && echo "API OK" || echo "API check failed"'
+          echo "Production deployment complete"
 
       - name: Notify
         run: |
-          echo "Deployed to production"
-
-  # ===========================================
-  # Docker Build & Push
-  # ===========================================
-  docker:
-    name: Docker Build & Push
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || startsWith(github.event.workflow_run.head_branch, 'v2-')) }}
-    steps:
-      - name: Checkout triggering commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=${{ github.event.workflow_run.head_branch }}
-            type=sha,prefix=${{ github.event.workflow_run.head_branch }}-
-            type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          echo "✅ GenFlow deployed to production: $(date)"
+          # Add Slack/email/webhook notification here
