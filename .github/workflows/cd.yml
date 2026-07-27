@@ -1,0 +1,37 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions: write-all
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
+      - run: |
+          echo "==================== GenFlow CD ===================="
+          echo "Target: ${{ github.event.inputs.environment }}"
+          echo ""
+          echo "To deploy to your server:"
+          echo "  1. SSH into your server"
+          echo "  2. cd /opt/genflow"
+          echo "  3. ./deploy/deploy.sh --prod"
+          echo ""
+          echo "Set GitHub secrets for auto-deploy:"
+          echo "  DEPLOY_SSH_KEY, STAGING_HOST, STAGING_USER"
+          echo "===================================================="

@@ -1,0 +1,47 @@
+name: CI
+
+on: [push]
+
+permissions: write-all
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    steps:
+      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
+      - run: rustup toolchain install stable --component clippy,rustfmt
+      - run: rustup default stable
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --locked 2>&1 | tail -5
+        continue-on-error: true
+      - run: cargo test --workspace --lib --locked
+      - name: Build release
+        run: cargo build --release -p genflow-gateway --locked 2>&1 | tail -5
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build & push API image
+        run: |
+          docker build -f Dockerfile -t ghcr.io/${{ github.repository }}/api:latest .
+          docker push ghcr.io/${{ github.repository }}/api:latest
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
+      - run: |
+          corepack enable
+          corepack prepare pnpm@9.1.0 --activate
+      - run: pnpm install --frozen-lockfile 2>&1 | tail -5
+      - name: Build web
+        run: pnpm --filter @genflow/web build 2>&1 | tail -10
+        env:
+          NODE_TELEMETRY_DISABLED: 1
+      - name: Build & push Web image
+        run: |
+          docker build -f apps/web/Dockerfile -t ghcr.io/${{ github.repository }}/web:latest .
+          docker push ghcr.io/${{ github.repository }}/web:latest
