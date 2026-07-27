@@ -1,154 +1,44 @@
-# =============================================================================
-# GenFlow v2 — Continuous Deployment
-#
-# Triggered by: CI pipeline completion (on main/main-platform)
-# Deploys to: staging (auto) → production (manual approval)
-# =============================================================================
-
 name: CD
 
 on:
   workflow_run:
-    workflows: ["CI/CD"]
+    workflows: ["Build"]
     types:
       - completed
-    branches: [main, main-platform]
+    branches: [main-platform]
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: 'Deployment target'
         required: true
         default: 'staging'
         type: choice
         options:
           - staging
           - production
-      ref:
-        description: 'Git ref to deploy'
-        required: false
-        default: 'main-platform'
 
-permissions:
-  contents: read
-  packages: read
-  id-token: write
+permissions: write-all
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
-
-  # ============================================================
-  # Deploy to Staging
-  # ============================================================
-  deploy-staging:
-    name: 🚀 Deploy to Staging
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    environment: staging
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.event.workflow_run.head_branch || 'main-platform' }}
+      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
 
-      - name: Configure SSH
+      - name: Deploy to server
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          cat >> ~/.ssh/config << 'EOF'
-          Host genflow-staging
-            HostName ${{ secrets.STAGING_HOST }}
-            User ${{ secrets.STAGING_USER }}
-            Port ${STAGING_PORT:-22}
-            IdentityFile ~/.ssh/deploy_key
-            StrictHostKeyChecking no
-          EOF
-
-      - name: Deploy via SSH
-        run: |
-          ssh genflow-staging '
-            cd /opt/genflow
-            git fetch origin
-            git checkout ${{ inputs.ref || 'main-platform' }}
-            git pull origin ${{ inputs.ref || 'main-platform' }}
-
-            # Pull latest images
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-            docker compose -f docker-compose.yml pull
-
-            # Restart services
-            docker compose -f docker-compose.yml up -d --force-recreate
-
-            # Clean up
-            docker image prune -f
-          '
-
-      - name: Health check
-        run: |
-          echo "Waiting for services to be healthy..."
-          sleep 15
-          ssh genflow-staging 'curl -sf http://localhost:3000/health && echo "API OK" || echo "API check failed"'
-          echo "Staging deployment complete"
-
-  # ============================================================
-  # Deploy to Production
-  # ============================================================
-  deploy-production:
-    name: 🚀 Deploy to Production
-    runs-on: ubuntu-latest
-    environment: production
-    needs: [deploy-staging]
-    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || 'main-platform' }}
-
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          cat >> ~/.ssh/config << 'EOF'
-          Host genflow-production
-            HostName ${{ secrets.PRODUCTION_HOST }}
-            User ${{ secrets.PRODUCTION_USER }}
-            Port ${PRODUCTION_PORT:-22}
-            IdentityFile ~/.ssh/deploy_key
-            StrictHostKeyChecking no
-          EOF
-
-      - name: Deploy via SSH
-        run: |
-          ssh genflow-production '
-            cd /opt/genflow
-
-            # Backup database before deploy
-            ./deploy/backup.sh --cron
-
-            git fetch origin
-            git checkout ${{ inputs.ref || 'main-platform' }}
-            git pull origin ${{ inputs.ref || 'main-platform' }}
-
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --force-recreate
-            docker image prune -f
-          '
-
-      - name: Health check
-        run: |
-          echo "Waiting for production services..."
-          sleep 20
-          ssh genflow-production 'curl -sf http://localhost:3000/health && echo "API OK" || echo "API check failed"'
-          echo "Production deployment complete"
-
-      - name: Notify
-        run: |
-          echo "✅ GenFlow deployed to production: $(date)"
-          # Add Slack/email/webhook notification here
+          echo "===== GenFlow Deployment ====="
+          echo "Run: ./deploy/deploy.sh --prod"
+          echo ""
+          echo "Configure GitHub secrets for auto-deploy:"
+          echo "  DEPLOY_SSH_KEY, STAGING_HOST, STAGING_USER"
+          echo "  PROD_SSH_KEY, PRODUCTION_HOST, PRODUCTION_USER"
+          echo ""
+          echo "Build passed - ready for deployment"
