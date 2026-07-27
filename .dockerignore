@@ -6,7 +6,6 @@ node_modules
 # Rust
 target
 **/target
-Cargo.lock
 **/deps
 
 # Build outputs
@@ -29,7 +28,6 @@ build
 npm-debug.log*
 
 # Environment
-.env
 .env.local
 .env*.local
 
