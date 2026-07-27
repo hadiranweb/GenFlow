@@ -1,10 +1,11 @@
-name: TestBranches
+name: TestDispatch
 on:
   push:
     branches: [main-platform]
+  workflow_dispatch:
 permissions: write-all
 jobs:
   t:
     runs-on: ubuntu-latest
     steps:
-      - run: echo test
+      - run: echo "workflow_dispatch test"
