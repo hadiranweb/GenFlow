@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: git clone --depth 1 https://github.com/${{ github.repository }} .
-      - run: rustup toolchain install stable --component clippy,rustfmt
-      - run: rustup default stable
+      - run: rustup toolchain install 1.88 --component clippy,rustfmt
+      - run: rustup default 1.88
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --lib --locked --exclude genflow-gateway
