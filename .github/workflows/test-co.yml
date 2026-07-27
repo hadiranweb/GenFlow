@@ -1,0 +1,11 @@
+name: TestCO
+on:
+  push:
+    branches: [main-platform]
+permissions: write-all
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ls -la
