@@ -68,8 +68,7 @@ impl ConvergenceTracker {
                 continue;
             }
 
-            let pattern_id = &pattern.pattern_id;
-            let key = format!("{pattern_id}:{correlation_id}");
+            let key = format!("{}:{}", pattern.pattern_id, correlation_id);
 
             let mut states = self.states.write().await;
             let state = states

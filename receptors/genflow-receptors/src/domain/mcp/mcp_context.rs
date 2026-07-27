@@ -86,7 +86,7 @@ impl McpType {
 
 impl std::fmt::Display for McpType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.as_db_str())
+        write!(f, "{}", self.as_db_str())
     }
 }
 
@@ -123,7 +123,7 @@ impl McpScope {
 
 impl std::fmt::Display for McpScope {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.as_db_str())
+        write!(f, "{}", self.as_db_str())
     }
 }
 
@@ -287,7 +287,7 @@ impl McpContext {
 
     /// آیا این MCP منقضی شده؟
     pub fn is_expired(&self) -> bool {
-        self.expires_at.map_or(false, |exp| exp < Utc::now())
+        self.expires_at.map(|exp| exp < Utc::now()).unwrap_or(false)
     }
 
     /// آیا این MCP برای استفاده در تحلیل مناسب است؟
@@ -297,11 +297,13 @@ impl McpContext {
 
     /// تولید کلید کش Redis
     pub fn cache_key(&self) -> String {
-        let mcp_type = self.mcp_type.as_db_str();
-        let scope = self.scope.as_db_str();
-        let code = &self.code;
-        let version = &self.version;
-        format!("mcp:ctx:{mcp_type}:{scope}:{code}:{version}")
+        format!(
+            "mcp:ctx:{}:{}:{}:{}",
+            self.mcp_type.as_db_str(),
+            self.scope.as_db_str(),
+            self.code,
+            self.version
+        )
     }
 
     /// اعتبارسنجی سازگاری scope با mcp_type
@@ -318,10 +320,9 @@ impl McpContext {
         };
 
         if !valid {
-            let scope = self.scope;
-            let mcp_type = self.mcp_type;
             return Err(McpError::Validation(format!(
-                "scope {scope:?} incompatible with mcp_type {mcp_type:?}"
+                "scope {:?} incompatible with mcp_type {:?}",
+                self.scope, self.mcp_type
             )));
         }
 
@@ -379,10 +380,14 @@ impl McpBundle {
     /// برآورد صرفه‌جویی توکن
     pub fn estimated_token_savings(&self) -> usize {
         let base = 500usize;
-        let industry = self.industry_mcp.as_ref().map_or(0, |_| 1000);
+        let industry = self.industry_mcp.as_ref().map(|_| 1000).unwrap_or(0);
         let processes = self.process_mcps.len() * 800;
         let positions = self.standard_position_mcps.len() * 1200;
-        let org = self.organization_context_mcp.as_ref().map_or(0, |_| 1500);
+        let org = self
+            .organization_context_mcp
+            .as_ref()
+            .map(|_| 1500)
+            .unwrap_or(0);
 
         base + industry + processes + positions + org
     }

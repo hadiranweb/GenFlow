@@ -32,12 +32,12 @@ impl SynapticBus {
     /// Publish an event to both layers (tokio + Redis)
     pub async fn publish(&self, envelope: EventEnvelope) -> Result<(), AppError> {
         // Layer 1: tokio broadcast (in-process)
-        let _ = self.internal.send(envelope.clone());
+        self.internal.send(envelope.clone()).ok();
 
         // Layer 2: Redis pub/sub (cross-container)
         let channel = envelope.channel_name();
         let payload = serde_json::to_string(&envelope)
-            .map_err(|e| AppError::Internal(format!("Event serialization: {e}")))?;
+            .map_err(|e| AppError::Internal(format!("Event serialization: {}", e)))?;
 
         let mut conn = self.redis.connection().await?;
         redis::cmd("PUBLISH")
@@ -45,7 +45,7 @@ impl SynapticBus {
             .arg(&payload)
             .query_async::<_, ()>(&mut conn)
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis publish: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Redis publish: {}", e)))?;
 
         tracing::debug!(
             event_type = %envelope.event_type,

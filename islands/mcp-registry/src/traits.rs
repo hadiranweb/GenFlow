@@ -15,9 +15,9 @@ pub enum McpRuntimeError {
 impl std::fmt::Display for McpRuntimeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Domain(e) => write!(f, "Domain: {e}"),
-            Self::Database(e) => write!(f, "Database: {e}"),
-            Self::Cache(msg) => write!(f, "Cache: {msg}"),
+            Self::Domain(e) => write!(f, "Domain: {}", e),
+            Self::Database(e) => write!(f, "Database: {}", e),
+            Self::Cache(msg) => write!(f, "Cache: {}", msg),
         }
     }
 }

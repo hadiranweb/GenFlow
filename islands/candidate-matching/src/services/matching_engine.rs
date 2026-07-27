@@ -126,7 +126,7 @@ impl MatchingEngine {
             .axes
             .iter()
             .find(|a| a.code == genflow_receptors::AxisCode::Capability)
-            .ok_or_else(|| AppError::Business("Missing capability axis".to_string()))?;
+            .ok_or(AppError::Business("Missing capability axis".to_string()))?;
 
         let mut details = Vec::new();
         let mut total_percentage = 0.0;
@@ -298,18 +298,16 @@ impl MatchingEngine {
             });
         }
 
-        if let Some(bf) = candidate
-            .big_five
-            .as_ref()
-            .filter(|bf| bf.neuroticism.is_high())
-        {
-            flags.push(RiskFlag {
-                // Canonical persistence code; this is support guidance, not a diagnostic label.
-                code: "stress_support_needed".to_string(),
-                severity: FlagSeverity::Info,
-                description: "Additional support may be beneficial in high-pressure situations".to_string(),
-                mitigation: "Ensure adequate support structure".to_string(),
-            });
+        if let Some(bf) = &candidate.big_five {
+            if bf.neuroticism.is_high() {
+                flags.push(RiskFlag {
+                    // Canonical persistence code; this is support guidance, not a diagnostic label.
+                    code: "stress_support_needed".to_string(),
+                    severity: FlagSeverity::Info,
+                    description: "Additional support may be beneficial in high-pressure situations".to_string(),
+                    mitigation: "Ensure adequate support structure".to_string(),
+                });
+            }
         }
 
         flags
@@ -504,7 +502,7 @@ impl MatchingEngine {
         }
 
         // Load skills from candidate's skill data
-        let _ = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
+        let _candidate_row = sqlx::query("SELECT email, full_name FROM candidates WHERE id = $1")
             .bind(candidate_id)
             .fetch_optional(&self.pool)
             .await?;

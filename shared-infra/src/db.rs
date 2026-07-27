@@ -27,12 +27,12 @@ impl DatabasePool {
             .idle_timeout(std::time::Duration::from_secs(config.idle_timeout_seconds))
             .connect(&config.url)
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Database connection failed: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Database connection failed: {}", e)))?;
 
         tracing::info!(
-            max_connections = config.max_connections,
-            min_connections = config.min_connections,
-            "Database pool connected"
+            "Database pool connected (max={}, min={})",
+            config.max_connections,
+            config.min_connections
         );
 
         Ok(Self { pool })
@@ -48,7 +48,7 @@ impl DatabasePool {
         MIGRATOR
             .run(&self.pool)
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Migration failed: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Migration failed: {}", e)))?;
 
         tracing::info!("Database migrations completed successfully");
         Ok(())

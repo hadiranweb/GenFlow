@@ -190,7 +190,8 @@ pub async fn generate_report(
             Ok(Json(report))
         }
         None => Err(ApiError(AppError::NotFound(format!(
-            "Match {match_id} not found"
+            "Match {} not found",
+            match_id
         )))),
     }
 }
@@ -228,11 +229,7 @@ pub async fn record_decision(
         "not_selected" => genflow_receptors::MatchStatus::NotSelected,
         "selected" => genflow_receptors::MatchStatus::Selected,
         "withdrawn" => genflow_receptors::MatchStatus::Withdrawn,
-        _ => {
-            return Err(ApiError(AppError::Business(
-                "Invalid decision status".to_string(),
-            )))
-        }
+        _ => return Err(ApiError(AppError::Business("Invalid decision status".to_string()))),
     };
 
     state.matching_engine

@@ -4,8 +4,13 @@ use genflow_receptors::{
     AxisCode, PositionGraph, RepresentativeInfluencePolicy, RepresentativeRelation,
 };
 
-#[derive(Default)]
 pub struct RepresentativeCalibrator;
+
+impl Default for RepresentativeCalibrator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl RepresentativeCalibrator {
     pub fn new() -> Self {
@@ -45,11 +50,11 @@ impl RepresentativeCalibrator {
         }
 
         // Record calibration notes
-        let relation = relation.as_db_str();
-        let effective_weight = policy.effective_weight();
-        let uses_personality = policy.uses_personality();
         graph.calibration_notes = Some(format!(
-            "Representative calibration: relation={relation}, effective_weight={effective_weight:.3}, personality={uses_personality}"
+            "Representative calibration: relation={}, effective_weight={:.3}, personality={}",
+            relation.as_db_str(),
+            policy.effective_weight(),
+            policy.uses_personality(),
         ));
 
         Ok(())

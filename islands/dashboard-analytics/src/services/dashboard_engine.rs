@@ -20,7 +20,7 @@ impl DashboardEngine {
     pub async fn get_overview(&self, org_id: Uuid) -> Result<DashboardOverview, AppError> {
         let metrics = self.fetch_metrics(org_id).await?;
         let recent_activity = self.fetch_recent_activity(org_id).await?;
-        let alerts = Self::fetch_alerts(org_id);
+        let alerts = self.fetch_alerts(org_id).await?;
 
         Ok(DashboardOverview {
             organization_id: org_id,
@@ -72,27 +72,24 @@ impl DashboardEngine {
 
         Ok(rows
             .iter()
-            .map(|row| {
-                let actor_id = row.get::<Uuid, _>("actor_id");
-                let entity_type = row.get::<String, _>("entity_type");
-                let entity_id = row.get::<Uuid, _>("entity_id");
-                let entity_title = format!("{entity_type} {entity_id}");
-
-                ActivityItem {
-                    id: row.get("id"),
-                    actor_name: format!("Representative {actor_id}"),
-                    action: ActivityAction::from_db_str(&row.get::<String, _>("action")),
-                    entity_type,
-                    entity_title,
-                    timestamp: row.get("created_at"),
-                    metadata: row.get("metadata"),
-                }
+            .map(|row| ActivityItem {
+                id: row.get("id"),
+                actor_name: format!("Representative {}", row.get::<Uuid, _>("actor_id")),
+                action: ActivityAction::from_db_str(&row.get::<String, _>("action")),
+                entity_type: row.get("entity_type"),
+                entity_title: format!(
+                    "{} {}",
+                    row.get::<String, _>("entity_type"),
+                    row.get::<Uuid, _>("entity_id")
+                ),
+                timestamp: row.get("created_at"),
+                metadata: row.get("metadata"),
             })
             .collect())
     }
 
-    fn fetch_alerts(_org_id: Uuid) -> Vec<DashboardAlert> {
+    async fn fetch_alerts(&self, _org_id: Uuid) -> Result<Vec<DashboardAlert>, AppError> {
         // Simplified for now — would be dynamic based on real data
-        vec![]
+        Ok(vec![])
     }
 }

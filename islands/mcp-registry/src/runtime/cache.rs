@@ -31,12 +31,14 @@ impl crate::traits::McpCache for RedisMcpCache {
             .await
             .map_err(|e| McpRuntimeError::Cache(e.to_string()))?;
 
-        result
-            .map(|json_str| {
-                serde_json::from_str(&json_str)
-                    .map_err(|e| McpRuntimeError::Cache(format!("Deserialization: {e}")))
-            })
-            .transpose()
+        match result {
+            Some(json_str) => {
+                let mcp: McpContext = serde_json::from_str(&json_str)
+                    .map_err(|e| McpRuntimeError::Cache(format!("Deserialization: {}", e)))?;
+                Ok(Some(mcp))
+            }
+            None => Ok(None),
+        }
     }
 
     async fn set(
@@ -46,7 +48,7 @@ impl crate::traits::McpCache for RedisMcpCache {
         ttl_seconds: u64,
     ) -> Result<(), McpRuntimeError> {
         let json = serde_json::to_string(value)
-            .map_err(|e| McpRuntimeError::Cache(format!("Serialization: {e}")))?;
+            .map_err(|e| McpRuntimeError::Cache(format!("Serialization: {}", e)))?;
 
         let mut conn = self
             .redis

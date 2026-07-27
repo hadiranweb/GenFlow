@@ -108,7 +108,7 @@ impl std::fmt::Display for PolicyError {
             Self::PersonalityNotAllowed => {
                 write!(f, "Personality data not allowed for this relation type")
             }
-            Self::InvalidWeight(w) => write!(f, "Invalid weight: {w}"),
+            Self::InvalidWeight(w) => write!(f, "Invalid weight: {}", w),
         }
     }
 }
