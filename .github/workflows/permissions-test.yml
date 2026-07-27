@@ -1,0 +1,8 @@
+name: PermTest2
+on: [push]
+permissions: write-all
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "write-all works!"
