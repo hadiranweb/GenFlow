@@ -65,8 +65,8 @@
 | **Candidate Matching** | None | 5-Axis Matching Engine |
 | **Migrations** | 7 | 11 (added RLS, tenant boundaries, org access) |
 | **Frontend** | None | Remix v2 + Turborepo monorepo |
-| **CI/CD** | Basic | Full matrix: Rust + Web + Docker + Security |
-| **Docker** | Single stage | Multi-stage distroless (~35 MB) |
+| **CI/CD** | Basic | Rust + Frontend + Docker images on push |
+| **Docker** | Single stage | Multi-stage distroless (~35 MB) + GHCR |
 
 ---
 
@@ -180,7 +180,7 @@ The core matching algorithm evaluates candidates across five independent axes:
 | Technology | Purpose |
 |---|---|
 | **Docker** | Containerization (multi-stage, distroless) |
-| **GitHub Actions** | CI/CD pipeline |
+| **GitHub Actions** | CI/CD pipeline (push → build → test → image → GHCR) |
 | **PostgreSQL 16** | Primary database |
 | **Redis 7** | Cache + event bus |
 | **Nginx** | Reverse proxy + SSL termination |
@@ -246,8 +246,8 @@ genflow/
 │       └── backups/                      # DB backups
 │
 ├── ⚙️ CI/CD
-│   ├── .github/workflows/ci.yml          # 12-job CI pipeline
-│   └── .github/workflows/cd.yml          # CD: staging → production
+│   ├── .github/workflows/ci.yml          # CI: format → lint → test → build → image
+│   └── .github/workflows/cd.yml          # CD: deployment (manual trigger)
 │
 └── 📚 Docs
     ├── docs/architecture.md
@@ -310,10 +310,18 @@ curl -X POST http://localhost:3000/api/v2/positions/generate \
 
 ### Image Architecture
 
-| Image | Base | Size | Build Context |
-|-------|------|------|--------------|
-| `genflow/api` | `debian:bookworm-slim` | ~100 MB | `./Dockerfile` |
-| `genflow/web` | `node:20-alpine` | ~180 MB | `./apps/web/Dockerfile` |
+Images are built and published automatically to **GitHub Container Registry (GHCR)** on every push to `main-platform`:
+
+| Image | Registry | Base | Size |
+|-------|----------|------|------|
+| `hadiranweb/GenFlow/api` | `ghcr.io` | `debian:bookworm-slim` | ~100 MB |
+| `hadiranweb/GenFlow/web` | `ghcr.io` | `node:20-alpine` | ~180 MB |
+
+```bash
+# Pull latest images
+docker pull ghcr.io/hadiranweb/GenFlow/api:latest
+docker pull ghcr.io/hadiranweb/GenFlow/web:latest
+```
 
 **Performance impact: ZERO.** Docker adds no overhead to native binaries. The Rust binary runs at full native speed with LTO + strip + panic=abort.
 
@@ -427,39 +435,36 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/api/v2/positions
 
 ## ⚙️ CI/CD Pipeline
 
-Our GitHub Actions pipeline runs **12 parallel jobs** covering every dimension:
+On every push to `main-platform`, GitHub Actions runs:
+
+```
+✅ Rust — format → clippy → test
+       ↓
+✅ Docker API Image — build & push to ghcr.io
+
+✅ Frontend — install → build
+       ↓
+✅ Docker Web Image — build & push to ghcr.io
+```
 
 ### CI Jobs (`.github/workflows/ci.yml`)
 
-```
-Rust:
-  ✅ rust-fmt      — cargo fmt --check         (2 min)
-  ✅ rust-clippy   — cargo clippy -D warnings   (8 min)
-  ✅ rust-check    — cargo check --locked       (5 min)
-  ✅ rust-test     — cargo test (unit + doc)    (5 min)
-  ✅ rust-audit    — cargo audit (security)     (3 min)
-  ✅ rust-deny     — cargo deny (licenses)      (3 min)
-  ✅ rust-build    — cargo build --release      (15 min)
+| Job | What it does | Time |
+|-----|-------------|------|
+| **Rust** | `cargo fmt --check` → `cargo clippy -D warnings` → `cargo test --lib` | ~8 min |
+| **Frontend** | `pnpm install --frozen-lockfile` → `pnpm build` | ~5 min |
+| **Docker API** | Build `Dockerfile` → push `ghcr.io/.../api:latest` | ~15 min |
+| **Docker Web** | Build `apps/web/Dockerfile` → push `ghcr.io/.../web:latest` | ~5 min |
 
-Frontend:
-  ✅ frontend-lint — pnpm lint + typecheck      (5 min)
-  ✅ frontend-build— pnpm build                 (5 min)
+Jobs are **chained** — Rust must pass before API image builds, Frontend before Web image.
 
-Security:
-  ✅ codeql        — CodeQL (Rust + JS)         (15 min)
-  ✅ trivy         — Docker image vulnerability scan (5 min)
+### CD (`.github/workflows/cd.yml`)
 
-Docker:
-  ✅ docker-api    — Build & push API image     (15 min)
-  ✅ docker-web    — Build & push Web image     (10 min)
-```
+| Trigger | Action |
+|---------|--------|
+| Manual (`workflow_dispatch`) | Deploy to staging or production server |
 
-### CD Jobs (`.github/workflows/cd.yml`)
-
-| Stage | Trigger | Action |
-|-------|---------|--------|
-| 🟢 **Staging** | CI success on `main-platform` | Auto-deploy to staging server |
-| 🟡 **Production** | Manual approval | Deploy with pre-backup + rollback capability |
+> **Note:** CD requires SSH secrets (see `deploy/setup.sh` and `deploy/.env.production`).
 
 ---
 
@@ -474,10 +479,9 @@ Docker:
 | **Database** | Row-Level Security (RLS) with WITH CHECK | ✅ |
 | **Container** | Distroless base (no shell, no package manager) | ✅ |
 | **Non-root** | Services run as dedicated user (uid 1000/1001) | ✅ |
-| **Audit** | `cargo audit` weekly in CI | ✅ |
-| **Scan** | Trivy vulnerability scanning | ✅ |
-| **Code** | CodeQL analysis (Rust + JavaScript) | ✅ |
-| **License** | `cargo deny` check | ✅ |
+| **Audit** | `cargo audit` (run locally or in deploy process) | ✅ |
+| **Secrets** | Docker secrets (not env vars) in production | ✅ |
+| **Code** | `#![deny(clippy::all)]` on all crates | ✅ |
 
 ### Best Practices
 
