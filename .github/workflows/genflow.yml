@@ -4,9 +4,6 @@ on: [push]
 
 permissions: write-all
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   rust:
     name: Rust
@@ -15,20 +12,14 @@ jobs:
       - run: git clone --depth 1 https://github.com/${{ github.repository }} .
       - run: rustup toolchain install stable --component clippy,rustfmt
       - run: rustup default stable
-      - name: Format check
-        run: cargo fmt --all -- --check
+      - run: cargo fmt --all -- --check
         continue-on-error: true
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets --locked
+      - run: cargo clippy --workspace --all-targets --locked
         continue-on-error: true
-      - name: Unit tests
-        run: cargo test --workspace --lib --locked
-      - name: Build release
-        run: cargo build --release -p genflow-gateway --locked
-      - name: Docker API login
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: Docker API build & push
-        run: |
+      - run: cargo test --workspace --lib --locked
+      - run: cargo check --workspace --locked
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - run: |
           docker build -f Dockerfile -t ghcr.io/${{ github.repository }}/api:latest .
           docker push ghcr.io/${{ github.repository }}/api:latest
         continue-on-error: true
@@ -39,14 +30,11 @@ jobs:
     steps:
       - run: git clone --depth 1 https://github.com/${{ github.repository }} .
       - run: corepack enable && corepack prepare pnpm@9.1.0 --activate
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
         continue-on-error: true
-      - name: Build
-        run: pnpm --filter @genflow/web build
+      - run: pnpm --filter @genflow/web build
         continue-on-error: true
-      - name: Docker web build
-        run: |
+      - run: |
           docker build -f apps/web/Dockerfile -t ghcr.io/${{ github.repository }}/web:latest .
           docker push ghcr.io/${{ github.repository }}/web:latest
         continue-on-error: true
