@@ -304,7 +304,8 @@ impl MatchingEngine {
                     // Canonical persistence code; this is support guidance, not a diagnostic label.
                     code: "stress_support_needed".to_string(),
                     severity: FlagSeverity::Info,
-                    description: "Additional support may be beneficial in high-pressure situations".to_string(),
+                    description: "Additional support may be beneficial in high-pressure situations"
+                        .to_string(),
                     mitigation: "Ensure adequate support structure".to_string(),
                 });
             }
@@ -575,8 +576,10 @@ impl MatchingEngine {
         .await?;
 
         let match_id: Uuid = row.get("id");
-        let status = MatchStatus::from_db_str(row.get::<String, _>("status").as_str())
-            .ok_or_else(|| AppError::Internal(format!("Unknown persisted match status for {match_id}")))?;
+        let status =
+            MatchStatus::from_db_str(row.get::<String, _>("status").as_str()).ok_or_else(|| {
+                AppError::Internal(format!("Unknown persisted match status for {match_id}"))
+            })?;
 
         // Risk flags are an analytical snapshot, not a human decision. Replace
         // them in the same transaction so a failed recalculation leaves the
@@ -614,7 +617,9 @@ impl MatchingEngine {
             .await?;
 
         row.map(|row| row.get("organization_id")).ok_or_else(|| {
-            AppError::NotFound(format!("Position {position_id} not found while calculating match"))
+            AppError::NotFound(format!(
+                "Position {position_id} not found while calculating match"
+            ))
         })
     }
 

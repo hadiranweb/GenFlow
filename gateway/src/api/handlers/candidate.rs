@@ -153,7 +153,8 @@ pub async fn generate_report(
                     details: vec![],
                 },
                 composite_index: genflow_receptors::Score::new_unchecked(
-                    row.get::<Option<f64>, _>("composite_match_index").unwrap_or(0.0) as f32,
+                    row.get::<Option<f64>, _>("composite_match_index")
+                        .unwrap_or(0.0) as f32,
                 ),
                 confidence_score: genflow_receptors::Score::new_unchecked(
                     row.get::<Option<f64>, _>("confidence_score").unwrap_or(0.0) as f32,
@@ -229,10 +230,15 @@ pub async fn record_decision(
         "not_selected" => genflow_receptors::MatchStatus::NotSelected,
         "selected" => genflow_receptors::MatchStatus::Selected,
         "withdrawn" => genflow_receptors::MatchStatus::Withdrawn,
-        _ => return Err(ApiError(AppError::Business("Invalid decision status".to_string()))),
+        _ => {
+            return Err(ApiError(AppError::Business(
+                "Invalid decision status".to_string(),
+            )))
+        }
     };
 
-    state.matching_engine
+    state
+        .matching_engine
         .record_decision(match_id, auth.user_id(), status, payload.note)
         .await?;
 
@@ -248,7 +254,11 @@ async fn require_position_tenant(
         .position_engine
         .get_position(position_id)
         .await?
-        .ok_or_else(|| ApiError(AppError::NotFound(format!("Position {position_id} not found"))))?;
+        .ok_or_else(|| {
+            ApiError(AppError::NotFound(format!(
+                "Position {position_id} not found"
+            )))
+        })?;
     auth.require_organization(position.organization_id)
 }
 

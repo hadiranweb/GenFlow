@@ -85,7 +85,9 @@ impl InvitationManager {
         .await?;
 
         let invitation = invite_row.ok_or_else(|| {
-            AppError::NotFound(format!("Active invitation with code {invite_code} not found"))
+            AppError::NotFound(format!(
+                "Active invitation with code {invite_code} not found"
+            ))
         })?;
         let invitation_id: Uuid = invitation.get("id");
         let position_id: Uuid = invitation.get("position_id");

@@ -115,7 +115,8 @@ impl PositionGenerationEngine {
                     .collect()
             })
             .unwrap_or_default();
-        let mut rationale: Vec<String> = needs.iter().map(|need| need.description.clone()).collect();
+        let mut rationale: Vec<String> =
+            needs.iter().map(|need| need.description.clone()).collect();
         if let Some(bundle) = mcp_bundle {
             rationale.push(format!(
                 "MCP resolution retained {} contexts (cache_hits={}, db_lookups={}, drafts_created={})",
@@ -180,8 +181,7 @@ impl PositionGenerationEngine {
         // Multi-table position generation must be atomic: either the analysis,
         // needs, run, position, graph, and requirements all commit together or
         // none of them do.
-        let mut tx =
-            begin_organization_transaction(&self.pool, request.organization_id).await?;
+        let mut tx = begin_organization_transaction(&self.pool, request.organization_id).await?;
 
         // 8a. Create business_analysis record
         sqlx::query(

@@ -18,7 +18,6 @@ pub struct AuthClaims {
     pub iat: i64,     // issued at timestamp
 }
 
-
 /// Roles accepted by the current Gateway contract.
 ///
 /// Parsing roles at the boundary prevents arbitrary JWT strings from becoming
@@ -36,9 +35,7 @@ impl AccessRole {
             "admin" => Ok(Self::Admin),
             "analyst" => Ok(Self::Analyst),
             "representative" => Ok(Self::Representative),
-            _ => Err(AppError::Authorization(format!(
-                "Unsupported role: {role}"
-            ))),
+            _ => Err(AppError::Authorization(format!("Unsupported role: {role}"))),
         }
     }
 

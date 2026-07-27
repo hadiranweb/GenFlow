@@ -65,6 +65,10 @@ impl FromRequestParts<Arc<AppState>> for TenantAuth {
             .strip_prefix("Bearer ")
             .ok_or_else(|| ApiError(AppError::Auth("Invalid bearer token".to_string())))?;
 
-        state.jwt_auth.validate_token(token).map(Self).map_err(ApiError)
+        state
+            .jwt_auth
+            .validate_token(token)
+            .map(Self)
+            .map_err(ApiError)
     }
 }

@@ -6,8 +6,8 @@ use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
 use genflow_receptors::BusinessAnalysisRequest;
-use genflow_shared_infra::Permission;
 use genflow_shared_infra::error::AppError;
+use genflow_shared_infra::Permission;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -113,7 +113,11 @@ pub async fn generate_position(
         .publish_event(&genflow_receptors::events::PositionGraphBuiltEvent {
             position_id: profile.position.id,
             axis_count: profile.graph.axes.len() as u32,
-            calibration_applied: profile.graph.axes.iter().any(|axis| axis.calibration_applied),
+            calibration_applied: profile
+                .graph
+                .axes
+                .iter()
+                .any(|axis| axis.calibration_applied),
         })
         .await
     {
