@@ -246,7 +246,7 @@ genflow/
 │       └── backups/                      # DB backups
 │
 ├── ⚙️ CI/CD
-│   ├── .github/workflows/ci.yml          # CI: format → lint → test → build → image
+│   ├── .github/workflows/genflow.yml          # CI: format → lint → test → build → image
 │   └── .github/workflows/cd.yml          # CD: deployment (manual trigger)
 │
 └── 📚 Docs
@@ -447,7 +447,7 @@ On every push to `main-platform`, GitHub Actions runs:
 ✅ Docker Web Image — build & push to ghcr.io
 ```
 
-### CI Jobs (`.github/workflows/ci.yml`)
+### CI Jobs (`.github/workflows/genflow.yml`)
 
 | Job | What it does | Time |
 |-----|-------------|------|
