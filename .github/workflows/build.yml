@@ -1,0 +1,98 @@
+name: Build
+
+on:
+  push:
+    branches: [main-platform]
+  workflow_dispatch:
+
+permissions: write-all
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+  REGISTRY: ghcr.io
+
+jobs:
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --workspace --lib --locked
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @genflow/web build
+        env:
+          NODE_TELEMETRY_DISABLED: 1
+
+  docker-api:
+    name: Docker API
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [rust]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/api:latest
+
+  docker-web:
+    name: Docker Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/web:latest
+
+  # Renamed to match "Build" workflow name for CD
+  cd-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    needs: [docker-api, docker-web]
+    environment: staging
+    if: false  # Disabled until SSH secrets are configured
+    steps:
+      - run: echo "CD configured via cd.yml workflow"
