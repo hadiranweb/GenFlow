@@ -12,7 +12,7 @@
     Hybrid Island Architecture — Rust + Remix — Zero GC Pauses
   </p>
   <p>
-    <a href="https://github.com/hadiranweb/GenFlow/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hadiranweb/GenFlow/ci.yml?branch=main-platform&label=CI&logo=github" alt="CI"></a>
+    <a href="https://github.com/hadiranweb/GenFlow/actions/workflows/genflow.yml"><img src="https://img.shields.io/github/actions/workflow/status/hadiranweb/GenFlow/genflow.yml?branch=main-platform&label=CI&logo=github" alt="CI"></a>
     <a href="https://github.com/hadiranweb/GenFlow/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/hadiranweb/GenFlow/cd.yml?branch=main-platform&label=CD&logo=github" alt="CD"></a>
     <a href="https://github.com/hadiranweb/GenFlow/blob/main-platform/LICENSE"><img src="https://img.shields.io/badge/License-PROPRIETARY-red.svg" alt="License"></a>
     <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.88-dea584?logo=rust" alt="Rust"></a>
