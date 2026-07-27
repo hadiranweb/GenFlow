@@ -1,0 +1,11 @@
+name: PermTest
+on: [push]
+permissions:
+  contents: read
+  packages: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Permissions test works!"
