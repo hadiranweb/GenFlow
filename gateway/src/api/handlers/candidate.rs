@@ -191,8 +191,7 @@ pub async fn generate_report(
             Ok(Json(report))
         }
         None => Err(ApiError(AppError::NotFound(format!(
-            "Match {} not found",
-            match_id
+            "Match {match_id} not found"
         )))),
     }
 }

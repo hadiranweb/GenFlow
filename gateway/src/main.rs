@@ -87,7 +87,7 @@ async fn main() -> anyhow::Result<()> {
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{}:{}", host, port)).await?;
+    let listener = TcpListener::bind(format!("{host}:{port}")).await?;
 
     tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
 

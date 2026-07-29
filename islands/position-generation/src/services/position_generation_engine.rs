@@ -161,7 +161,7 @@ impl PositionGenerationEngine {
                         score_range: dim.min.map(|m| {
                             (
                                 m,
-                                dim.ideal.unwrap_or(Score::default()),
+                                dim.ideal.unwrap_or_default(),
                                 dim.max.unwrap_or(Score::max()),
                             )
                         }),

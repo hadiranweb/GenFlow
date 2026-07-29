@@ -57,7 +57,7 @@ impl BusinessNeedDiscovery {
             } => {
                 needs.push(BusinessNeed::new(
                     BusinessNeedType::DirectPositionRequest,
-                    format!("{} — {}", requested_title, reason),
+                    format!("{requested_title} — {reason}"),
                     NeedUrgency::Immediate,
                 ));
             }

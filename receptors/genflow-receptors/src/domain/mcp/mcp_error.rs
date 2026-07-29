@@ -18,11 +18,11 @@ pub enum McpError {
 impl std::fmt::Display for McpError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Cache(msg) => write!(f, "Cache error: {}", msg),
-            Self::Serialization(msg) => write!(f, "Serialization error: {}", msg),
-            Self::Validation(msg) => write!(f, "Validation error: {}", msg),
-            Self::Builder(msg) => write!(f, "Builder error: {}", msg),
-            Self::NotFound(msg) => write!(f, "Not found: {}", msg),
+            Self::Cache(msg) => write!(f, "Cache error: {msg}"),
+            Self::Serialization(msg) => write!(f, "Serialization error: {msg}"),
+            Self::Validation(msg) => write!(f, "Validation error: {msg}"),
+            Self::Builder(msg) => write!(f, "Builder error: {msg}"),
+            Self::NotFound(msg) => write!(f, "Not found: {msg}"),
         }
     }
 }
