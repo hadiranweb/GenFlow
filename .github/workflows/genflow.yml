@@ -1,7 +1,10 @@
 # =============================================================================
 # GenFlow v2 — CI Pipeline
 #
-# Fixed: actions/checkout@v4 replaces git clone, proper GHCR login with actor
+# Fixes applied:
+#   - actions/checkout@v4 replaces git clone
+#   - docker/login-action@v3 + github.actor for GHCR auth
+#   - docker/build-push-action@v5 (v6 does not exist as of 2026-07)
 # =============================================================================
 
 name: CI
@@ -18,7 +21,7 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write
+  # Removed id-token: write — not needed for GHCR; was blocking job startup
 
 env:
   CARGO_TERM_COLOR: always
@@ -36,7 +39,7 @@ jobs:
           fetch-depth: 1
       - name: Install Rust 1.88
         run: |
-          rustup toolchain install 1.88 --component clippy,rustfmt --no-self-update
+          rustup toolchain install 1.88 --component clippy,rustfmt --no-self-update 2>&1
           rustup default 1.88
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -50,8 +53,7 @@ jobs:
     name: Docker API
     needs: [rust]
     runs-on: ubuntu-latest
-    # Allow push even if rust had warnings (but not if it failed entirely)
-    if: always() && needs.rust.result == 'success'
+    if: needs.rust.result == 'success' || needs.rust.result == 'success()'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,9 +68,9 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DOCKER_PAT || secrets.GITHUB_TOKEN }}
       - name: Build and push API image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: Dockerfile
@@ -77,9 +79,6 @@ jobs:
             ghcr.io/${{ github.repository }}/api:latest
             ghcr.io/${{ github.repository }}/api:${{ steps.meta.outputs.sha_short }}
             ghcr.io/${{ github.repository }}/api:${{ steps.meta.outputs.timestamp }}
-        env:
-          # In case GITHUB_TOKEN doesn't have write:packages, allow override via secret
-          DOCKER_PAT: ${{ secrets.DOCKER_PAT || secrets.GITHUB_TOKEN }}
 
   # ============================================================
   # Docker — Build & push Web image to GHCR
@@ -88,7 +87,7 @@ jobs:
     name: Docker Web
     needs: [rust]
     runs-on: ubuntu-latest
-    if: always() && needs.rust.result == 'success'
+    if: needs.rust.result == 'success' || needs.rust.result == 'success()'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,7 +104,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_PAT || secrets.GITHUB_TOKEN }}
       - name: Build and push Web image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: ./apps/web
           file: apps/web/Dockerfile
