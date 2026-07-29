@@ -1,10 +1,5 @@
 # =============================================================================
 # GenFlow v2 — CI Pipeline
-#
-# Fixes applied:
-#   - actions/checkout@v4 replaces git clone
-#   - docker/login-action@v3 + github.actor for GHCR auth
-#   - docker/build-push-action@v5 (v6 does not exist as of 2026-07)
 # =============================================================================
 
 name: CI
@@ -18,10 +13,8 @@ on:
     branches:
       - main-platform
 
-permissions:
-  contents: read
-  packages: write
-  # Removed id-token: write — not needed for GHCR; was blocking job startup
+# Same as original — write-all is needed for GHCR + status checks
+permissions: write-all
 
 env:
   CARGO_TERM_COLOR: always
@@ -53,7 +46,7 @@ jobs:
     name: Docker API
     needs: [rust]
     runs-on: ubuntu-latest
-    if: needs.rust.result == 'success' || needs.rust.result == 'success()'
+    if: success()
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,7 +80,7 @@ jobs:
     name: Docker Web
     needs: [rust]
     runs-on: ubuntu-latest
-    if: needs.rust.result == 'success' || needs.rust.result == 'success()'
+    if: success()
     steps:
       - uses: actions/checkout@v4
         with:
