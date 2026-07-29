@@ -1,8 +1,17 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - main-platform
+      - v2-island-architecture
+  pull_request:
+    branches:
+      - main-platform
 
-permissions: write-all
+permissions:
+  contents: read
+  packages: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,8 +24,10 @@ jobs:
     name: Rust
     runs-on: ubuntu-latest
     steps:
-      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
-      - run: rustup toolchain install 1.88 --component clippy,rustfmt
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: rustup toolchain install 1.88 --component clippy,rustfmt --no-self-update
       - run: rustup default 1.88
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -31,10 +42,30 @@ jobs:
     needs: [rust]
     runs-on: ubuntu-latest
     steps:
-      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
-      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - run: docker build -f Dockerfile -t ghcr.io/${{ github.repository }}/api:latest .
-      - run: docker push ghcr.io/${{ github.repository }}/api:latest
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Generate image tags
+        id: meta
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/api:latest
+            ghcr.io/${{ github.repository }}/api:${{ steps.meta.outputs.sha_short }}
+            ghcr.io/${{ github.repository }}/api:${{ steps.meta.outputs.timestamp }}
 
   # ============================================================
   # Docker — Build & push Web image to GHCR
@@ -44,8 +75,27 @@ jobs:
     needs: [rust]
     runs-on: ubuntu-latest
     steps:
-      - run: git clone --depth 1 https://github.com/${{ github.repository }} .
-      - run: corepack enable && corepack prepare pnpm@9.1.0 --activate
-      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - run: docker build -f apps/web/Dockerfile -t ghcr.io/${{ github.repository }}/web:latest .
-      - run: docker push ghcr.io/${{ github.repository }}/web:latest
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Generate image tags
+        id: meta
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/web:latest
+            ghcr.io/${{ github.repository }}/web:${{ steps.meta.outputs.sha_short }}
+            ghcr.io/${{ github.repository }}/web:${{ steps.meta.outputs.timestamp }}
