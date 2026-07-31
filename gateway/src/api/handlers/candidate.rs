@@ -22,6 +22,18 @@ pub async fn calculate_match(
         .calculate_match(position_id, candidate_id)
         .await?;
 
+    // Retrieve organization_id and analysis_id (correlation_id) from job_positions
+    let pos_row = sqlx::query(
+        "SELECT organization_id, (SELECT business_analysis_id FROM position_generation_runs WHERE id = generation_run_id) as analysis_id FROM job_positions WHERE id = $1"
+    )
+    .bind(position_id)
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+    let org_id: Uuid = pos_row.get("organization_id");
+    let corr_id: Option<Uuid> = pos_row.get("analysis_id");
+
     if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::MatchCalculatedEvent {
@@ -30,6 +42,8 @@ pub async fn calculate_match(
             candidate_id: match_result.candidate_id,
             composite_score: match_result.composite_index.value(),
             human_review_required: match_result.human_review_required,
+            organization_id: Some(org_id),
+            correlation_id: corr_id,
         })
         .await
     {
@@ -63,6 +77,18 @@ pub async fn create_invitation(
         .create_invitation(req.position_id, req.invited_by_rep_id, req.email, req.phone)
         .await?;
 
+    // Retrieve organization_id and analysis_id (correlation_id)
+    let pos_row = sqlx::query(
+        "SELECT organization_id, (SELECT business_analysis_id FROM position_generation_runs WHERE id = generation_run_id) as analysis_id FROM job_positions WHERE id = $1"
+    )
+    .bind(req.position_id)
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+    let org_id: Uuid = pos_row.get("organization_id");
+    let corr_id: Option<Uuid> = pos_row.get("analysis_id");
+
     if let Err(error) = state
         .synaptic_bus
         .publish_event(&genflow_receptors::events::CandidateInvitedEvent {
@@ -70,6 +96,8 @@ pub async fn create_invitation(
             position_id: invite.position_id,
             candidate_id: invite.candidate_id,
             email: invite.email.clone(),
+            organization_id: Some(org_id),
+            correlation_id: corr_id,
         })
         .await
     {
@@ -172,12 +200,26 @@ pub async fn generate_report(
                 .generate(&job_match, genflow_receptors::ReportType::ForEmployer)
                 .await?;
 
+            // Retrieve organization_id and analysis_id (correlation_id)
+            let pos_row = sqlx::query(
+                "SELECT organization_id, (SELECT business_analysis_id FROM position_generation_runs WHERE id = generation_run_id) as analysis_id FROM job_positions WHERE id = $1"
+            )
+            .bind(job_match.position_id)
+            .fetch_one(&state.db_pool)
+            .await
+            .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+
+            let org_id: Uuid = pos_row.get("organization_id");
+            let corr_id: Option<Uuid> = pos_row.get("analysis_id");
+
             if let Err(error) = state
                 .synaptic_bus
                 .publish_event(&genflow_receptors::events::ReportGeneratedEvent {
                     report_id: report.id,
                     match_id: report.job_match_id,
                     report_type: report.report_type.as_db_str().to_string(),
+                    organization_id: Some(org_id),
+                    correlation_id: corr_id,
                 })
                 .await
             {
@@ -191,7 +233,8 @@ pub async fn generate_report(
             Ok(Json(report))
         }
         None => Err(ApiError(AppError::NotFound(format!(
-            "Match {match_id} not found"
+            "Match {} not found",
+            match_id
         )))),
     }
 }
@@ -236,6 +279,31 @@ pub async fn record_decision(
         }
     };
 
+    // ──────────────────────────────────────────────────────────
+    // HUMAN-IN-THE-LOOP COMPLIANCE ENFORCEMENT
+    // ──────────────────────────────────────────────────────────
+    let hr_row = sqlx::query("SELECT human_review_required FROM job_matches WHERE id = $1")
+        .bind(match_id)
+        .fetch_one(&state.db_pool)
+        .await
+        .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+        
+    let human_review_required: bool = hr_row.get("human_review_required");
+    
+    // Only enforce mandatory notes on final/critical decisions: selected, not_selected, withdrawn
+    let is_critical_decision = matches!(
+        status,
+        genflow_receptors::MatchStatus::Selected 
+            | genflow_receptors::MatchStatus::NotSelected 
+            | genflow_receptors::MatchStatus::Withdrawn
+    );
+
+    if human_review_required && is_critical_decision && (payload.note.is_none() || payload.note.as_deref().unwrap_or("").trim().is_empty()) {
+        return Err(ApiError(AppError::Business(
+            "HUMAN-IN-THE-LOOP COMPLIANCE: A detailed review justification note is required because this candidate profile is flagged for human review.".to_string()
+        )));
+    }
+
     state
         .matching_engine
         .record_decision(match_id, auth.user_id(), status, payload.note)
@@ -277,4 +345,69 @@ async fn require_match_tenant(
         .map(|row| row.get("organization_id"))
         .ok_or_else(|| ApiError(AppError::NotFound(format!("Match {match_id} not found"))))?;
     auth.require_organization(organization_id)
+}
+
+#[derive(serde::Deserialize)]
+pub struct SubmitFeedbackRequest {
+    pub feedback_from: String, // "employer" | "candidate"
+    pub accuracy_rating: i32, // 1 to 5
+    pub prediction_accurate: bool,
+    pub mispredicted_axes: Vec<String>,
+    pub comments: Option<String>,
+}
+
+pub async fn submit_match_feedback(
+    auth: TenantAuth,
+    State(state): State<Arc<AppState>>,
+    Path(match_id): Path<Uuid>,
+    Json(payload): Json<SubmitFeedbackRequest>,
+) -> Result<Json<Uuid>, ApiError> {
+    auth.require_permission(Permission::RecordDecision)?;
+    require_match_tenant(&state, &auth, match_id).await?;
+
+    let feedback_id = state
+        .learning_loop
+        .submit_match_feedback(
+            match_id,
+            &payload.feedback_from,
+            payload.accuracy_rating,
+            payload.prediction_accurate,
+            &payload.mispredicted_axes,
+            payload.comments.as_deref(),
+        )
+        .await?;
+
+    // Get organization id and analysis_id (correlation_id)
+    let pos_row = sqlx::query(
+        "SELECT p.organization_id, (SELECT business_analysis_id FROM position_generation_runs WHERE id = p.generation_run_id) as analysis_id FROM job_matches m JOIN job_positions p ON m.position_id = p.id WHERE m.id = $1"
+    )
+    .bind(match_id)
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|e| ApiError(AppError::Infrastructure(e.to_string())))?;
+    
+    let org_id: Uuid = pos_row.get("organization_id");
+    let corr_id: Option<Uuid> = pos_row.get("analysis_id");
+
+    // Publish event to Synaptic Bus
+    if let Err(error) = state
+        .synaptic_bus
+        .publish_event(&genflow_receptors::events::MatchFeedbackReceivedEvent {
+            match_id,
+            feedback_from: payload.feedback_from.clone(),
+            accuracy_rating: payload.accuracy_rating as u32,
+            prediction_accurate: payload.prediction_accurate,
+            organization_id: Some(org_id),
+            correlation_id: corr_id,
+        })
+        .await
+    {
+        tracing::warn!(
+            error = %error,
+            match_id = %match_id,
+            "Failed to publish match feedback received event"
+        );
+    }
+
+    Ok(Json(feedback_id))
 }

@@ -23,7 +23,10 @@ pub async fn get_mcp(
 
     match mcp {
         Some(ctx) => Ok(Json(ctx)),
-        None => Err(ApiError(AppError::NotFound(format!("MCP {id} not found")))),
+        None => Err(ApiError(AppError::NotFound(format!(
+            "MCP {} not found",
+            id
+        )))),
     }
 }
 

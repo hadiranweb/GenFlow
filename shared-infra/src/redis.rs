@@ -12,19 +12,20 @@ pub struct RedisPool {
 impl RedisPool {
     /// Create Redis client from config and verify connection
     pub async fn connect(config: &RedisConfig) -> Result<Self, AppError> {
-        let client = Client::open(config.url.clone())
-            .map_err(|e| AppError::Infrastructure(format!("Redis client creation failed: {e}")))?;
+        let client = Client::open(config.url.clone()).map_err(|e| {
+            AppError::Infrastructure(format!("Redis client creation failed: {}", e))
+        })?;
 
         let mut conn = client
             .get_multiplexed_async_connection()
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {}", e)))?;
 
         // Verify connection with PING
         let result: String = redis::cmd("PING")
             .query_async(&mut conn)
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {}", e)))?;
 
         if result != "PONG" {
             return Err(AppError::Infrastructure(
@@ -42,7 +43,7 @@ impl RedisPool {
         self.client
             .get_multiplexed_async_connection()
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {e}")))
+            .map_err(|e| AppError::Infrastructure(format!("Redis connection failed: {}", e)))
     }
 
     /// Get the client (for creating new connections)
@@ -56,7 +57,7 @@ impl RedisPool {
         let _: String = redis::cmd("PING")
             .query_async(&mut conn)
             .await
-            .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {e}")))?;
+            .map_err(|e| AppError::Infrastructure(format!("Redis ping failed: {}", e)))?;
         Ok(())
     }
 }

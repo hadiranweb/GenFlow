@@ -137,7 +137,7 @@ where
                     McpContext {
                         status: McpStatus::ReviewReady,
                         ..McpContextBuilder::new(McpType::StandardPosition, McpScope::Global, hint)
-                            .title(format!("Position: {hint}"))
+                            .title(format!("Position: {}", hint))
                             .build()
                     }
                 }

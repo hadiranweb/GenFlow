@@ -47,6 +47,10 @@ pub fn build_router(state: Arc<AppState>) -> Router {
             "/api/v2/matches/{match_id}/decision",
             post(handlers::candidate::record_decision),
         )
+        .route(
+            "/api/v2/matches/{match_id}/feedback",
+            post(handlers::candidate::submit_match_feedback),
+        )
         // Dashboard routes
         .route(
             "/api/v2/dashboard/{org_id}",

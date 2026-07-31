@@ -30,6 +30,7 @@ pub struct AppState {
     pub matching_engine: genflow_candidate_matching::MatchingEngine,
     pub invitation_manager: genflow_candidate_matching::InvitationManager,
     pub report_generator: genflow_candidate_matching::ReportGenerator,
+    pub learning_loop: genflow_candidate_matching::LearningLoopService,
 
     // Dashboard Analytics Island
     pub dashboard_engine: genflow_dashboard_analytics::DashboardEngine,

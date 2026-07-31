@@ -70,13 +70,13 @@ impl AppError {
 impl std::fmt::Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Validation(msg) => write!(f, "Validation: {msg}"),
-            Self::NotFound(msg) => write!(f, "Not found: {msg}"),
-            Self::Auth(msg) => write!(f, "Auth: {msg}"),
-            Self::Authorization(msg) => write!(f, "Authorization: {msg}"),
-            Self::Infrastructure(msg) => write!(f, "Infrastructure: {msg}"),
-            Self::Business(msg) => write!(f, "Business: {msg}"),
-            Self::Internal(msg) => write!(f, "Internal: {msg}"),
+            Self::Validation(msg) => write!(f, "Validation: {}", msg),
+            Self::NotFound(msg) => write!(f, "Not found: {}", msg),
+            Self::Auth(msg) => write!(f, "Auth: {}", msg),
+            Self::Authorization(msg) => write!(f, "Authorization: {}", msg),
+            Self::Infrastructure(msg) => write!(f, "Infrastructure: {}", msg),
+            Self::Business(msg) => write!(f, "Business: {}", msg),
+            Self::Internal(msg) => write!(f, "Internal: {}", msg),
         }
     }
 }
@@ -89,13 +89,13 @@ pub type AppResult<T> = Result<T, AppError>;
 // From conversions (infrastructure errors only)
 impl From<SqlxError> for AppError {
     fn from(e: SqlxError) -> Self {
-        Self::Infrastructure(format!("Database: {e}"))
+        Self::Infrastructure(format!("Database: {}", e))
     }
 }
 
 impl From<redis::RedisError> for AppError {
     fn from(e: redis::RedisError) -> Self {
-        Self::Infrastructure(format!("Redis: {e}"))
+        Self::Infrastructure(format!("Redis: {}", e))
     }
 }
 

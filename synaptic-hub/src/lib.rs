@@ -12,7 +12,11 @@
 pub mod bus;
 pub mod convergence;
 pub mod router;
+pub mod store;
+pub mod worker;
 
 pub use bus::SynapticBus;
 pub use convergence::ConvergenceTracker;
 pub use router::EventRouter;
+pub use store::EventStore;
+pub use worker::start_background_worker;

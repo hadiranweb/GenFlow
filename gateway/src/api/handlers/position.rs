@@ -118,6 +118,7 @@ pub async fn generate_position(
                 .axes
                 .iter()
                 .any(|axis| axis.calibration_applied),
+            correlation_id: Some(analysis_request.analysis_id),
         })
         .await
     {
@@ -136,6 +137,7 @@ pub async fn generate_position(
             position_code: profile.position.position_code.clone(),
             title: profile.position.title.clone(),
             generation_method: profile.position.generation_method.as_db_str().to_string(),
+            correlation_id: Some(analysis_request.analysis_id),
         })
         .await
     {
@@ -167,7 +169,8 @@ pub async fn get_position(
             Ok(Json(pos))
         }
         None => Err(ApiError(AppError::NotFound(format!(
-            "Position {id} not found"
+            "Position {} not found",
+            id
         )))),
     }
 }

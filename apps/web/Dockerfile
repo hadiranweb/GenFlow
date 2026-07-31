@@ -1,8 +1,8 @@
 # =============================================================================
 # GenFlow v2 — Remix Frontend Dockerfile
 #
-# Builder: node:20-alpine, pnpm install with frozen-lockfile for deterministic
-#   builds. The pnpm-lock.yaml must be committed into the monorepo.
+# Builder: node:20-alpine, pnpm install (no frozen-lockfile — lockfile
+#   is generated during build since it's not checked into the monorepo)
 # Runtime: node:20-alpine, production-only artifacts
 # =============================================================================
 
@@ -11,13 +11,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
 
-# Dependency cache layer — lockfile enables deterministic installs
-COPY pnpm-lock.yaml package.json pnpm-workspace.yaml .npmrc ./
+# Dependency cache layer
+COPY package.json pnpm-workspace.yaml .npmrc ./
 COPY apps/web/package.json apps/web/
 COPY packages/ui/package.json packages/ui/
 COPY packages/db/package.json packages/db/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Source code + build
 COPY . .

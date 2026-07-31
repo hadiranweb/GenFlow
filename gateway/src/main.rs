@@ -54,12 +54,33 @@ async fn main() -> anyhow::Result<()> {
     let matching_engine = genflow_candidate_matching::MatchingEngine::new(pg_pool.clone());
     let invitation_manager = genflow_candidate_matching::InvitationManager::new(pg_pool.clone());
     let report_generator = genflow_candidate_matching::ReportGenerator::new(pg_pool.clone());
+    let learning_loop = genflow_candidate_matching::LearningLoopService::new(pg_pool.clone());
     let dashboard_engine = genflow_dashboard_analytics::DashboardEngine::new(pg_pool.clone());
     let notification_service =
         genflow_dashboard_analytics::NotificationService::new(pg_pool.clone());
 
     // 6. Initialize Synaptic Hub
     let synaptic_bus = Arc::new(genflow_synaptic_hub::SynapticBus::new(redis_pool.clone()));
+    
+    // Spawn the Synaptic Hub background worker
+    let convergence_tracker = Arc::new(genflow_synaptic_hub::ConvergenceTracker::default());
+    let event_router = Arc::new(genflow_synaptic_hub::EventRouter::default());
+    let event_store = Arc::new(genflow_synaptic_hub::EventStore::new(pg_pool.clone()));
+
+    let worker_bus = synaptic_bus.clone();
+    let worker_convergence = convergence_tracker.clone();
+    let worker_router = event_router.clone();
+    let worker_store = event_store.clone();
+
+    tokio::spawn(async move {
+        genflow_synaptic_hub::start_background_worker(
+            worker_bus,
+            worker_convergence,
+            worker_router,
+            Some(worker_store),
+        )
+        .await;
+    });
 
     // 7. Build application state
     let host = config.server.host.clone();
@@ -75,6 +96,7 @@ async fn main() -> anyhow::Result<()> {
         matching_engine,
         invitation_manager,
         report_generator,
+        learning_loop,
         dashboard_engine,
         notification_service,
         jwt_auth,
@@ -87,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
     let app = api::build_router(state);
 
     // 9. Start server
-    let listener = TcpListener::bind(format!("{host}:{port}")).await?;
+    let listener = TcpListener::bind(format!("{}:{}", host, port)).await?;
 
     tracing::info!("GenFlow v2 Gateway ready — listening on {}:{}", host, port);
 

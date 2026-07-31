@@ -51,19 +51,22 @@ impl PositionGenerationEngine {
         // 1. Discover business needs from input
         let needs = self.need_discovery.discover(request);
 
-        // 2. Determine axis weights (with representative context adjustment)
+        // 2. Fetch the latest adaptive weights or default weights for this organization
+        let base_weights = self.fetch_latest_adaptive_weights(request.organization_id).await;
+
+        // Apply representative context adjustment on top of base weights
         let weights = request
             .representative_context
             .as_ref()
             .map(|ctx| {
-                let mut w = AxisWeights::default();
+                let mut w = base_weights.clone();
                 if ctx.use_personality {
-                    w.work_style += ctx.requested_weight * 0.10;
-                    w.capability -= ctx.requested_weight * 0.05;
+                    w.work_style = (w.work_style + ctx.requested_weight * 0.10).min(0.50);
+                    w.capability = (w.capability - ctx.requested_weight * 0.05).max(0.05);
                 }
                 w
             })
-            .unwrap_or_default();
+            .unwrap_or(base_weights);
 
         // 3. Build position graph
         let position_id = Uuid::new_v4();
@@ -161,7 +164,7 @@ impl PositionGenerationEngine {
                         score_range: dim.min.map(|m| {
                             (
                                 m,
-                                dim.ideal.unwrap_or_default(),
+                                dim.ideal.unwrap_or(Score::default()),
                                 dim.max.unwrap_or(Score::max()),
                             )
                         }),
@@ -343,6 +346,41 @@ impl PositionGenerationEngine {
             genflow_receptors::BusinessNeedType::RiskMitigation => {
                 format!("{} Analyst", primary.description)
             }
+        }
+    }
+
+    /// Fetch latest active adaptive weights for an organization
+    async fn fetch_latest_adaptive_weights(&self, org_id: Uuid) -> AxisWeights {
+        let row = sqlx::query(
+            r#"
+            SELECT capability_weight, output_kpi_weight, business_gap_weight, work_style_weight, growth_motivation_weight
+            FROM adaptive_weights_history
+            WHERE organization_id = $1
+            ORDER BY created_at DESC
+            LIMIT 1
+            "#
+        )
+        .bind(org_id)
+        .fetch_optional(&self.pool)
+        .await;
+
+        match row {
+            Ok(Some(r)) => {
+                let capability: f64 = r.get::<sqlx::types::BigDecimal, _>("capability_weight").to_string().parse().unwrap_or(0.25);
+                let output_kpi: f64 = r.get::<sqlx::types::BigDecimal, _>("output_kpi_weight").to_string().parse().unwrap_or(0.25);
+                let business_gap: f64 = r.get::<sqlx::types::BigDecimal, _>("business_gap_weight").to_string().parse().unwrap_or(0.20);
+                let work_style: f64 = r.get::<sqlx::types::BigDecimal, _>("work_style_weight").to_string().parse().unwrap_or(0.20);
+                let growth_motivation: f64 = r.get::<sqlx::types::BigDecimal, _>("growth_motivation_weight").to_string().parse().unwrap_or(0.10);
+
+                AxisWeights {
+                    capability: capability as f32,
+                    output_kpi: output_kpi as f32,
+                    business_gap: business_gap as f32,
+                    work_style: work_style as f32,
+                    growth_motivation: growth_motivation as f32,
+                }
+            }
+            _ => AxisWeights::default(),
         }
     }
 

@@ -14,7 +14,7 @@ impl ReportGenerator {
         Self { pool }
     }
 
-    /// Generate a match report
+    /// Generate a match report — Enforces compliance guards for human-in-the-loop policies
     pub async fn generate(
         &self,
         job_match: &JobMatch,
@@ -22,7 +22,7 @@ impl ReportGenerator {
     ) -> Result<MatchReport, AppError> {
         let report_id = Uuid::new_v4();
 
-        let (title, summary, strengths, development_areas) = match report_type {
+        let (title, mut summary, mut strengths, mut development_areas) = match report_type {
             ReportType::ForEmployer => (
                 format!(
                     "Match Report — Position vs Candidate ({})",
@@ -51,11 +51,33 @@ impl ReportGenerator {
         };
 
         // Disclaimer (always included)
-        let disclaimers = vec![
+        let mut disclaimers = vec![
             "This assessment is for guidance only and should not be the sole basis for hiring decisions.".to_string(),
             "All scores are relative and contextual.".to_string(),
             "No assessment can capture the full complexity of human potential.".to_string(),
         ];
+
+        let mut recommendations = vec![
+            "Schedule a structured interview for deeper evaluation".to_string()
+        ];
+
+        // ──────────────────────────────────────────────────────────
+        // HUMAN-IN-THE-LOOP COMPLIANCE ENFORCEMENT
+        // ──────────────────────────────────────────────────────────
+        if job_match.human_review_required {
+            summary = format!(
+                "{} (⚠️ ATTENTION: Human Review Required — Algorithmic confidence is low or risk flag was raised.)",
+                summary
+            );
+            
+            strengths.push("Review Requirement: High priority flags present, manual override recommended".to_string());
+            development_areas.push("Pending Human Verification: Scores on some axes must be validated in an interview".to_string());
+            
+            recommendations.insert(0, "REQUIRED: A registered Business Representative must conduct a manual interview before finalizing any decision.".to_string());
+            recommendations.push("COMPLIANCE ACTION: Do NOT reject or select this candidate based on these scores alone.".to_string());
+
+            disclaimers.push("COMPLIANCE NOTICE: Automatic candidate rejection/selection is blocked for this profile under platform policy.".to_string());
+        }
 
         let report = MatchReport {
             id: report_id,
@@ -69,9 +91,7 @@ impl ReportGenerator {
             )],
             strengths,
             development_areas,
-            recommendations: vec![
-                "Schedule a structured interview for deeper evaluation".to_string()
-            ],
+            recommendations,
             disclaimers,
         };
 
@@ -87,7 +107,7 @@ impl ReportGenerator {
             .execute(&self.pool)
             .await?;
 
-        tracing::info!(report_id = %report_id, "Match report generated");
+        tracing::info!(report_id = %report_id, human_review_enforced = %job_match.human_review_required, "Match report generated with compliance guards");
         Ok(report)
     }
 }

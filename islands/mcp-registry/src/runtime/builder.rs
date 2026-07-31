@@ -26,7 +26,7 @@ impl McpBuilder for McpBuilderImpl {
         industry_code: &str,
     ) -> Result<McpContext, McpRuntimeError> {
         let mcp = McpContextBuilder::new(McpType::Industry, McpScope::Industry, industry_code)
-            .title(format!("Industry: {industry_code}"))
+            .title(format!("Industry: {}", industry_code))
             .content(serde_json::json!({
                 "industry_code": industry_code,
                 "draft": true,
@@ -55,7 +55,7 @@ impl McpBuilder for McpBuilderImpl {
             McpScope::Global
         };
         let mcp = McpContextBuilder::new(McpType::BusinessProcess, scope, process_code)
-            .title(format!("Process: {process_code}"))
+            .title(format!("Process: {}", process_code))
             .content(serde_json::json!({
                 "process_code": process_code,
                 "industry_code": industry_code,
@@ -77,9 +77,9 @@ impl McpBuilder for McpBuilderImpl {
         let mcp = McpContextBuilder::new(
             McpType::CaseTemporary,
             McpScope::Case,
-            format!("case-{org_id}"),
+            format!("case-{}", org_id),
         )
-        .title(format!("Case for org {org_id}"))
+        .title(format!("Case for org {}", org_id))
         .organization_id(org_id)
         .content(serde_json::json!({
             "organization_id": org_id,

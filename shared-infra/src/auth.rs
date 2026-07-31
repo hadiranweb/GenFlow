@@ -115,7 +115,7 @@ impl JwtAuth {
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)
-            .map_err(|e| AppError::Auth(format!("Token generation failed: {e}")))
+            .map_err(|e| AppError::Auth(format!("Token generation failed: {}", e)))
     }
 
     /// Validate a JWT token and return claims
@@ -125,7 +125,7 @@ impl JwtAuth {
 
         decode(token, &self.decoding_key, &validation)
             .map(|data| data.claims)
-            .map_err(|e| AppError::Auth(format!("Token validation failed: {e}")))
+            .map_err(|e| AppError::Auth(format!("Token validation failed: {}", e)))
     }
 }
 

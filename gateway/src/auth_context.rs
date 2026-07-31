@@ -42,13 +42,13 @@ impl TenantAuth {
             Ok(())
         } else {
             Err(ApiError(AppError::Authorization(format!(
-                "Role {role:?} is not allowed to perform {permission:?}"
+                "Role {:?} is not allowed to perform {:?}",
+                role, permission
             ))))
         }
     }
 }
 
-#[axum::async_trait]
 impl FromRequestParts<Arc<AppState>> for TenantAuth {
     type Rejection = ApiError;
 

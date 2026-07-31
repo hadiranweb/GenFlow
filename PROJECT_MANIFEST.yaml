@@ -1,0 +1,46 @@
+name: GenFlow
+description: "Business-First Position Generation & Candidate Matching Platform — Talent Intelligence Island under PEMA Architecture"
+version: 2.0.0
+pema_alignment:
+  role: "Talent / Organization Intelligence Island (Business-to-Talent Semantic Engine)"
+  architecture: "Inspired by PEMA Island/Cell/Synaptic topology"
+  specification_version: "2.1.0"
+
+topology:
+  islands:
+    mcp-registry:
+      description: "MCP Registry Island — Stores, manages, and resolves Model Context Protocol cells"
+      path: "islands/mcp-registry"
+      cells:
+        - PlatformPolicy
+        - Industry
+        - BusinessProcess
+        - StandardPosition
+        - OrganizationContext
+        - CaseTemporary
+    position-generation:
+      description: "Position Generation Island — Discovers business gaps, builds position requirements graphs, and calibrates weight profiles"
+      path: "islands/position-generation"
+    candidate-matching:
+      description: "Candidate Matching Island — Handles invitations, calculates multi-axis match scores, and generates detailed reports"
+      path: "islands/candidate-matching"
+    dashboard-analytics:
+      description: "Dashboard Analytics Island — Projects raw events into real-time operational views and alerts"
+      path: "islands/dashboard-analytics"
+    learning-loop:
+      description: "Learning Loop Service / Island — Accumulates hiring decisions, captures user feedback, and adaptively tunes weighting matrices"
+      path: "islands/learning-loop"
+
+  synaptic_hub:
+    bus: "Dual-layer event bus: Layer 1 (Tokio in-process broadcast) + Layer 2 (Redis Pub/Sub)"
+    router: "EventRouter routes events from source islands to target receptors"
+    convergence: "ConvergenceTracker matches multi-source event flows into composite actions"
+
+  receptors:
+    crate: "receptors/genflow-receptors"
+    contracts:
+      - Domain Types
+      - Event Types
+      - API DTOs
+      - Enum Mapping
+      - Validation Rules
