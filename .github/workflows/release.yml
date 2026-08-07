@@ -84,7 +84,7 @@ jobs:
 
       - name: 🚀 Create GitHub Release
         if: ${{ !inputs.dry_run }}
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f710763431c56ea4d2dfb
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8 pinned
         with:
           tag_name: ${{ steps.validate.outputs.tag }}
           name: ${{ steps.validate.outputs.release_title }}
