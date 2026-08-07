@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 1
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: 🔑 Deploy via SSH (staging)
         if: ${{ inputs.environment == 'staging' }}
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@cac19b8814ecea08f7e84ff838c9f166f2435715d # v1.2.0 pinned
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
@@ -52,41 +52,17 @@ jobs:
             set -e
             echo "🚀 GenFlow CD — target: staging"
             echo "   Image tag: ${{ inputs.image_tag }}"
-            echo "   Timestamp: $(date -u)"
             cd ${{ steps.vars.outputs.deploy_dir }}
-            if [ ! -f "${{ steps.vars.outputs.compose_file }}" ]; then
-              echo "❌ docker-compose.yml not found"
-              exit 1
-            fi
             export IMAGE_TAG=${{ inputs.image_tag }}
-            echo "📦 Pulling images..."
             docker compose pull
-            echo "🔄 Recreating services..."
             docker compose up -d --remove-orphans
-            echo "🏥 Running health check..."
             sleep 10
-            HEALTH_URL="http://localhost:3000/health"
-            for i in $(seq 1 10); do
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
-              if [ "$STATUS" = "200" ]; then
-                echo "✅ Health check passed (attempt $i/10)"
-                break
-              fi
-              if [ "$i" = "10" ]; then
-                echo "❌ Health check failed after 10 attempts"
-                docker compose logs --tail=20 api web
-                exit 1
-              fi
-              echo "⏳ Waiting... (attempt $i/10, status=$STATUS)"
-              sleep 5
-            done
-            echo "🧹 Cleaning up..."
+            curl -f http://localhost:3000/health || (docker compose logs --tail=20; exit 1)
             docker image prune -f --filter "until=24h"
-            echo "✅ Deployment complete!"
 
       - name: 🔑 Deploy via SSH (production)
         if: ${{ inputs.environment == 'production' }}
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@cac19b8814ecea08f7e84ff838c9f166f2435715d
         with:
           host: ${{ secrets.PRODUCTION_HOST }}
           username: ${{ secrets.PRODUCTION_USER }}
@@ -96,45 +72,16 @@ jobs:
             set -e
             echo "🚀 GenFlow CD — target: production"
             echo "   Image tag: ${{ inputs.image_tag }}"
-            echo "   Timestamp: $(date -u)"
             cd ${{ steps.vars.outputs.deploy_dir }}
-            if [ ! -f "${{ steps.vars.outputs.compose_file }}" ]; then
-              echo "❌ docker-compose.yml not found"
-              exit 1
-            fi
             export IMAGE_TAG=${{ inputs.image_tag }}
-            echo "📦 Pulling images..."
             docker compose pull
-            echo "🔄 Recreating services..."
             docker compose up -d --remove-orphans
-            echo "🏥 Running health check..."
             sleep 10
-            HEALTH_URL="http://localhost:3000/health"
-            for i in $(seq 1 10); do
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
-              if [ "$STATUS" = "200" ]; then
-                echo "✅ Health check passed (attempt $i/10)"
-                break
-              fi
-              if [ "$i" = "10" ]; then
-                echo "❌ Health check failed after 10 attempts"
-                docker compose logs --tail=20 api web
-                exit 1
-              fi
-              echo "⏳ Waiting... (attempt $i/10, status=$STATUS)"
-              sleep 5
-            done
-            echo "🧹 Cleaning up..."
+            curl -f http://localhost:3000/health || (docker compose logs --tail=20; exit 1)
             docker image prune -f --filter "until=24h"
-            echo "✅ Deployment complete!"
 
       - name: 📋 Deployment summary
         run: |
           echo "## ✅ Deployed ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image tag | ${{ inputs.image_tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trigger | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Timestamp | $(date -u) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Env | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ inputs.image_tag }} |" >> $GITHUB_STEP_SUMMARY
