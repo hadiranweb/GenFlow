@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron">
+  <diagram name="Page-1" id="6Az_kC4T0SDrXKMSezVI">
+    <mxGraphModel dx="3096" dy="3592" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="E69CDET4ddx6yGC_dZxk-4" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-8" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;aspect=fixed;" value="کار بر درخواست شروع مکامله میدهد." vertex="1">
+          <mxGeometry height="80" width="80" x="33" y="-692" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-2" parent="1" style="shape=wedgeCallout;whiteSpace=wrap;html=1;tipX=-0.25;tipY=0.875;" value="این مکالمه با نام &quot;ارزیابی اولیه&quot; به کاربر نمایش داده میشود و در اصل شروع فرایند &quot;ارزیابی نود&quot; برای دادن یکی از وضعیت های سه گانه به وی است. این ارزیابی یک فیلتر نیست بلکه یک لیبل&amp;nbsp; است که به نوع تفکر فعلی فد(بدون قضاوت کلی) داده میشود تا بتوانیم او را کمی بسنجیم در سیستم." vertex="1">
+          <mxGeometry height="190" width="160" x="33" y="-1002" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-13" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-12" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="سوالات &quot;ارزیابی نود&quot; شروع میشود به پرسیدن." vertex="1">
+          <mxGeometry height="60" width="120" x="213" y="-682" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-10" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-9" parent="1" style="shape=card;whiteSpace=wrap;html=1;" value="- آیا به نظرتان فلان موضوع چقدر مهم است.&lt;br&gt;عددی بین 0 تا 10&lt;br&gt;(به صورت یک نواری که رنج را مشخص کند)" vertex="1">
+          <mxGeometry height="120" width="110" x="218" y="-562" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-36" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="سوالات &quot;ارزیابی&quot; کامل که پرسیده شد، پاسخ به صورت &quot;ماتریس پاسخ ها&quot; آماده میشود." vertex="1">
+          <mxGeometry height="60" width="120" x="368" y="-682" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-17" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-16" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-14" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="json با api ارسال میشود،&amp;nbsp; به صورت همزمان API AI." vertex="1">
+          <mxGeometry height="60" width="120" x="13" y="-352" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-19" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-18" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-16" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="مفسر مفسر AI با استفاده از دستورالعمل(برای مفسر انسانی، فرم تفسیر است و برای AI یک MCP (چه به صورت سرور مجزا و چه در خود سرور) استفاده میکنند تا تفسیر کنند." vertex="1">
+          <mxGeometry height="120" width="120" x="13" y="-202" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-101" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-100">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-18" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="ماتریس &quot;تفسیر عمیق عارضه یابی&quot;( AI. آماده است." vertex="1">
+          <mxGeometry height="60" width="120" x="13" y="-42" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-23" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-22" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-20" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="نتیجه تفسیر با استفاده از یک دستور العمل دیگر(این دستورالعمل برای مرحله ی تبدیل به سند است) که شامل قالب نوشتن (ویراست متن) و قالب نمایس (HTML)&amp;nbsp;" vertex="1">
+          <mxGeometry height="110" width="120" x="43" y="348" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-22" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="سند عارضه یابی آماده شده و برای دانلود قرار میگیرد." vertex="1">
+          <mxGeometry height="60" width="120" x="43" y="498" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-48" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-47" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-105" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-104">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-25" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="سپس بدون اینکه کاربر متوجه شود سوالات ادامه پیدا میکند اما از بانک سوالات &quot;عارضه یابی&quot; است، یعنی مثلا x سوال ابتدایی که پرشود ما میتوانیم فرد را ارزیابی کنیم و با مابقی سوالات میتوانیم فرد (کسب و کارش را) عارضه یابی کنیم." vertex="1">
+          <mxGeometry height="110" width="150" x="683" y="-707" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-37" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-25" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-28" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;aspect=fixed;" value="اینجا &quot;ارزیابی&quot; تمام شده اما سوالات &quot;عارضه یابی&quot; شروع میشود." vertex="1">
+          <mxGeometry height="110" width="110" x="543" y="-707" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-39" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-34" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="فرمول محاسبه &quot;ماتریس&quot; تبدیل پاسخ ها به یک رنج 0 تا 100(امتیازدهی).&lt;br&gt;که کاربر را در یکی از سه رنج معرفی شده قرار میدهد" vertex="1">
+          <mxGeometry height="120" width="110" x="373" y="-562" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-35" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-41" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-40" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-38" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ماتریس تبدیل پاسخ فرم ارزیابی به رنج 0 تا 100" vertex="1">
+          <mxGeometry height="60" width="120" x="463" y="-392" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-43" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-42" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-40" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="سناریو های قرار گیری رنج عددی در یکی از سه حالت" vertex="1">
+          <mxGeometry height="100" width="80" x="313" y="-392" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-46" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-45" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ایجاد لیبل (سبز، زرد، قرمز) برای فرد" vertex="1">
+          <mxGeometry height="60" width="120" x="293" y="-192" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-45" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="نمایش فقط در داشبورد مدیر و به هیچ وجه در مابقی فرایند این صرفا لیبل، دخالت پیدا نمیکند و حتی نمایش هم داده نمیشود.&lt;br&gt;(انتقال لیبل فرد به دیتابیس و نمایش رنک کاربر در داشبورد مدیر)" vertex="1">
+          <mxGeometry height="130" width="130" x="488" y="-227" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-75" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-69">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-47" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="سوالات &quot;عارضه یابی&quot; شروع میشود به پرسیدن." vertex="1">
+          <mxGeometry height="60" width="120" x="698" y="-492" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-78" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-77">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-82" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-81">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-50" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="سوالات &quot;عارضه یابی&quot; کامل که پرسیده شد، پاسخ به صورت ماتریس آماده میشود." vertex="1">
+          <mxGeometry height="60" width="120" x="698" y="-72" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-53" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" value="دیتا بیس اطلاعات کاربر" vertex="1">
+          <mxGeometry height="230" width="200" x="328" y="448" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-54" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-55" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;curved=0;" target="E69CDET4ddx6yGC_dZxk-53" value="&#xa;&lt;span style=&quot;color: rgb(255, 255, 255); font-family: Helvetica; font-size: 11px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(18, 18, 18); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;فرم پرشده کاربر آرشیو میشود و سند میشود (یعنی شماره سری میگیرد و به عنوان پاسخش در نشست شماره x سریال میگیرد تا بتوانیم همه را ذخیره کنیم و آرشیو.&lt;/span&gt;&#xa;&#xa;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="428" y="-592" />
+              <mxPoint x="548" y="-592" />
+              <mxPoint x="548" y="563" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-59" parent="1" style="swimlane;" value="سوالات ارزیابی" vertex="1">
+          <mxGeometry height="40" width="200" x="243" y="-1082" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-67" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-60" parent="1" style="swimlane;" value="سوالات عارضه یابی" vertex="1">
+          <mxGeometry height="50" width="200" x="523" y="-1092" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-61" parent="1" style="swimlane;" value="فرمول محاسبه ارزیابی" vertex="1">
+          <mxGeometry height="200" width="200" x="243" y="-952" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-93" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-62" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-62" parent="1" style="swimlane;" value="فرمول محاسبه عارضه یابی" vertex="1">
+          <mxGeometry height="200" width="200" x="523" y="-942" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-65" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-66" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-76" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-69" parent="1" style="swimlane;startSize=20;horizontal=1;containerType=tree;transparentBounds=1;groupPadding=20;" value="نوع پاسخ ها" vertex="1">
+          <mxGeometry as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-70" edge="1" parent="E69CDET4ddx6yGC_dZxk-69" source="E69CDET4ddx6yGC_dZxk-71" style="edgeStyle=elbowEdgeStyle;elbow=vertical;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;curved=0;" target="E69CDET4ddx6yGC_dZxk-72" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-71" parent="E69CDET4ddx6yGC_dZxk-69" style="whiteSpace=wrap;html=1;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" value="رنج" vertex="1">
+          <mxGeometry height="40" width="120" x="698" y="-322" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-72" parent="E69CDET4ddx6yGC_dZxk-69" style="whiteSpace=wrap;html=1;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" value="توضیح اضافه بر رنج" vertex="1">
+          <mxGeometry height="40" width="120" x="698" y="-242" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-77" parent="1" style="shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;" value="پس از هر سوال باید در نشست مربوط ذخیره شود که کاربر اگر صفحه را رفرش کرد، بتواند ادامه سوال را پاسخ دهد مگر اینکه بخواهد از نو شروع کند که به نوعی نشست جدید ساخته میشود اما نشست قبلی هم اطلاعاتش در دیتابیس میماند." vertex="1">
+          <mxGeometry height="140" width="140" x="528" y="-32" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-79" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-77" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.85;entryDx=0;entryDy=0;entryPerimeter=0;curved=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="E69CDET4ddx6yGC_dZxk-53" value="&#xa;&lt;span style=&quot;color: rgb(255, 255, 255); font-family: Helvetica; font-size: 11px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(18, 18, 18); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;فرم پرشده کاربر آرشیو میشود و سند میشود (یعنی شماره سری میگیرد و به عنوان پاسخش در نشست شماره x سریال میگیرد تا بتوانیم همه را ذخیره کنیم و آرشیو.&lt;/span&gt;&#xa;&#xa;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="553" y="108" as="sourcePoint" />
+            <mxPoint x="483" y="643.5000000000005" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-83" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-106" value="بله">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="153" y="3" />
+              <mxPoint x="153" y="-552" />
+              <mxPoint x="113" y="-552" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-87" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-71" value="بله">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-90" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-86" value="خیر">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="263" y="98" />
+              <mxPoint x="468" y="98" />
+              <mxPoint x="468" y="248" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-81" parent="1" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" value="آیا کلید &quot;تفسیر عمیق&quot; در داشبورد مدیر فعال است؟&lt;br&gt;این کلید مشخص میکند که پاسخ هم با استفاده از &quot;ماتریس عارضه یابی که به نوعی فقط با استفاده از رنج ها تفسیر میشود برود یا همزمان هم برای ماتریس و هم برای تفسیر عمیق(توسط انسان و AI) برود." vertex="1">
+          <mxGeometry height="130" width="140" x="193" y="-62" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-99" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-86" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-98" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-86" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="پاسخ رنجی کاربر (فقط رنج و نه پاسخ تشریحی) با استفاده از ماتریس تفسیر عارضه یابی به صورت داخلی(داخل خود سرور) تفسیر میشود." vertex="1">
+          <mxGeometry height="85" width="120" x="603" y="208" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-94" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-71" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;endArrow=none;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-86">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="843" y="8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-98" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ماتریس &quot;تفسیر عارضه یابی رنجی&quot; آماده میشود که در زبان json (یا هر زبانی که بتوان به مدل ارسال شود آماده میشود." vertex="1">
+          <mxGeometry height="100" width="120" x="633" y="478" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-102" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-100" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E69CDET4ddx6yGC_dZxk-20" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-100" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;aspect=fixed;" value="اینجا فرایند &quot;عارضه یابی عمیق&quot; تمام میشود و فرایند بعدی که قالب دهی برای دسیابی به سند نهایی قابل نمایش است شروع میشود" vertex="1">
+          <mxGeometry height="170" width="170" x="18" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-103" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;aspect=fixed;" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;اینجا فرایند &quot;عارضه یابی رنجی&quot; تمام میشود و فرایند بعدی که قالب دهی برای دسیابی به سند نهایی قابل نمایش است شروع میشود&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="80" x="623" y="638" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-104" parent="1" style="shape=wedgeCallout;whiteSpace=wrap;html=1;" value="این سوالات دو ساید دارد یعنی هم پاسخ رنجی دارد و هم یک کادر برای توضیح." vertex="1">
+          <mxGeometry height="80" width="120" x="718" y="-1022" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-107" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-14" value="بله">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-109" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-108" value="خیر">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-115" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-108" value="بله">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-106" parent="1" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" value="آیا کلید &quot;تفسیر AI فعال است؟" vertex="1">
+          <mxGeometry height="80" width="80" x="73" y="-532" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-112" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-108" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-111" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-108" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="فقط برای تفسیر انسانی آماده&amp;nbsp; و ارسال میشود." vertex="1">
+          <mxGeometry height="60" width="120" x="163" y="-352" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-113" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E69CDET4ddx6yGC_dZxk-100" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-111" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="ماتریس &quot;تفسیر عمیق عارضه یابی&quot; (فقط انسانی) آماده است." vertex="1">
+          <mxGeometry height="60" width="120" x="153" y="-207" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-114" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-53" value="باید به آرشیو اطلاعات کاربر برود و سریال بگیرد (در نشت) و ذخیره شود.">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-116" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-53" value="ذخیره کد دار و سریال دار در دیتا بیس کاربر">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E69CDET4ddx6yGC_dZxk-117" edge="1" parent="1" source="E69CDET4ddx6yGC_dZxk-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.85;entryDx=0;entryDy=0;entryPerimeter=0;" target="E69CDET4ddx6yGC_dZxk-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

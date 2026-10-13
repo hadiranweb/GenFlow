@@ -1,0 +1,140 @@
+﻿# ============================================================
+# مرحله ۲ — عارضه‌یابی تفصیلی (۵۴ سوال در ۹ محور)
+# مبنای طراحی: رجیستری پلی‌بوک‌ها و راهنماهای اجرایی کاسیو +
+#              پایگاه داده دپارتمان‌ها/خدمات (ردیف «عارضه‌یابی و اصلاح مهندسی»)
+# دامنه پاسخ: ۰ تا ۱۰  (۰ = اصلاً / ۱۰ = کاملاً)
+# «تاریس» = ماتریس محور × سوال که در پس‌زمینه و تدریجی پر می‌شود.
+# ============================================================
+version: 1
+stage: diagnostics
+title: "عارضه‌یابی تفصیلی نود"
+scale_hint: "۰ = اصلاً برقرار نیست — ۱۰ = کاملاً برقرار است"
+
+
+
+
+target_index: 75      # امتیاز مطلوب هر محور (مبنای محاسبه‌ی شکاف)
+symptom_threshold: 4  # نمره‌ی <= 4 روی هر سوال = «عارضه‌ی مشاهده‌شده»
+
+
+
+
+severity_bands:       # دسته‌بندی نهایی هر محور بر پایه‌ی شاخص ۰..۱۰۰
+ healthy: 75         # >= 75 → مطلوب
+ borderline: 60      # 60..75 → مرزی
+ needs_fix: 40       # 40..60 → نیازمند اصلاح
+ # کمتر از 40 → بحرانی
+
+
+
+
+dimensions:
+ - { id: strategy, title: "استراتژی و مدل کسب‌وکار", weight: 1.20 }
+ - { id: process,  title: "فرآیندها و رویه‌ها",        weight: 1.15 }
+ - { id: data,     title: "داده و مدل داده",           weight: 1.10 }
+ - { id: tech,     title: "فناوری و اتوماسیون",        weight: 1.05 }
+ - { id: standard, title: "استانداردها و انطباق",      weight: 1.10 }
+ - { id: people,   title: "سرمایه انسانی و آموزش",     weight: 1.05 }
+ - { id: market,   title: "بازاریابی، فروش و برند",    weight: 1.10 }
+ - { id: finance,  title: "مالی و بهره‌وری",           weight: 1.20 }
+ - { id: risk,     title: "ریسک، کیفیت و پایداری",     weight: 1.15 }
+
+
+
+
+items:
+ # ---------- استراتژی و مدل کسب‌وکار ----------
+ - { id: d101, dim: strategy, weight: 1.00, critical: false, text: "مدل درآمدی نود (چگونه پول درمی‌آورد) مکتوب و شفاف است." }
+ - { id: d102, dim: strategy, weight: 1.00, critical: false, text: "بازار هدف و اندازه‌ی فرصت آن برآورد مستند دارد." }
+ - { id: d103, dim: strategy, weight: 1.00, critical: false, text: "مزیت رقابتی ما مشخص و قابل دفاع است." }
+ - { id: d104, dim: strategy, weight: 1.00, critical: true,  text: "اهداف ۱۲ ماه آینده به اهداف فصلی و ماهانه شکسته شده است." }
+ - { id: d105, dim: strategy, weight: 1.00, critical: false, text: "تصمیم‌های راهبردی بر پایه‌ی داده گرفته می‌شود، نه سلیقه." }
+ - { id: d106, dim: strategy, weight: 1.00, critical: false, text: "برنامه‌ی رشد نود (محصول، بازار، ظرفیت) مکتوب است." }
+
+
+
+
+ # ---------- فرآیندها و رویه‌ها ----------
+ - { id: d201, dim: process, weight: 1.00, critical: false, text: "نقشه‌ی فرآیندهای اصلی (Workflow Map) ترسیم شده است." }
+ - { id: d202, dim: process, weight: 1.00, critical: false, text: "مالک و مسئول هر فرآیند مشخص است." }
+ - { id: d203, dim: process, weight: 1.00, critical: false, text: "ورودی و خروجی هر فرآیند مستند است." }
+ - { id: d204, dim: process, weight: 1.00, critical: true,  text: "گلوگاه‌ها شناسایی شده و زمان چرخه‌ی هر فرآیند اندازه‌گیری می‌شود." }
+ - { id: d205, dim: process, weight: 1.00, critical: false, text: "رویه‌های اضطراری/جایگزین برای اختلال‌ها تعریف شده است." }
+ - { id: d206, dim: process, weight: 1.00, critical: false, text: "بهبود فرآیندها چرخه‌ی منظم دارد (بازخورد ← اصلاح)." }
+
+
+
+
+ # ---------- داده و مدل داده ----------
+ - { id: d301, dim: data, weight: 1.00, critical: false, text: "فیلدها و ساختار داده‌های اصلی (Data Model) تعریف شده است." }
+ - { id: d302, dim: data, weight: 1.00, critical: true,  text: "سطوح دسترسی و محرمانگی داده‌ها مشخص و رعایت می‌شود." }
+ - { id: d303, dim: data, weight: 1.00, critical: false, text: "پاک‌سازی داده‌ی تکراری/متناقض به‌صورت منظم انجام می‌شود." }
+ - { id: d304, dim: data, weight: 1.00, critical: false, text: "گزارش‌های مدیریتی مستقیماً از داده استخراج می‌شوند (نه دستی)." }
+ - { id: d305, dim: data, weight: 1.00, critical: false, text: "داشبورد مدیریتی به‌روز در دسترس تصمیم‌گیرنده است." }
+ - { id: d306, dim: data, weight: 1.00, critical: false, text: "مسیر بازگشت نتیجه‌ی تحلیل به عملیات روزمره برقرار است." }
+
+
+
+
+ # ---------- فناوری و اتوماسیون ----------
+ - { id: d401, dim: tech, weight: 1.00, critical: false, text: "ابزارهای فعلی پاسخ نیاز نود را می‌دهند و از هم پراکنده نیستند." }
+ - { id: d402, dim: tech, weight: 1.00, critical: true,  text: "اتوماسیون‌های موجود پایدارند و خطای مکرر ندارند." }
+ - { id: d403, dim: tech, weight: 1.00, critical: false, text: "یکپارچگی بین سامانه‌ها (API/فایل مشترک) برقرار است." }
+ - { id: d404, dim: tech, weight: 1.00, critical: false, text: "محیط آزمون و پشتیبان‌گیری سامانه‌ها انجام می‌شود." }
+ - { id: d405, dim: tech, weight: 1.00, critical: false, text: "تیم توان نگهداری ابزارها را دارد یا پشتیبانی قراردادی وجود دارد." }
+ - { id: d406, dim: tech, weight: 1.00, critical: false, text: "نقشه‌ی راه فناوری (چه چیزی، چه زمانی، با چه هزینه‌ای) مکتوب است." }
+
+
+
+
+ # ---------- استانداردها و انطباق ----------
+ - { id: d501, dim: standard, weight: 1.00, critical: false, text: "فهرست استانداردها و الزامات مرتبط به‌روز نگهداری می‌شود." }
+ - { id: d502, dim: standard, weight: 1.00, critical: true,  text: "گواهی‌نامه‌ها/مجوزهای لازم معتبر و در دسترس‌اند." }
+ - { id: d503, dim: standard, weight: 1.00, critical: false, text: "کنترل کیفیت تجهیزات/خروجی‌ها طبق دستورالعمل انجام می‌شود." }
+ - { id: d504, dim: standard, weight: 1.00, critical: false, text: "سوابق ممیزی و اقدامات اصلاحی نگهداری می‌شود." }
+ - { id: d505, dim: standard, weight: 1.00, critical: false, text: "کارکنان با الزامات قانونی مرتبط با نقش خود آشنا هستند." }
+ - { id: d506, dim: standard, weight: 1.00, critical: false, text: "ریسک‌های انطباقی (جریمه/توقف فعالیت) ارزیابی شده است." }
+
+
+
+
+ # ---------- سرمایه انسانی و آموزش ----------
+ - { id: d601, dim: people, weight: 1.00, critical: false, text: "ساختار سازمانی و شرح وظایف به‌روز است." }
+ - { id: d602, dim: people, weight: 1.00, critical: false, text: "فرآیند جذب و ورود نیروی جدید (Onboarding) استاندارد دارد." }
+ - { id: d603, dim: people, weight: 1.00, critical: false, text: "برنامه‌ی آموزش مهارتی به‌صورت منظم اجرا می‌شود." }
+ - { id: d604, dim: people, weight: 1.00, critical: true,  text: "شاخص عملکرد فردی اندازه‌گیری و بازخورد داده می‌شود." }
+ - { id: d605, dim: people, weight: 1.00, critical: false, text: "وابستگی به افراد کلیدی مدیریت شده (جایگزین/مستندسازی)." }
+ - { id: d606, dim: people, weight: 1.00, critical: false, text: "رضایت و ماندگاری نیروی کلیدی پایش می‌شود." }
+
+
+
+
+ # ---------- بازاریابی، فروش و برند ----------
+ - { id: d701, dim: market, weight: 1.00, critical: false, text: "پرسونای مشتری و نیاز او مستند شده است." }
+ - { id: d702, dim: market, weight: 1.00, critical: true,  text: "کانال‌های جذب مشتری مشخص و اندازه‌گیری می‌شوند." }
+ - { id: d703, dim: market, weight: 1.00, critical: false, text: "قیمت‌گذاری بر پایه‌ی هزینه و ارزش انجام شده است." }
+ - { id: d704, dim: market, weight: 1.00, critical: false, text: "قیف فروش (از سرنخ تا خرید) تعریف و پایش می‌شود." }
+ - { id: d705, dim: market, weight: 1.00, critical: false, text: "رضایت مشتری و نرخ شکایت/بازگشت اندازه‌گیری می‌شود." }
+ - { id: d706, dim: market, weight: 1.00, critical: false, text: "محتوا و هویت برند (پیام، لحن، تصویر) یکدست است." }
+
+
+
+
+ # ---------- مالی و بهره‌وری ----------
+ - { id: d801, dim: finance, weight: 1.00, critical: true,  text: "صورت درآمد و هزینه‌ی ماهانه تهیه می‌شود." }
+ - { id: d802, dim: finance, weight: 1.00, critical: false, text: "بهای تمام‌شده‌ی محصول/خدمت محاسبه شده و به‌روز است." }
+ - { id: d803, dim: finance, weight: 1.00, critical: false, text: "حاشیه‌ی سود هر محصول/خدمت مشخص است." }
+ - { id: d804, dim: finance, weight: 1.00, critical: false, text: "برنامه‌ی نقدینگی و پیش‌بینی جریان نقدی وجود دارد." }
+ - { id: d805, dim: finance, weight: 1.00, critical: false, text: "هزینه‌های پنهان/هدررفت شناسایی شده و هدف کاهش دارند." }
+ - { id: d806, dim: finance, weight: 1.00, critical: false, text: "سرمایه‌گذاری‌ها و بازگشت آن‌ها (ROI) ارزیابی می‌شود." }
+
+
+
+
+ # ---------- ریسک، کیفیت و پایداری ----------
+ - { id: d901, dim: risk, weight: 1.00, critical: true,  text: "فهرست ریسک‌های اصلی (عملیاتی/مالی/حقوقی) تهیه شده است." }
+ - { id: d902, dim: risk, weight: 1.00, critical: false, text: "برای ریسک‌های بحرانی برنامه‌ی کاهش/اقدام نوشته شده است." }
+ - { id: d903, dim: risk, weight: 1.00, critical: false, text: "بیمه/پشتیبان مناسب (تجهیزات، اطلاعات، افراد) وجود دارد." }
+ - { id: d904, dim: risk, weight: 1.00, critical: false, text: "حوادث و خطاها ثبت و ریشه‌یابی (عارضه‌یابی) می‌شوند." }
+ - { id: d905, dim: risk, weight: 1.00, critical: false, text: "نگهداری پیشگیرانه/دوره‌ای تجهیزات و سامانه‌ها انجام می‌شود." }
+ - { id: d906, dim: risk, weight: 1.00, critical: false, text: "وابستگی به یک مشتری/فرد/تأمین‌کننده مدیریت شده است." }

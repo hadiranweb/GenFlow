@@ -1,0 +1,15 @@
+node_modules
+dist
+out
+.env
+.env.local
+data/app.db
+data/app.db-wal
+data/app.db-shm
+data/reports
+tests
+scripts
+*.log
+.git
+.gitignore
+README.md

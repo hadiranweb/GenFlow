@@ -1,0 +1,94 @@
+# ---------------------------------------------------------------------------
+# سیاست محاسبهٔ «ارزیابی نود» (مرحلهٔ ۱ — لیبل نگرش)
+#
+# تصمیم‌های تأییدشدهٔ مالک محصول (۱۴۰۵/۰۷/۲۰):
+#   • این بخش «لیبل» است، نه فیلتر:
+#       - به کاربر نمایش داده نمی‌شود
+#       - در ادامهٔ فرایند هیچ دخالتی نمی‌کند (نه انتخاب پرسش، نه تفسیر)
+#   • قانون کلیدی (critical_ceiling) دو پله دارد:
+#       نمرهٔ ≤ critical_red_max   → سقف لیبل = قرمز
+#       نمرهٔ ≤ critical_yellow_max → سقف لیبل = زرد (سبز نمی‌شود)
+#   • روش وزن‌دهی: سطح پرسش (dim_weight × q_weight)
+#       دلیل: تعداد پرسش محورها برابر نیست (۱ در برابر ۲) و این روش خودبه‌خود
+#       این نابرابری را جبران می‌کند. برای تغییر به میانگین‌محور:
+#       weighting: dimension_mean
+# ---------------------------------------------------------------------------
+version: score-2.0.0
+mode: weighted_scale
+weighting: question_level
+
+# آستانه‌های منطقه (مطابق پیش‌نویس مالک محصول)
+zones:
+  - key: green
+    min: 70
+    label: "🟢 سبز"
+    description: نگرش سازنده و هم‌راستا با اصول رشد؛ لیبل داخلی.
+    color: "#16a34a"
+  - key: yellow
+    min: 40
+    label: "🟡 زرد"
+    description: نگرش میانه؛ برخی اصول پایه کم‌اهمیت دیده شده‌اند.
+    color: "#d97706"
+  - key: red
+    min: 0
+    label: "🔴 قرمز"
+    description: نگرش پرریسک؛ دست‌کم یک اصل پایه «بی‌اهمیت» ارزیابی شده است.
+    color: "#dc2626"
+
+# قانون سرنوشت‌ساز: سقف منطقه بر پایهٔ پرسش‌های کلیدی
+critical_ceiling:
+  # نمرهٔ ≤ این مقدار روی هر پرسش کلیدی → سقف قرمز
+  critical_red_max: 2
+  # نمرهٔ ≤ این مقدار روی هر پرسش کلیدی → سقف زرد (سبز نمی‌شود)
+  critical_yellow_max: 4
+  # اگر false شود، بی‌پاسخی «سقف» ایجاد نمی‌کند (پیش‌فرض: true)
+  unanswered_is_flagged: true
+
+# گاردهای کیفیت (فقط برای «اطمینان» در پرونده — هیچ‌کدام مسیر را متوقف نمی‌کنند)
+unknown:
+  min_completeness: 0.80
+  require_critical_answered: false
+  max_straight_line_run: 8
+  max_within_dimension_dispersion: 0.45
+  min_median_seconds_per_answer: 2.5
+
+# سنجه‌های رفتاری (از دیاگرام فرایند — برای پرونده، بدون اثر بر لیبل)
+behaviors:
+  action_to_complain_target: 2
+  min_self_sufficiency_retries: 1
+
+# موتور بایگانی‌شدهٔ «آستانهٔ الگوی ذهنی» (SJT) — فعال نیست.
+# برای فعال‌سازی: mode: sjt_knockout و فایل gate.mindset.example.yaml
+mindset:
+  knockout_on_red: false
+  red_count_for_knockout: 99
+  min_green_ratio_for_pass: 1.0
+  require_all_axes_answered: true
+  guards:
+    min_median_seconds_per_scenario: 3.0
+    max_same_position_share: 0.80
+    min_answered: 10
+
+weighted_scale:
+  unknown:
+    min_completeness: 0.80
+    require_critical_answered: false
+    max_straight_line_run: 8
+    max_within_dimension_dispersion: 0.45
+    min_median_seconds_per_answer: 2.5
+  zones:
+    - key: green
+      min: 70
+      label: "🟢 سبز"
+      description: نگرش سازنده و هم‌راستا با اصول رشد.
+      color: "#16a34a"
+    - key: yellow
+      min: 40
+      label: "🟡 زرد"
+      description: نگرش میانه.
+      color: "#d97706"
+    - key: red
+      min: 0
+      label: "🔴 قرمز"
+      description: نگرش پرریسک.
+      color: "#dc2626"

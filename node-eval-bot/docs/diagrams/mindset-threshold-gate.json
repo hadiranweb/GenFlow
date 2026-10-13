@@ -1,0 +1,32 @@
+{
+  "_note": "منبع: دیاگرام رسمی «درگاه احراز هویت اکوسیستم — فیلتر آستانه الگوی ذهنی (Mindset Threshold Gate)» که توسط مالک محصول ارائه شد. color: 1=قرمز، 3=زرد، 4=سبز (پالت draw.io).",
+  "nodes": [
+    {"id":"root_title","type":"text","text":"# 🛡️ درگاه احراز هویت اکوسیستم\n## فیلتر آستانه الگوی ذهنی (Mindset Threshold Gate)\n**هدف:** حذف کاربران پرهزینه (High Friction) در مرحله ورود","x":-250,"y":-400,"width":500,"height":130,"color":"6"},
+    {"id":"scientific_name","type":"text","text":"### 🧠 عنوان علمی و عملیاتی قانون\n* **معیار حذفی صریح:** Knock-out Criteria\n* **مفهوم روان‌شناختی:** منبع کنترل درونی (Internal Locus of Control)\n* **مفهوم رفتاری:** عاملیت / فاعلیت (Agency)","x":-300,"y":-220,"width":600,"height":130,"color":"5"},
+    {"id":"sub_1","type":"text","text":"### ۱. منبع کنترل\n*(Locus of Control)*\n\n**تمرکز:** مسئولیت‌پذیری در برابر مشکلات و عدم انتساب ناکامی به عوامل بیرونی.","x":-650,"y":0,"width":360,"height":140,"color":"3"},
+    {"id":"sub_2","type":"text","text":"### ۲. فاعلیت و خودتنظیمی\n*(Agency & Resilience)*\n\n**تمرکز:** میزان تاب‌آوری در برابر اصطکاک‌های اولیه و تلاش برای حل مشکل پیش از درخواست کمک.","x":-180,"y":0,"width":360,"height":140,"color":"3"},
+    {"id":"sub_3","type":"text","text":"### ۳. تفکر مسئله‌محور\n*(Problem-Solving Orientation)*\n\n**تمرکز:** رویکرد ساختاریافته به ابهام و تلاش برای بهبود به جای غر زدن منفعلانه.","x":290,"y":0,"width":360,"height":140,"color":"3"},
+    {"id":"det_1","type":"text","text":"#### 📊 شاخص‌ها و سنجه‌ها\n* **نحوه بیان (Framing):** نسبت «بیان مسئله + راهکار» به «شکایت محض»\n* **سهم‌دهی به خود:** سنجش میزان مقصر دانستن سیستم در مواجهه با خطای کاربر","x":-650,"y":180,"width":360,"height":160},
+    {"id":"det_2","type":"text","text":"#### 📊 شاخص‌ها و سنجه‌ها\n* **نرخ تلاش مجدد (Self-Sufficiency):** تعداد دفعات تلاش مستقل برای خواندن راهنما قبل از پیام به پشتیبانی\n* **واکنش به اصطکاک:** رفتار فرد هنگام مواجهه با باگ یا کندی در ثبت‌نام","x":-180,"y":180,"width":360,"height":160},
+    {"id":"det_3","type":"text","text":"#### 📊 شاخص‌ها و سنجه‌ها\n* **Action-to-Complain Ratio:**\n  $$\\frac{Action}{Complain} \\ge 2$$\n* **نمره آزمون SJT:** سنجش پاسخ به سناریوهای مبهم ورود","x":290,"y":180,"width":360,"height":160},
+    {"id":"sjt_engine","type":"text","text":"### ⚙️ موتور ارزیابی ورودی: آزمون قضاوت موقعیتی (SJT)\nقراردادن متقاضی در سناریوی اصطکاک فرضی در فرم احراز هویت","x":-300,"y":400,"width":600,"height":100,"color":"2"},
+    {"id":"out_red","type":"text","text":"### 🔴 پاسخ قرمز (Knock-out)\n* **رفتار:** مقصر دانستن سیستم، طلبکاری، غر زدن.\n* **نتیجه:** **رد صریح (ممانعت از ورود)**\n* **دلیل:** کاربر پرهزینه (High Friction)","x":-650,"y":550,"width":360,"height":180,"color":"1"},
+    {"id":"out_yellow","type":"text","text":"### 🟡 پاسخ زرد (Hold)\n* **رفتار:** انفعال، انتظار برای حل مشکل توسط دیگران بدون شکایت شدید.\n* **نتیجه:** **ورود مشروط / نیازمند آموزش**","x":-180,"y":550,"width":360,"height":180,"color":"3"},
+    {"id":"out_green","type":"text","text":"### 🟢 پاسخ سبز (Pass)\n* **رفتار:** ارائه پیشنهاد، جستجوی راه جایگزین، فاعلیت بالا.\n* **نتیجه:** **پذیرش فوری (تایید هویت)**\n* **دلیل:** کاربر کم‌هزینه و سازنده","x":290,"y":550,"width":360,"height":180,"color":"4"}
+  ],
+  "edges": [
+    {"id":"e1","fromNode":"root_title","fromSide":"bottom","toNode":"scientific_name","toSide":"top"},
+    {"id":"e2","fromNode":"scientific_name","fromSide":"bottom","toNode":"sub_2","toSide":"top"},
+    {"id":"e3","fromNode":"scientific_name","fromSide":"bottom","toNode":"sub_1","toSide":"top"},
+    {"id":"e4","fromNode":"scientific_name","fromSide":"bottom","toNode":"sub_3","toSide":"top"},
+    {"id":"e5","fromNode":"sub_1","fromSide":"bottom","toNode":"det_1","toSide":"top"},
+    {"id":"e6","fromNode":"sub_2","fromSide":"bottom","toNode":"det_2","toSide":"top"},
+    {"id":"e7","fromNode":"sub_3","fromSide":"bottom","toNode":"det_3","toSide":"top"},
+    {"id":"e8","fromNode":"det_1","fromSide":"bottom","toNode":"sjt_engine","toSide":"top"},
+    {"id":"e9","fromNode":"det_2","fromSide":"bottom","toNode":"sjt_engine","toSide":"top"},
+    {"id":"e10","fromNode":"det_3","fromSide":"bottom","toNode":"sjt_engine","toSide":"top"},
+    {"id":"e11","fromNode":"sjt_engine","fromSide":"bottom","toNode":"out_red","toSide":"top","color":"1","label":"رد (Knock-out)"},
+    {"id":"e12","fromNode":"sjt_engine","fromSide":"bottom","toNode":"out_yellow","toSide":"top","color":"3","label":"بررسی"},
+    {"id":"e13","fromNode":"sjt_engine","fromSide":"bottom","toNode":"out_green","toSide":"top","color":"4","label":"تایید (Pass)"}
+  ]
+}

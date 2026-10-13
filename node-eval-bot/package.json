@@ -1,0 +1,31 @@
+{
+  "name": "node-eval-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ربات تلگرام «نود ارزیابی» — گیت ورود سه‌ناحیه‌ای (سبز/زرد/قرمز) + ماتریس عارضه‌یابی + گزارش HTML",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node --no-warnings=ExperimentalWarning dist/index.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "smoke": "tsx scripts/smoke-report.ts",
+    "lint:questions": "tsx scripts/validate-questions.ts",
+    "seed": "tsx scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "grammy": "^1.30.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
+  }
+}

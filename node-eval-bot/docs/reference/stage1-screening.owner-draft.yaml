@@ -1,0 +1,58 @@
+﻿# ============================================================
+# مرحله ۱ — غربالگری سریع «وضعیت نود» (۱۵ سوال)
+# مبنای طراحی: سند «استراتژی ارزیابی نود Casioplus» + پلی‌بوک‌های کاسیو
+# دامنه پاسخ: ۰ تا ۱۰  (۰ = اصلاً / ۱۰ = کاملاً)
+# محاسبه: ۱۰۰٪ فرمولی و قطعی — بدون LLM
+# ============================================================
+version: 1
+stage: screening
+title: "غربالگری وضعیت نود"
+scale_hint: "۰ = اصلاً برقرار نیست — ۱۰ = کاملاً برقرار است"
+
+
+
+
+# آستانه‌های منطقه‌بندی (قابل تغییر بدون دست‌زدن به کد)
+zones:
+ green: 70      # امتیاز >= 70  → سبز
+ yellow: 40     # 40 <= امتیاز < 70 → زرد، کمتر از آن → قرمز
+
+
+
+
+# قانون سرنوشت‌ساز: اگر هر سوال critical نمره‌ی <= 2 بگیرد، سقف منطقه قرمز می‌شود
+critical_ceiling: 2
+
+
+
+
+# وزن محورها در امتیاز کل
+dimensions:
+ - { id: ownership,  title: "نقش و مالکیت",            weight: 1.20 }
+ - { id: process,    title: "فرآیند و مستندسازی",      weight: 1.00 }
+ - { id: data,       title: "داده و سنجه",             weight: 1.10 }
+ - { id: standard,   title: "استاندارد و کیفیت",       weight: 1.10 }
+ - { id: automation, title: "اتوماسیون و ابزار",       weight: 0.90 }
+ - { id: people,     title: "مهارت و تیم",             weight: 1.05 }
+ - { id: market,     title: "بازار و مشتری",           weight: 1.05 }
+ - { id: finance,    title: "پایداری مالی",            weight: 1.15 }
+
+
+
+
+questions:
+ - { id: s01, dim: ownership,  weight: 1.00, critical: true,  text: "مالک و مسئول مشخصی برای این نود تعیین شده و اختیارات او مکتوب است." }
+ - { id: s02, dim: process,    weight: 1.00, critical: false, text: "فرآیندهای اصلی نود به‌صورت مکتوب (پلی‌بوک/چک‌لیست) مستند شده‌اند." }
+ - { id: s03, dim: process,    weight: 1.00, critical: false, text: "هر فرآیند کلیدی، ورودی، خروجی و معیار موفقیت روشنی دارد." }
+ - { id: s04, dim: data,       weight: 1.00, critical: false, text: "داده‌های کلیدی کسب‌وکار در یک محل مشخص و قابل اتکا نگهداری می‌شود." }
+ - { id: s05, dim: data,       weight: 1.00, critical: true,  text: "شاخص‌های کلیدی عملکرد (KPI) تعریف شده و به‌طور منظم پایش می‌شوند." }
+ - { id: s06, dim: standard,   weight: 1.00, critical: true,  text: "استانداردها و الزامات قانونی مرتبط با این فعالیت شناسایی و رعایت می‌شوند." }
+ - { id: s07, dim: standard,   weight: 1.00, critical: false, text: "کنترل کیفیت خروجی‌ها (بازبینی/چک‌لیست) به‌صورت روتین انجام می‌شود." }
+ - { id: s08, dim: automation, weight: 1.00, critical: false, text: "ابزار دیجیتال مناسب (CRM/ERP/سامانه‌ی تخصصی) در نود استفاده می‌شود." }
+ - { id: s09, dim: automation, weight: 1.00, critical: true,  text: "کارهای تکراری تا حد ممکن خودکار یا استاندارد شده‌اند." }
+ - { id: s10, dim: people,     weight: 1.00, critical: false, text: "مهارت‌های لازم برای اجرای این نود در تیم موجود است." }
+ - { id: s11, dim: people,     weight: 1.00, critical: false, text: "دانش کلیدی نود مستند و قابل انتقال به فرد جدید است." }
+ - { id: s12, dim: market,     weight: 1.00, critical: false, text: "مشتری هدف و ارزش پیشنهادی نود به‌روشنی تعریف شده است." }
+ - { id: s13, dim: market,     weight: 1.00, critical: false, text: "جریان ورود مشتری/فروش قابل پیش‌بینی و تکرارپذیر است." }
+ - { id: s14, dim: finance,    weight: 1.00, critical: true,  text: "درآمد و هزینه‌های نود به‌صورت منظم اندازه‌گیری و تحلیل می‌شود." }
+ - { id: s15, dim: finance,    weight: 1.00, critical: false, text: "نود حداقل به نقطه‌ی سربه‌سر رسیده یا مسیر روشنی برای آن دارد." }
