@@ -41,7 +41,7 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     sessionId = session.id;
     expect(session.status).toBe('consent_pending');
     expect(session.session_no).toBe(1);
-    expect(flow.combinedTotal).toBe(69);
+    expect(flow.combinedTotal).toBe(34);
   });
 
   it('پس از تأیید، پرسش اول نمایش داده می‌شود و پیشرفت پیوسته است', () => {
@@ -49,8 +49,8 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     const view = flow.grantConsent(session);
     expect(view.flow).toBe('screening');
     expect(view.displayIndex).toBe(1);
-    expect(view.total).toBe(69);
-    expect(view.text).toContain('پرسش ۱ از ۶۹');
+    expect(view.total).toBe(34);
+    expect(view.text).toContain('پرسش ۱ از ۳۴');
   });
 
   it('کلیک کهنه نادیده گرفته می‌شود و مقدار نامعتبر رد می‌شود', () => {
@@ -79,7 +79,7 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
       expect('blocked' in outcome).toBe(false);
       expect(outcome.nextView.flow).toBe('diagnostics');
       expect(outcome.nextView.displayIndex).toBe(16);
-      expect(outcome.nextView.text).toContain('پرسش ۱۶ از ۶۹');
+      expect(outcome.nextView.text).toContain('پرسش ۱۶ از ۳۴');
     }
     expect(repo.getSession(sessionId)!.status).toBe('diagnostics_in_progress');
   });
@@ -142,7 +142,7 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     const state = repo.getSessionState(sessionId)!;
     expect(state.row.status).toBe('diagnostics_done');
     expect(state.matrixResult!.band).toBe('critical');
-    expect(state.matrixResult!.symptoms.length).toBeGreaterThan(40);
+    expect(state.matrixResult!.symptoms.length).toBeGreaterThan(15);
   });
 
   it('ماتریس و فرم عارضه‌یابی با سریال آرشیو می‌شوند و گزارش ساخته می‌شود', () => {

@@ -19,12 +19,39 @@ function fmt(x: number, digits = 0): string {
   return toPersianDigits(digits > 0 ? x.toFixed(digits) : String(Math.round(x)));
 }
 
+/** آستانهٔ «قوی/ضعیف» برای الگوهای بین‌لایه‌ای سند (مقیاس ۰..۱۰۰) */
+const PATTERN_STRONG_MIN = 60;
+const PATTERN_WEAK_MAX = 60;
+
+/** تشخیص الگوهای بین‌لایه‌ای ماتریس تفسیر روی نمره‌های محاسبه‌شده */
+export function detectCrossLayerPatterns(
+  input: InterpretInput,
+): Array<{ id: string; meaning: string; actionFocus: string }> {
+  const im = input.interpretationMatrix;
+  if (!im) return [];
+  const score = new Map(input.matrix.domains.map((d) => [d.code, d.score0to100]));
+  const strong = (c?: string) => c !== undefined && (score.get(c) ?? -1) >= PATTERN_STRONG_MIN;
+  const weak = (c?: string) => c !== undefined && (score.get(c) ?? 101) < PATTERN_WEAK_MAX;
+  const hits: Array<{ id: string; meaning: string; actionFocus: string }> = [];
+  for (const p of im.crossLayerPatterns) {
+    const w = p.when;
+    let ok = true;
+    if (w.strong && !strong(w.strong)) ok = false;
+    if (w.weak && !weak(w.weak)) ok = false;
+    if (w.also_weak && !weak(w.also_weak)) ok = false;
+    if (w.weak_any && !w.weak_any.some((c) => weak(c))) ok = false;
+    if (ok) hits.push({ id: p.id, meaning: p.meaning, actionFocus: p.action_focus });
+  }
+  return hits;
+}
+
 export function deterministicInterpretation(
   input: InterpretInput,
   meta: { provider: string; model: string; status: 'ok' | 'fallback' | 'failed'; error?: string },
   vocab: ActionsVocab,
 ): Interpretation {
   const { matrix, now, explanations } = input;
+  const im = input.interpretationMatrix;
   const weak = matrix.priorities.slice(0, 3);
   const strongest = matrix.domains[matrix.domains.length - 1];
   const symptomCritical = matrix.symptoms.filter((s) => s.critical);
@@ -157,9 +184,24 @@ export function deterministicInterpretation(
   }
 
   // ---------------------------------------------- اقدام‌ها
+  // اولویت با اقدام‌های ماتریس تفسیر (درخت کلیدواژهٔ سند) است؛ کتابخانهٔ
+  // اقدام همان عناوین را نگه می‌دارد و «چرا/مسئول/افق» را کامل می‌کند.
   const nextActions: Interpretation['nextActions'] = [];
   for (const p of weak) {
     const v = vocab.domains[p.code];
+    const layer = im?.layers[p.code];
+    if (layer) {
+      for (const node of layer.keyword_tree) {
+        const match = v?.actions.find((a) => a.keyword_ref === node.id) ?? v?.actions.find((a) => a.title === node.title);
+        nextActions.push({
+          title: node.title,
+          why: match?.why ?? layer.as_is,
+          ownerRole: v?.owner_role ?? 'مالک کسب‌وکار',
+          horizon: match?.horizon ?? 'کوتاه‌مدت',
+        });
+      }
+      continue;
+    }
     if (!v) continue;
     for (const a of v.actions.slice(0, 2)) {
       nextActions.push({ title: a.title, why: a.why, ownerRole: v.owner_role, horizon: a.horizon });

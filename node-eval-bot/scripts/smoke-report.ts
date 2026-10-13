@@ -45,7 +45,7 @@ async function main(): Promise<void> {
   const cases = [
     { name: 'healthy-node', screening: [9, 9, 8], diagnostics: [8, 8, 7, 8, 7, 8, 8], deep: true, ai: true, withText: true },
     { name: 'borderline-node', screening: [7, 6, 7], diagnostics: [6, 5, 6, 5, 6, 6, 5], deep: false, ai: false, withText: false },
-    { name: 'critical-finance', screening: [5, 5, 6], diagnostics: [7, 6, 7, 7, 6, 7, 3], deep: true, ai: false, withText: true },
+    { name: 'critical-governance', screening: [5, 5, 6], diagnostics: [7, 6, 7, 7, 6, 7, 3], deep: true, ai: false, withText: true },
   ];
 
   for (const c of cases) {
@@ -57,11 +57,11 @@ async function main(): Promise<void> {
         ...diagnosticsAnswers[first.code]!,
         explanation: 'این مورد را قبلاً شروع کرده‌ایم اما هنوز مکتوب نشده است؛ تصمیم اصلی روی دوش خودم است.',
       };
-      const fin = content.matrix.sections.find((s) => s.code === 'finance')!.questions[0]!;
-      diagnosticsAnswers[fin.code] = {
-        ...diagnosticsAnswers[fin.code]!,
+      const gov = content.matrix.sections.find((s) => s.code === 'governance')!.questions[0]!;
+      diagnosticsAnswers[gov.code] = {
+        ...diagnosticsAnswers[gov.code]!,
         value: 3,
-        explanation: 'صورت مالی ماهانه نداریم؛ اعداد را ذهنی می‌دانم اما می‌خواهم از این ماه شروع کنم.',
+        explanation: 'اگر نباشم کارها می‌خوابد؛ سیستم هنوز به خودم وابسته است و می‌خواهم این را درست کنم.',
       };
     }
 
@@ -78,6 +78,7 @@ async function main(): Promise<void> {
     const base = {
       matrix,
       bundle,
+      interpretationMatrix: content.interpretationMatrix,
       matrixVersion: content.matrix.version,
       targetIndex: content.matrixScoring.targetIndex,
       symptomThreshold: content.matrixScoring.symptomThreshold,
@@ -110,6 +111,7 @@ async function main(): Promise<void> {
       matrix,
       matrixQuestionnaire: content.matrix,
       matrixScoring: content.matrixScoring,
+      interpretationMatrix: content.interpretationMatrix,
       matrixAnswers: diagnosticsAnswers,
       explanations,
       interpretation: chosen,

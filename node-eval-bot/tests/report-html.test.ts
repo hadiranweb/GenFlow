@@ -31,6 +31,7 @@ function makeInput(interpretation: Interpretation, answers?: AnswersMap) {
     matrix,
     matrixQuestionnaire: content.matrix,
     matrixScoring: content.matrixScoring,
+    interpretationMatrix: content.interpretationMatrix,
     matrixAnswers,
     explanations: collectExplanations(matrix, matrixAnswers, content.matrix, 40),
     interpretation,
@@ -51,7 +52,7 @@ const malicious: Interpretation = {
   risks: [
     { title: '<svg onload=alert(2)>', severity: 'high', evidence: '<script>', implication: '</script>', mitigation: 'a & b' },
   ],
-  bottlenecks: [{ domainCode: 'finance', domainTitle: '<img>', score0to100: 30, why: '<script>' }],
+  bottlenecks: [{ domainCode: 'governance', domainTitle: '<img>', score0to100: 30, why: '<script>' }],
   inconsistencies: ['<script>inconsistency</script>'],
   openQuestions: ['<script>open</script>'],
   nextActions: [{ title: '<a href=javascript:alert(1)>click</a>', why: '<x>', ownerRole: '<y>', horizon: 'کوتاه‌مدت' }],
@@ -114,6 +115,16 @@ describe('ساختار سند', () => {
     ]) {
       expect(html).toContain(section);
     }
+  });
+
+  it('جدول گزارش ماتریسی شکاف سند پنج‌لایه (As-Is/To-Be/راهکار) در سند هست', () => {
+    expect(html).toContain('گزارش ماتریسی شکاف');
+    expect(html).toContain('وضعیت موجود (As-Is)');
+    expect(html).toContain('وضعیت مطلوب (To-Be)');
+    // متن مرجع ماتریس تفسیر برای لایه‌ها
+    expect(html).toContain('تله متخصص');
+    expect(html).toContain('گلوگاه بحرانی فعلی');
+    expect(html).toContain('از ۲۰');
   });
 
   it('لیبل ارزیابی اولیه در سند کاربر نیست', () => {

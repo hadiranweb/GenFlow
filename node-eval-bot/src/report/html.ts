@@ -13,6 +13,7 @@ import type {
   MatrixScoringConfig,
   QuestionnaireDef,
 } from '../domain/types.js';
+import type { InterpretationMatrix } from '../domain/content.js';
 import { bandLabel } from '../domain/matrix.js';
 import { escapeHtml } from '../util/html.js';
 import { formatJalaliDateTime, toPersianDigits } from '../util/time.js';
@@ -26,6 +27,8 @@ export interface ReportInput {
   matrix: MatrixResult;
   matrixQuestionnaire: QuestionnaireDef;
   matrixScoring: MatrixScoringConfig;
+  /** ماتریس تفسیر پنج‌لایه برای جدول «گزارش ماتریسی شکاف» (اختیاری برای سازگاری) */
+  interpretationMatrix?: InterpretationMatrix;
   matrixAnswers: AnswersMap;
   explanations: ExplanationPayloadItem[];
   interpretation: Interpretation;
@@ -77,9 +80,33 @@ export function renderReportHtml(input: ReportInput): string {
     .map((d) => {
       const priorityRow = matrix.priorities.find((p) => p.code === d.code);
       const extra = priorityRow ? `شکاف ${fa(priorityRow.gap)} · اولویت ${fa(priorityRow.priority)}` : undefined;
-      return bar(d.title, d.score0to100, d.band, extra);
+      return bar(`${d.title} (${fa(d.score0to20, 1)} از ۲۰)`, d.score0to100, d.band, extra);
     })
     .join('');
+
+  // جدول «گزارش ماتریسی شکاف» سند پنج‌لایه: لایه | وضع موجود | وضع مطلوب | راهکار
+  const gapTable = input.interpretationMatrix
+    ? `<h3 style="margin-top:18px">گزارش ماتریسی شکاف (وضع موجود ← وضع مطلوب)</h3>
+    <table class="tbl">
+      <thead><tr><th>لایهٔ سیستم‌سازی</th><th>امتیاز</th><th>وضعیت موجود (As-Is)</th><th>وضعیت مطلوب (To-Be)</th><th>راهکارهای پیشنهادی و گام‌های اقدام</th></tr></thead>
+      <tbody>${matrix.domains
+        .slice()
+        .sort((a, b) => a.score0to100 - b.score0to100)
+        .map((d) => {
+          const layer = input.interpretationMatrix!.layers[d.code];
+          if (!layer) return '';
+          return `<tr>
+        <td><strong>${escapeHtml(layer.title)}</strong><br>${bandChip(d.band)}</td>
+        <td class="num">${fa(d.score0to20, 1)} از ۲۰</td>
+        <td class="small">${escapeHtml(d.band === 'healthy' ? layer.to_be : layer.as_is)}</td>
+        <td class="small">${escapeHtml(layer.to_be)}</td>
+        <td class="small">${escapeHtml(layer.recommended_actions)}</td>
+      </tr>`;
+        })
+        .join('')}</tbody>
+    </table>
+    <p class="small muted">گلوگاه بحرانی فعلی: <strong>${escapeHtml(matrix.bottleneck.title)}</strong> (کم‌امتیازترین لایه). برای لایهٔ مطلوب، ستون «وضع موجود» همان وضع مطلوب ثبت شده است.</p>`
+    : '';
 
   const priorityRows = matrix.priorities
     .slice(0, 6)
@@ -307,8 +334,9 @@ export function renderReportHtml(input: ReportInput): string {
 
   <!-- ===================== تصویر وضع موجود ===================== -->
   <section class="card">
-    <h2>تصویر وضع موجود (۹ محور)</h2>
+    <h2>تصویر وضع موجود (${fa(matrix.domains.length)} لایهٔ سیستم‌سازی — هر لایه از ۲۰)</h2>
     ${domainBars}
+    ${gapTable}
     <p class="small muted">
       دسته‌بندی: ≥ ${fa(matrixScoring.severityBands.healthy)} مطلوب · ${fa(matrixScoring.severityBands.borderline)}..${fa(matrixScoring.severityBands.healthy)} مرزی ·
       ${fa(matrixScoring.severityBands.needs_fix)}..${fa(matrixScoring.severityBands.borderline)} نیازمند اصلاح · کمتر از ${fa(matrixScoring.severityBands.needs_fix)} بحرانی.

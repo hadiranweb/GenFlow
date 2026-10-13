@@ -20,13 +20,45 @@ function build(answers: AnswersMap) {
 }
 
 describe('پیکربندی عارضه‌یابی', () => {
-  it('۵۴ پرسش در ۹ محور با ۶ پرسش و ۱ پرسش کلیدی در هر محور', () => {
-    expect(questions).toHaveLength(54);
-    expect(content.matrix.sections).toHaveLength(9);
+  it('۱۹ پرسش در ۵ لایه (۴+۴+۴+۴+۳) با ۱ پرسش کلیدی در هر لایه (سند پنج‌لایه)', () => {
+    expect(questions).toHaveLength(19);
+    expect(content.matrix.sections).toHaveLength(5);
+    expect(content.matrix.sections.map((s) => s.code)).toEqual([
+      'governance',
+      'architecture',
+      'implementation',
+      'maintenance',
+      'scaling',
+    ]);
+    expect(content.matrix.sections.map((s) => s.questions.length)).toEqual([4, 4, 4, 4, 3]);
     for (const s of content.matrix.sections) {
-      expect(s.questions).toHaveLength(6);
       expect(s.questions.filter((q) => q.critical)).toHaveLength(1);
+      // وزن برابر لایه‌ها: نمرهٔ کل = مجموع نمرهٔ لایه‌ها (۰..۲۰)
+      expect(s.weight).toBe(1);
     }
+  });
+
+  it('ردیابی منبع: هر پرسش source_ref و keyword_refs معتبر دارد', () => {
+    const refs = questions.map((q) => q.sourceRef);
+    expect(new Set(refs).size).toBe(19);
+    expect(refs).toContain('L1-Q1');
+    expect(refs).toContain('L5-Q3');
+    for (const q of questions) {
+      expect(q.sourcePrompt).toBeTruthy();
+      expect((q.keywordRefs ?? []).length).toBeGreaterThan(0);
+    }
+    const criticalRefs = questions.filter((q) => q.critical).map((q) => q.sourceRef);
+    expect(criticalRefs).toEqual(['L1-Q1', 'L2-Q2', 'L3-Q1', 'L4-Q1', 'L5-Q1']);
+  });
+
+  it('ماتریس تفسیر برای هر ۵ لایه وضع موجود/مطلوب و درخت کلیدواژه دارد', () => {
+    expect(Object.keys(content.interpretationMatrix.layers)).toHaveLength(5);
+    for (const layer of Object.values(content.interpretationMatrix.layers)) {
+      expect(layer.as_is).toBeTruthy();
+      expect(layer.to_be).toBeTruthy();
+      expect(layer.keyword_tree).toHaveLength(3);
+    }
+    expect(content.interpretationMatrix.crossLayerPatterns.map((p) => p.id)).toContain('written_not_executed');
   });
 
   it('همهٔ پرسش‌ها دو ساید هستند (رنج + توضیح اختیاری)', () => {
@@ -53,20 +85,22 @@ describe('پیکربندی عارضه‌یابی', () => {
 });
 
 describe('محاسبهٔ ماتریس', () => {
-  it('همهٔ پاسخ‌ها ۱۰ → ۱۰۰، مطلوب، بدون عارضه', () => {
+  it('همهٔ پاسخ‌ها ۱۰ → ۱۰۰، مطلوب، بدون عارضه؛ هر لایه ۲۰ از ۲۰', () => {
     const m = build(fillAnswers(questions, 10));
     expect(m.overall0to100).toBe(100);
     expect(m.band).toBe('healthy');
     expect(m.gapToTarget).toBe(0);
     expect(m.symptoms).toHaveLength(0);
-    expect(m.severityCounts.healthy).toBe(54);
+    expect(m.severityCounts.healthy).toBe(19);
+    for (const d of m.domains) expect(d.score0to20).toBe(20);
+    expect(m.domains.reduce((a, d) => a + d.score0to20, 0)).toBeCloseTo(m.overall0to100, 5);
   });
 
-  it('همهٔ پاسخ‌ها ۰ → صفر، بحرانی، ۵۴ عارضه', () => {
+  it('همهٔ پاسخ‌ها ۰ → صفر، بحرانی، ۱۹ عارضه', () => {
     const m = build(fillAnswers(questions, 0));
     expect(m.overall0to100).toBe(0);
     expect(m.band).toBe('critical');
-    expect(m.symptoms).toHaveLength(54);
+    expect(m.symptoms).toHaveLength(19);
     expect(m.gapToTarget).toBe(75);
   });
 
@@ -81,41 +115,43 @@ describe('محاسبهٔ ماتریس', () => {
 
   it('گلوگاه = کم‌نمره‌ترین محور و اولویت‌بندی = شکاف × وزن', () => {
     const answers = fillAnswers(questions, 9);
-    const finance = content.matrix.sections.find((s) => s.code === 'finance')!;
-    for (const q of finance.questions) {
+    const governance = content.matrix.sections.find((s) => s.code === 'governance')!;
+    for (const q of governance.questions) {
       answers[q.code] = { questionCode: q.code, value: 2, answeredAt: '', elapsedMs: 9000 };
     }
     const m = build(answers);
-    expect(m.bottleneck.code).toBe('finance');
-    expect(m.domains[0]!.code).toBe('finance');
-    expect(m.priorities[0]!.code).toBe('finance');
-    expect(m.priorities[0]!.priority).toBeCloseTo((75 - 20) * 1.2, 5);
+    expect(m.bottleneck.code).toBe('governance');
+    expect(m.domains[0]!.code).toBe('governance');
+    expect(m.priorities[0]!.code).toBe('governance');
+    expect(m.priorities[0]!.priority).toBeCloseTo((75 - 20) * 1.0, 5);
     expect(m.priorities[0]!.gap).toBeCloseTo(55, 5);
+    expect(m.domains[0]!.score0to20).toBeCloseTo(4, 5);
   });
 
   it('پرسش کلیدی زیر آستانه، محور را علامت‌دار می‌کند', () => {
     const answers = fillAnswers(questions, 9);
-    const risk = content.matrix.sections.find((s) => s.code === 'risk')!;
-    const critical = risk.questions.find((q) => q.critical)!;
+    const scaling = content.matrix.sections.find((s) => s.code === 'scaling')!;
+    const critical = scaling.questions.find((q) => q.critical)!;
     answers[critical.code] = { questionCode: critical.code, value: 2, answeredAt: '', elapsedMs: 9000 };
     const m = build(answers);
-    const domain = m.domains.find((d) => d.code === 'risk')!;
+    const domain = m.domains.find((d) => d.code === 'scaling')!;
     expect(domain.criticalBelowThreshold).toBe(true);
-    const priority = m.priorities.find((p) => p.code === 'risk')!;
+    const priority = m.priorities.find((p) => p.code === 'scaling')!;
     expect(priority.criticalWeakCount).toBe(1);
     expect(m.symptoms.find((s) => s.questionCode === critical.code)?.critical).toBe(true);
   });
 
-  it('وزن محورها در نمرهٔ کل اثر می‌گذارد (مالی ۱.۲۰ در برابر فناوری ۱.۰۵)', () => {
-    const lowFinance = fillAnswers(questions, 10);
-    for (const q of content.matrix.sections.find((s) => s.code === 'finance')!.questions) {
-      lowFinance[q.code] = { questionCode: q.code, value: 0, answeredAt: '', elapsedMs: 9000 };
+  it('وزن برابر لایه‌ها: افت هر لایه اثر برابر بر نمرهٔ کل دارد', () => {
+    const lowGovernance = fillAnswers(questions, 10);
+    for (const q of content.matrix.sections.find((s) => s.code === 'governance')!.questions) {
+      lowGovernance[q.code] = { questionCode: q.code, value: 0, answeredAt: '', elapsedMs: 9000 };
     }
-    const lowTech = fillAnswers(questions, 10);
-    for (const q of content.matrix.sections.find((s) => s.code === 'tech')!.questions) {
-      lowTech[q.code] = { questionCode: q.code, value: 0, answeredAt: '', elapsedMs: 9000 };
+    const lowMaintenance = fillAnswers(questions, 10);
+    for (const q of content.matrix.sections.find((s) => s.code === 'maintenance')!.questions) {
+      lowMaintenance[q.code] = { questionCode: q.code, value: 0, answeredAt: '', elapsedMs: 9000 };
     }
-    expect(build(lowFinance).overall0to100).toBeLessThan(build(lowTech).overall0to100);
+    expect(build(lowGovernance).overall0to100).toBeCloseTo(build(lowMaintenance).overall0to100, 5);
+    expect(build(lowGovernance).overall0to100).toBeCloseTo(80, 5);
   });
 
   it('توضیح متنی در محاسبه وارد نمی‌شود ولی شمارش و نگهداری آن انجام می‌شود', () => {
@@ -140,12 +176,12 @@ describe('محاسبهٔ ماتریس', () => {
 
   it('پراکندگی محور محاسبه می‌شود (ناهمگونی درک)', () => {
     const answers = fillAnswers(questions, 5);
-    const gov = content.matrix.sections.find((s) => s.code === 'risk')!;
+    const gov = content.matrix.sections.find((s) => s.code === 'scaling')!;
     gov.questions.forEach((q, i) => {
       answers[q.code] = { questionCode: q.code, value: i % 2 === 0 ? 0 : 10, answeredAt: '', elapsedMs: 9000 };
     });
     const m = build(answers);
-    expect(m.domains.find((d) => d.code === 'risk')!.dispersion).toBeGreaterThan(0.4);
+    expect(m.domains.find((d) => d.code === 'scaling')!.dispersion).toBeGreaterThan(0.4);
   });
 
   it('بستهٔ ارسالی به مدل، خلاصه و محدود است و اولویت‌ها را می‌آورد', () => {
@@ -162,10 +198,10 @@ describe('محاسبهٔ ماتریس', () => {
 
   it('توضیحات برای مفسر، به ترتیب اولویت محورها مرتب می‌شوند', () => {
     const answers = fillAnswers(questions, 3);
-    const finance = content.matrix.sections.find((s) => s.code === 'finance')!.questions[0]!;
-    const strategy = content.matrix.sections.find((s) => s.code === 'strategy')!.questions[0]!;
-    answers[finance.code] = { ...answers[finance.code]!, explanation: 'توضیح مالی' };
-    answers[strategy.code] = { ...answers[strategy.code]!, explanation: 'توضیح استراتژی' };
+    const governance = content.matrix.sections.find((s) => s.code === 'governance')!.questions[0]!;
+    const architecture = content.matrix.sections.find((s) => s.code === 'architecture')!.questions[0]!;
+    answers[governance.code] = { ...answers[governance.code]!, explanation: 'توضیح حاکمیت' };
+    answers[architecture.code] = { ...answers[architecture.code]!, explanation: 'توضیح معماری' };
     const m = build(answers);
     const items = collectExplanations(m, answers, content.matrix, 40);
     expect(items).toHaveLength(2);

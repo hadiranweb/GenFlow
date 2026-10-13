@@ -136,6 +136,7 @@ export async function generateReport(input: {
     matrix: data.matrix,
     matrixQuestionnaire: content.matrix,
     matrixScoring: content.matrixScoring,
+    interpretationMatrix: content.interpretationMatrix,
     matrixAnswers: data.matrixAnswers,
     explanations: allExplanations,
     interpretation: chosen,

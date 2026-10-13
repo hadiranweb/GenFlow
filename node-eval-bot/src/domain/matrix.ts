@@ -126,6 +126,8 @@ export function buildMatrix({ questionnaire, answers, config, generatedAt }: Bui
       title: section.title,
       weight: section.weight,
       score0to100,
+      // قرارداد سند پنج‌لایه: هر لایه ۰ تا ۲۰
+      score0to20: round2((score0to100 / 100) * config.fiveLayer.perLayerMax),
       band: bandOf(score0to100, config.severityBands),
       answered: normalized.length,
       total: scored.length,

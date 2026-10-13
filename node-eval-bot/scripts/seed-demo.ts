@@ -48,12 +48,12 @@ async function main(): Promise<void> {
   const screeningAnswers = fill(content.gate.sections.flatMap((s) => s.questions), (i) => 8 - (i % 4));
   const diagnosticsAnswers = fill(content.matrix.sections.flatMap((s) => s.questions), (i) => (i % 6 === 0 ? 3 : i % 3 === 0 ? 6 : 8));
 
-  // یک توضیح نمونه روی گزارهٔ مالی کلیدی
-  const finQ = content.matrix.sections.find((s) => s.code === 'finance')!.questions[0]!;
+  // یک توضیح نمونه روی گزارهٔ کلیدی حاکمیت
+  const finQ = content.matrix.sections.find((s) => s.code === 'governance')!.questions[0]!;
   diagnosticsAnswers[finQ.code] = {
     ...diagnosticsAnswers[finQ.code]!,
     value: 3,
-    explanation: 'صورت مالی ماهانه نداریم؛ اعداد را ذهنی می‌دانم و می‌خواهم از این ماه شروع کنم.',
+    explanation: 'اگر نباشم کارها می‌خوابد؛ سیستم هنوز به خودم وابسته است و می‌خواهم این را درست کنم.',
   };
 
   repo.updateSessionProgress(session.id, { gateAnswers: screeningAnswers, matrixAnswers: diagnosticsAnswers });

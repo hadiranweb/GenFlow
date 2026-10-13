@@ -1,9 +1,12 @@
 import type { ExplanationPayloadItem, Interpretation, MatrixResult } from '../domain/types.js';
 import type { MatrixBundle } from '../domain/matrix.js';
+import type { InterpretationMatrix } from '../domain/content.js';
 
 export interface InterpretInput {
   matrix: MatrixResult;
   bundle: MatrixBundle;
+  /** «ماتریس تفسیر پنج‌لایه» — زبان مرجع تفسیر (وضع موجود/مطلوب/اقدام هر لایه) */
+  interpretationMatrix?: InterpretationMatrix;
   /** توضیحات متنی کاربر (ساید دوم) — در مسیر رنجی خالی است */
   explanations: ExplanationPayloadItem[];
   matrixVersion: string;

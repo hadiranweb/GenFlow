@@ -50,8 +50,14 @@ function main(): void {
         `ارسال به مفسر عمیق: ${content.matrixScoring.interpretation.explanationsToAi ? 'بله' : 'خیر'}`,
       `   کلیدهای مدیر (پیش‌فرض فایل): تفسیر عمیق=${content.matrixScoring.adminKeys.deepInterpretation} · ` +
         `تفسیر AI=${content.matrixScoring.adminKeys.aiInterpretation}`,
+      `   پنج‌لایه: هر لایه ۰..${toPersianDigits(content.matrixScoring.fiveLayer.perLayerMax)} · مجموع ${toPersianDigits(content.matrixScoring.fiveLayer.totalMax)}`,
       '',
-      `✅ محتوا معتبر است (${Object.keys(content.actions.domains).length} محور کتابخانهٔ اقدام).`,
+      '🧭 ماتریس تفسیر پنج‌لایه (vocab/interpretation-matrix.yaml)',
+      `   نسخه: ${content.interpretationMatrix.version} · لایه‌ها: ${Object.keys(content.interpretationMatrix.layers).length} · ` +
+        `الگوهای بین‌لایه‌ای: ${content.interpretationMatrix.crossLayerPatterns.length}`,
+      `   درخت کلیدواژه: ${Object.values(content.interpretationMatrix.layers).reduce((a, l) => a + l.keyword_tree.length, 0)} اقدام والد`,
+      '',
+      `✅ محتوا معتبر است (${Object.keys(content.actions.domains).length} لایهٔ کتابخانهٔ اقدام).`,
     ].join('\n') + '\n',
   );
 }

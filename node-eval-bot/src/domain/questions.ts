@@ -98,6 +98,15 @@ function normalizeQuestion(raw: Record<string, unknown>, dimension: string, ctx:
   if (raw['high'] !== undefined) q.high = String(raw['high']);
   if (raw['remedy_hint'] !== undefined) q.remedyHint = String(raw['remedy_hint']);
   if (raw['indicator'] !== undefined) q.indicator = String(raw['indicator']);
+  if (raw['source_ref'] !== undefined) q.sourceRef = String(raw['source_ref']);
+  if (raw['source_format'] !== undefined) q.sourceFormat = String(raw['source_format']);
+  if (raw['source_prompt'] !== undefined) q.sourcePrompt = String(raw['source_prompt']);
+  if (raw['keyword_refs'] !== undefined) {
+    if (!Array.isArray(raw['keyword_refs'])) {
+      throw new QuestionnaireError(`${ctx} (${code}): keyword_refs باید فهرست باشد`);
+    }
+    q.keywordRefs = (raw['keyword_refs'] as unknown[]).map((v) => String(v));
+  }
   if (hasOptions) q.options = parseOptions(raw['options'], `${ctx} (${code})`);
   return q;
 }

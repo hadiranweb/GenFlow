@@ -69,6 +69,14 @@ export interface QuestionDef {
   /** range = فقط رنج · range+text = رنج + کادر توضیح اختیاری */
   response: ResponseMode;
   options?: SjtOption[];
+  /** ردیابی منبع (سند پنج‌لایه): ارجاع یکتای پرسش، مثل L2-Q3 */
+  sourceRef?: string;
+  /** قالب پاسخ در سند اصلی (طیف ۱تا۵، درصدی، گزینه‌ای…) پیش از تبدیل به ۰..۱۰ */
+  sourceFormat?: string;
+  /** متن اصلی پرسش در سند، عیناً */
+  sourcePrompt?: string;
+  /** ارجاع به اقدام‌های درخت کلیدواژه در ماتریس تفسیر، مثل L2-K2 */
+  keywordRefs?: string[];
 }
 
 export interface SectionDef {
@@ -163,6 +171,8 @@ export interface MatrixScoringConfig {
     maxExplanationsInPayload: number;
   };
   adminKeys: { deepInterpretation: boolean; aiInterpretation: boolean };
+  /** قرارداد امتیازدهی سند پنج‌لایه (هر لایه ۰..۲۰، مجموع ۱۰۰) */
+  fiveLayer: { perLayerMax: number; totalMax: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -276,6 +286,8 @@ export interface MatrixDomainResult {
   title: string;
   weight: number;
   score0to100: number;
+  /** امتیاز لایه روی مقیاس سند پنج‌لایه: ۰ تا ۲۰ (score0to100 ÷ ۵) */
+  score0to20: number;
   band: MatrixBand;
   answerRate: number;
   answered: number;
