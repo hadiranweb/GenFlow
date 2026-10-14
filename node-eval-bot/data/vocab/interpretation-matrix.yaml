@@ -18,8 +18,8 @@
 # data/scoring/matrix.yaml یکی است: ≥۷۵ مطلوب · ۶۰..۷۵ مرزی ·
 # ۴۰..۶۰ نیازمند اصلاح · <۴۰ بحرانی (معادل ۰..۲۰: ≥۱۵ · ۱۲..۱۵ · ۸..۱۲ · <۸).
 # ---------------------------------------------------------------------------
-version: five-layer-interpretation-1.0.0
-source_document: "عارضه‌یابی پنج‌لایه — نوت واحد عارضه‌یابی مدل سیستم‌سازی کسب‌وکارهای کوچک (مدل پنج‌لایه)"
+version: five-layer-interpretation-1.1.0
+source_document: "عارضه‌یابی پنج لایه - نسخه ۰ تا ۱۰ (طبق پلی‌بوک) — نوت واحد عارضه‌یابی مدل سیستم‌سازی کسب‌وکارهای کوچک (مدل پنج‌لایه)، version 0.1-draft"
 
 scoring:
   per_layer_max: 20
@@ -27,24 +27,33 @@ scoring:
   layer_score_formula: "mean(normalized answers of layer) * 20"
   total_formula: "sum of layer scores (equal weights)"
   bottleneck_rule: "کم‌امتیازترین لایه = گلوگاه بحرانی فعلی کسب‌وکار"
-  layer_bands:
-    - { band: healthy, label: مطلوب, min_0to100: 75, min_0to20: 15, meaning: "لایه برقرار است؛ تمرکز بر تثبیت و انتقال الگو به لایه‌های ضعیف‌تر." }
-    - { band: borderline, label: مرزی, min_0to100: 60, min_0to20: 12, meaning: "اسکلت لایه وجود دارد اما ناپایدار است؛ با اقدام‌های مشخص قابل تثبیت است." }
-    - { band: needs_fix, label: نیازمند اصلاح, min_0to100: 40, min_0to20: 8, meaning: "لایه نیمه‌کاره است و روی لایه‌های دیگر اثر می‌گذارد؛ اصلاح ساخت‌یافته لازم است." }
-    - { band: critical, label: بحرانی, min_0to100: 0, min_0to20: 0, meaning: "لایه عملاً برقرار نیست و به‌احتمال زیاد گلوگاه فعلی کل سیستم است." }
+  # نوارهای موقت (provisional) خود سند — نسخهٔ ۰ تا ۱۰
+  layer_bands_provisional:
+    - { key: weak, label: "ضعف (گلوگاه بالقوه)", min: 0, max: 9.9, meaning: "لایه عملاً برقرار نیست و به‌احتمال زیاد گلوگاه فعلی کل سیستم است." }
+    - { key: growing, label: "در حال رشد", min: 10, max: 14.9, meaning: "اسکلت لایه وجود دارد اما ناپایدار است؛ با اقدام‌های مشخص قابل تثبیت است." }
+    - { key: strong, label: "قوی", min: 15, max: 20, meaning: "لایه برقرار است؛ تمرکز بر تثبیت و انتقال الگو به لایه‌های ضعیف‌تر." }
+  maturity_bands_provisional:
+    - { key: nascent, label: نوپا, min: 0, max: 39 }
+    - { key: forming, label: "در حال شکل‌گیری", min: 40, max: 59 }
+    - { key: maturing, label: "در حال بلوغ", min: 60, max: 79 }
+    - { key: mature, label: بالغ, min: 80, max: 100 }
+  gap_inclusion_rule: "همهٔ ۵ لایه بدون توجه به نمره در گزارش شکاف می‌آیند؛ نمره فقط برای اولویت‌بندی و گلوگاه است."
+  reverse_items: [L1-Q2, L2-Q3, L3-Q2, L4-Q3, L5-Q3]
 
 # بخش عمومی فرم (در سند: «بخش اطلاعات پایه و نبض کسب‌وکار») — هنوز در جریان
 # ربات نیست (نیازمند ورودی انتخابی/متنی)؛ اینجا ثبت شده تا از منبع جا نماند.
 general_section:
-  title: بخش اطلاعات پایه و نبض کسب‌وکار
+  title: بخش اطلاعات پایه و نبض کسب‌وکار (زمینه‌ای؛ بدون نمره)
+  scored: false
   in_bot_flow: false
   fields:
-    - { label: "حوزه فعالیت و مدل درآمدی", options: [B2C, B2B, خدماتی, تولیدی, بازرگانی] }
-    - { label: "تعداد پرسنل (تمام‌وقت و پاره‌وقت) و سابقه کسب‌وکار" }
-    - { label: "ساعات کار هفتگی شخص مدیر و سهم کارهای اجرایی روزمره از کل زمان او" }
+    - { label: "حوزه فعالیت و مدل درآمدی", type: single_choice, options: [B2C, B2B, خدماتی, تولیدی, بازرگانی] }
+    - { label: "تعداد پرسنل (تمام‌وقت و پاره‌وقت) و سابقه کسب‌وکار", type: number_pair, fields: [headcount, business_age_years] }
+    - { label: "ساعات کار هفتگی شخص مدیر", type: number, field: manager_weekly_hours }
 
 layers:
   governance:
+    construct: میزان جداسازی نقش مالک از اجرا و وجود استراتژی مکتوب و تسهیم‌شده
     title: حاکمیت
     title_en: Governance
     objective: "سنجش میزان شفافیت چشم‌انداز، تفکیک نقش مالک از مجری، و تخصیص منابع."
@@ -69,6 +78,7 @@ layers:
         supporting_source_ids: [ifc_sme_governance, small_business_growth_managers]
 
   architecture:
+    construct: میزان مکتوب بودن فرایندهای حیاتی، پوشش SOP و وضوح مسئولیت‌ها
     title: معماری و طراحی
     title_en: Architecture
     objective: "بررسی شفافیت جریان کارها، دستورالعمل‌ها (SOP) و چک‌لیست‌ها."
@@ -93,6 +103,7 @@ layers:
         supporting_source_ids: [sop_practitioner, ifa_four_pillars]
 
   implementation:
+    construct: میزان استقلال تیم در اجرای فرایندها و پایبندی به دستورالعمل‌ها در غیاب مالک
     title: جاری‌سازی
     title_en: Implementation
     objective: "بررسی توانایی پرسنل در اجرای خودکار فرآیندها بدون نیاز به پیگیری مداوم مدیر."
@@ -117,6 +128,7 @@ layers:
         supporting_source_ids: [ifc_sme_governance, small_business_growth_managers]
 
   maintenance:
+    construct: میزان پایش عددی عملکرد، انضباط جلسات، و یادگیری سازمانی از خطاها
     title: نگهداشت و پایش
     title_en: Maintenance
     objective: "سنجش مستمر خروجی‌ها در برابر اهداف، پایش KPIها و مکانیزم‌های بازخورد."
@@ -141,6 +153,7 @@ layers:
         supporting_source_ids: [rca_review, asq_problem_solving, pdca4_mdpi]
 
   scaling:
+    construct: توان مقیاس‌پذیری عملیات، قابلیت تکثیر مدل بدون مالک، و اقتصاد واحد
     title: توسعه و مقیاس‌پذیری
     title_en: Scaling
     objective: "ارزیابی آمادگی کسب‌وکار برای تکثیر سیستم، فرانچایز، راه‌اندازی شعب یا تنوع درآمدی."

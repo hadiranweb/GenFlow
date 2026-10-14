@@ -57,6 +57,8 @@ export interface QuestionDef {
   code: string;
   text: string;
   low?: string;
+  /** لنگر میانی مقیاس (۵) — از سند پنج‌لایه */
+  mid?: string;
   high?: string;
   polarity: Polarity;
   kind: QuestionKind;
@@ -172,7 +174,14 @@ export interface MatrixScoringConfig {
   };
   adminKeys: { deepInterpretation: boolean; aiInterpretation: boolean };
   /** قرارداد امتیازدهی سند پنج‌لایه (هر لایه ۰..۲۰، مجموع ۱۰۰) */
-  fiveLayer: { perLayerMax: number; totalMax: number };
+  fiveLayer: {
+    perLayerMax: number;
+    totalMax: number;
+    /** نوارهای موقت لایه روی مقیاس ۰..۲۰ (ضعف/در حال رشد/قوی) */
+    layerBands: Array<{ key: string; label: string; min: number; max: number }>;
+    /** نوارهای موقت بلوغ کل روی مقیاس ۰..۱۰۰ (نوپا/در حال شکل‌گیری/در حال بلوغ/بالغ) */
+    maturityBands: Array<{ key: string; label: string; min: number; max: number }>;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -288,6 +297,8 @@ export interface MatrixDomainResult {
   score0to100: number;
   /** امتیاز لایه روی مقیاس سند پنج‌لایه: ۰ تا ۲۰ (score0to100 ÷ ۵) */
   score0to20: number;
+  /** نوار موقت لایه طبق سند: ضعف / در حال رشد / قوی */
+  layerBand: { key: string; label: string };
   band: MatrixBand;
   answerRate: number;
   answered: number;
@@ -302,6 +313,8 @@ export interface MatrixDomainResult {
 export interface MatrixResult {
   overall0to100: number;
   band: MatrixBand;
+  /** رتبهٔ بلوغ کل طبق نوارهای موقت سند پنج‌لایه (نوپا/در حال شکل‌گیری/در حال بلوغ/بالغ) */
+  maturity: { key: string; label: string };
   gapToTarget: number;
   targetIndex: number;
   bottleneck: { code: string; title: string; score0to100: number };

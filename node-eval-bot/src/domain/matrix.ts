@@ -44,6 +44,15 @@ export function bandOf(score0to100: number, bands: MatrixScoringConfig['severity
   return 'critical';
 }
 
+/** یافتن نوار تفسیری (بازهای سند شامل هر دو سر) برای یک امتیاز */
+export function bandForValue(
+  value: number,
+  bands: Array<{ key: string; label: string; min: number; max: number }>,
+): { key: string; label: string } {
+  const hit = bands.find((b) => value >= b.min && value <= b.max) ?? bands[bands.length - 1]!;
+  return { key: hit.key, label: hit.label };
+}
+
 export function bandLabel(band: MatrixBand): string {
   switch (band) {
     case 'healthy':
@@ -121,13 +130,15 @@ export function buildMatrix({ questionnaire, answers, config, generatedAt }: Bui
     }
 
     const score0to100 = normalized.length === 0 ? 0 : round2(mean(normalized) * 100);
+    // قرارداد سند پنج‌لایه: هر لایه ۰ تا ۲۰ — معادل «مجموع نمره‌های تعدیل‌شده ÷ ۲»
+    const score0to20 = round2((score0to100 / 100) * config.fiveLayer.perLayerMax);
     return {
       code: section.code,
       title: section.title,
       weight: section.weight,
       score0to100,
-      // قرارداد سند پنج‌لایه: هر لایه ۰ تا ۲۰
-      score0to20: round2((score0to100 / 100) * config.fiveLayer.perLayerMax),
+      score0to20,
+      layerBand: bandForValue(score0to20, config.fiveLayer.layerBands),
       band: bandOf(score0to100, config.severityBands),
       answered: normalized.length,
       total: scored.length,
@@ -169,6 +180,8 @@ export function buildMatrix({ questionnaire, answers, config, generatedAt }: Bui
     })
     .sort((a, b) => b.priority - a.priority);
 
+  // مرتب‌سازی پایدار است؛ در تساوی نمره، ترتیب لایه‌ها (بالادستی‌تر اول) حفظ
+  // می‌شود — عین قاعدهٔ سند برای «گلوگاه بحرانی».
   const sortedByScore = [...answeredDomains].sort((a, b) => a.score0to100 - b.score0to100);
   const bottleneck = sortedByScore[0] ?? { code: 'n/a', title: 'داده کافی نیست', score0to100: 0 };
   const strongest = sortedByScore[sortedByScore.length - 1] ?? bottleneck;
@@ -176,6 +189,7 @@ export function buildMatrix({ questionnaire, answers, config, generatedAt }: Bui
   return {
     overall0to100,
     band: bandOf(overall0to100, config.severityBands),
+    maturity: bandForValue(overall0to100, config.fiveLayer.maturityBands),
     gapToTarget: round2(Math.max(0, target - overall0to100)),
     targetIndex: target,
     bottleneck: { code: bottleneck.code, title: bottleneck.title, score0to100: bottleneck.score0to100 },
@@ -204,6 +218,8 @@ export function buildMatrix({ questionnaire, answers, config, generatedAt }: Bui
 export interface MatrixBundle {
   overall: number;
   band: MatrixBand;
+  /** رتبهٔ بلوغ کل طبق نوارهای موقت سند */
+  maturity: { key: string; label: string };
   gapToTarget: number;
   targetIndex: number;
   symptomThreshold: number;
@@ -215,6 +231,10 @@ export interface MatrixBundle {
     code: string;
     title: string;
     score: number;
+    /** امتیاز لایه از ۲۰ (قرارداد سند پنج‌لایه) */
+    score20: number;
+    /** نوار موقت لایه: ضعف / در حال رشد / قوی */
+    layerBand: { key: string; label: string };
     band: MatrixBand;
     weight: number;
     dispersion: number;
@@ -232,6 +252,7 @@ export function toMatrixBundle(
   return {
     overall: matrix.overall0to100,
     band: matrix.band,
+    maturity: matrix.maturity,
     gapToTarget: matrix.gapToTarget,
     targetIndex: matrix.targetIndex,
     symptomThreshold: opts.symptomThreshold ?? 4,
@@ -250,6 +271,8 @@ export function toMatrixBundle(
       code: d.code,
       title: d.title,
       score: d.score0to100,
+      score20: d.score0to20,
+      layerBand: d.layerBand,
       band: d.band,
       weight: d.weight,
       dispersion: d.dispersion,

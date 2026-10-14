@@ -41,6 +41,8 @@ export interface InterpretationLayer {
   title: string;
   title_en: string;
   objective: string;
+  /** سازهٔ اندازه‌گیری‌شدهٔ لایه (فیلد construct سند) */
+  construct?: string;
   /** وضع موجود (As-Is) وقتی لایه ضعیف است */
   as_is: string;
   /** وضع مطلوب (To-Be) */
@@ -93,6 +95,23 @@ function readText(p: string): string {
 
 function numOr(v: unknown, d: number): number {
   return Number.isFinite(Number(v)) ? Number(v) : d;
+}
+
+/** نوارهای تفسیری موقت سند (لایه/بلوغ) با کلید، برچسب فارسی و بازهٔ شمول */
+function parseBands(
+  raw: unknown,
+  fallback: Array<{ key: string; label: string; min: number; max: number }>,
+): Array<{ key: string; label: string; min: number; max: number }> {
+  if (!Array.isArray(raw) || raw.length === 0) return fallback;
+  return raw.map((b) => {
+    const band = b as Record<string, unknown>;
+    return {
+      key: String(band['key'] ?? ''),
+      label: String(band['label'] ?? ''),
+      min: numOr(band['min'], 0),
+      max: numOr(band['max'], 0),
+    };
+  });
 }
 
 function parseUnknown(raw: unknown, fallback: UnknownGuardConfig): UnknownGuardConfig {
@@ -264,6 +283,17 @@ export function parseMatrixScoring(rawYaml: string): MatrixScoringConfig {
     fiveLayer: {
       perLayerMax: numOr(fiveRaw['per_layer_max'], 20),
       totalMax: numOr(fiveRaw['total_max'], 100),
+      layerBands: parseBands(fiveRaw['layer_bands_provisional'], [
+        { key: 'weak', label: 'ضعف (گلوگاه بالقوه)', min: 0, max: 9.9 },
+        { key: 'growing', label: 'در حال رشد', min: 10, max: 14.9 },
+        { key: 'strong', label: 'قوی', min: 15, max: 20 },
+      ]),
+      maturityBands: parseBands(fiveRaw['maturity_bands_provisional'], [
+        { key: 'nascent', label: 'نوپا', min: 0, max: 39 },
+        { key: 'forming', label: 'در حال شکل‌گیری', min: 40, max: 59 },
+        { key: 'maturing', label: 'در حال بلوغ', min: 60, max: 79 },
+        { key: 'mature', label: 'بالغ', min: 80, max: 100 },
+      ]),
     },
     interpretation: {
       explanationRequired: interpRaw['explanation_required'] === true,
@@ -352,6 +382,7 @@ export function parseInterpretationMatrix(rawYaml: string): InterpretationMatrix
       title: String(l['title'] ?? code),
       title_en: String(l['title_en'] ?? ''),
       objective: String(l['objective'] ?? ''),
+      ...(l['construct'] !== undefined ? { construct: String(l['construct']) } : {}),
       as_is: String(l['as_is'] ?? ''),
       to_be: String(l['to_be'] ?? ''),
       recommended_actions: String(l['recommended_actions'] ?? ''),

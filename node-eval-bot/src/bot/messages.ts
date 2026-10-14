@@ -109,9 +109,10 @@ export function renderQuestion(
   }
   lines.push('');
   lines.push(`<b>${question.text}</b>`);
-  if (question.low || question.high) {
+  if (question.low || question.mid || question.high) {
     lines.push('');
     lines.push(`۰ ← ${question.low ?? 'کمترین'}`);
+    if (question.mid) lines.push(`۵ ← ${question.mid}`);
     lines.push(`۱۰ ← ${question.high ?? 'بیشترین'}`);
   }
   if (section) {

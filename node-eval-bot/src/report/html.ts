@@ -97,7 +97,7 @@ export function renderReportHtml(input: ReportInput): string {
           if (!layer) return '';
           return `<tr>
         <td><strong>${escapeHtml(layer.title)}</strong><br>${bandChip(d.band)}</td>
-        <td class="num">${fa(d.score0to20, 1)} از ۲۰</td>
+        <td class="num">${fa(d.score0to20, 1)} از ۲۰<br><span class="small muted">${escapeHtml(d.layerBand.label)}</span></td>
         <td class="small">${escapeHtml(d.band === 'healthy' ? layer.to_be : layer.as_is)}</td>
         <td class="small">${escapeHtml(layer.to_be)}</td>
         <td class="small">${escapeHtml(layer.recommended_actions)}</td>
@@ -314,6 +314,7 @@ export function renderReportHtml(input: ReportInput): string {
       <div style="text-align:center">
         <div class="score-big" style="color:${BAND_COLORS[band]}">${fa(matrix.overall0to100)}<small> / ۱۰۰</small></div>
         <div class="muted small">امتیاز عارضه‌یابی (هدف: ${fa(matrix.targetIndex)})</div>
+        <div class="small">رتبهٔ بلوغ سیستم‌سازی: <strong>${escapeHtml(matrix.maturity.label)}</strong></div>
       </div>
       <div>
         <div class="muted small">فاصله تا هدف</div>

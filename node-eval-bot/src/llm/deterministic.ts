@@ -64,7 +64,8 @@ export function deterministicInterpretation(
 
   const narrative: string[] = [];
   narrative.push(
-    `نمرهٔ کل عارضه‌یابی ${fmt(matrix.overall0to100)} از ۱۰۰ و در دستهٔ «${bandLabel(matrix.band)}» است؛ ` +
+    `نمرهٔ کل عارضه‌یابی ${fmt(matrix.overall0to100)} از ۱۰۰ و در دستهٔ «${bandLabel(matrix.band)}» است ` +
+      `(رتبهٔ بلوغ سیستم‌سازی: «${matrix.maturity.label}»)؛ ` +
       `این عدد از ${fmt(matrix.answeredCount)} گزارهٔ پاسخ‌داده‌شده در ${fmt(matrix.domains.length)} محور ` +
       `با وزن‌دهی محورها محاسبه شده و فاصلهٔ آن تا امتیاز مطلوب ${fmt(input.targetIndex)} برابر ` +
       `${fmt(matrix.gapToTarget)} واحد است.`,

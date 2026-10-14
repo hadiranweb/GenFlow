@@ -95,6 +95,7 @@ function normalizeQuestion(raw: Record<string, unknown>, dimension: string, ctx:
     response: responseRaw as ResponseMode,
   };
   if (raw['low'] !== undefined) q.low = String(raw['low']);
+  if (raw['mid'] !== undefined) q.mid = String(raw['mid']);
   if (raw['high'] !== undefined) q.high = String(raw['high']);
   if (raw['remedy_hint'] !== undefined) q.remedyHint = String(raw['remedy_hint']);
   if (raw['indicator'] !== undefined) q.indicator = String(raw['indicator']);
