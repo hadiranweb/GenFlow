@@ -100,8 +100,8 @@ function numOr(v: unknown, d: number): number {
 /** نوارهای تفسیری موقت سند (لایه/بلوغ) با کلید، برچسب فارسی و بازهٔ شمول */
 function parseBands(
   raw: unknown,
-  fallback: Array<{ key: string; label: string; min: number; max: number }>,
-): Array<{ key: string; label: string; min: number; max: number }> {
+  fallback: Array<{ key: string; label: string; min: number; max: number; maxInclusive: boolean }>,
+): Array<{ key: string; label: string; min: number; max: number; maxInclusive: boolean }> {
   if (!Array.isArray(raw) || raw.length === 0) return fallback;
   return raw.map((b) => {
     const band = b as Record<string, unknown>;
@@ -110,6 +110,8 @@ function parseBands(
       label: String(band['label'] ?? ''),
       min: numOr(band['min'], 0),
       max: numOr(band['max'], 0),
+      // مرز بالا نیم‌باز است (max_inclusive: false) مگر در آخرین نوار
+      maxInclusive: band['max_inclusive'] === true,
     };
   });
 }
@@ -284,15 +286,15 @@ export function parseMatrixScoring(rawYaml: string): MatrixScoringConfig {
       perLayerMax: numOr(fiveRaw['per_layer_max'], 20),
       totalMax: numOr(fiveRaw['total_max'], 100),
       layerBands: parseBands(fiveRaw['layer_bands_provisional'], [
-        { key: 'weak', label: 'ضعف (گلوگاه بالقوه)', min: 0, max: 9.9 },
-        { key: 'growing', label: 'در حال رشد', min: 10, max: 14.9 },
-        { key: 'strong', label: 'قوی', min: 15, max: 20 },
+        { key: 'weak', label: 'ضعف (گلوگاه بالقوه)', min: 0, max: 10, maxInclusive: false },
+        { key: 'growing', label: 'در حال رشد', min: 10, max: 15, maxInclusive: false },
+        { key: 'strong', label: 'قوی', min: 15, max: 20, maxInclusive: true },
       ]),
       maturityBands: parseBands(fiveRaw['maturity_bands_provisional'], [
-        { key: 'nascent', label: 'نوپا', min: 0, max: 39 },
-        { key: 'forming', label: 'در حال شکل‌گیری', min: 40, max: 59 },
-        { key: 'maturing', label: 'در حال بلوغ', min: 60, max: 79 },
-        { key: 'mature', label: 'بالغ', min: 80, max: 100 },
+        { key: 'nascent', label: 'نوپا', min: 0, max: 40, maxInclusive: false },
+        { key: 'forming', label: 'در حال شکل‌گیری', min: 40, max: 60, maxInclusive: false },
+        { key: 'maturing', label: 'در حال بلوغ', min: 60, max: 80, maxInclusive: false },
+        { key: 'mature', label: 'بالغ', min: 80, max: 100, maxInclusive: true },
       ]),
     },
     interpretation: {

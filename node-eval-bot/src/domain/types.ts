@@ -178,9 +178,9 @@ export interface MatrixScoringConfig {
     perLayerMax: number;
     totalMax: number;
     /** نوارهای موقت لایه روی مقیاس ۰..۲۰ (ضعف/در حال رشد/قوی) */
-    layerBands: Array<{ key: string; label: string; min: number; max: number }>;
+    layerBands: Array<{ key: string; label: string; min: number; max: number; maxInclusive: boolean }>;
     /** نوارهای موقت بلوغ کل روی مقیاس ۰..۱۰۰ (نوپا/در حال شکل‌گیری/در حال بلوغ/بالغ) */
-    maturityBands: Array<{ key: string; label: string; min: number; max: number }>;
+    maturityBands: Array<{ key: string; label: string; min: number; max: number; maxInclusive: boolean }>;
   };
 }
 

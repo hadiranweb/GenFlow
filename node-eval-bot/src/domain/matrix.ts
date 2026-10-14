@@ -47,9 +47,13 @@ export function bandOf(score0to100: number, bands: MatrixScoringConfig['severity
 /** یافتن نوار تفسیری (بازهای سند شامل هر دو سر) برای یک امتیاز */
 export function bandForValue(
   value: number,
-  bands: Array<{ key: string; label: string; min: number; max: number }>,
+  bands: Array<{ key: string; label: string; min: number; max: number; maxInclusive: boolean }>,
 ): { key: string; label: string } {
-  const hit = bands.find((b) => value >= b.min && value <= b.max) ?? bands[bands.length - 1]!;
+  // مرزهای پیوسته و نیم‌باز سند: [min, max) — تا نیم‌امتیازهایی مانند ۳۹٫۵
+  // بدون طبقه نمانند؛ فقط آخرین نوار سرِ بالا را هم شامل می‌شود.
+  const hit =
+    bands.find((b) => value >= b.min && (b.maxInclusive ? value <= b.max : value < b.max)) ??
+    bands[bands.length - 1]!;
   return { key: hit.key, label: hit.label };
 }
 

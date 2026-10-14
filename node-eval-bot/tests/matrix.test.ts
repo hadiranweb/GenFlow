@@ -3,7 +3,7 @@
  *   هدف ۷۵ · آستانهٔ عارضه ۴ · دسته‌ها ۷۵/۶۰/۴۰ · دو ساید بودن پرسش‌ها
  */
 import { describe, expect, it } from 'vitest';
-import { bandOf, buildMatrix, collectExplanations, toMatrixBundle } from '../src/domain/matrix.js';
+import { bandForValue, bandOf, buildMatrix, collectExplanations, toMatrixBundle } from '../src/domain/matrix.js';
 import type { AnswersMap } from '../src/domain/types.js';
 import { testContent } from './helpers.js';
 
@@ -119,6 +119,37 @@ describe('پیکربندی عارضه‌یابی', () => {
     const weak = build(fillEff(2));
     expect(weak.maturity.key).toBe('nascent');
     expect(weak.domains[0]!.layerBand.key).toBe('weak');
+  });
+
+  it('مرزهای پیوسته و نیم‌باز سند: نیم‌امتیازها بدون طبقه نمی‌مانند', () => {
+    const maturity = content.matrixScoring.fiveLayer.maturityBands;
+    const layer = content.matrixScoring.fiveLayer.layerBands;
+    // کل (۰..۱۰۰): کمتر از ۴۰ نوپا · ۴۰ تا کمتر از ۶۰ شکل‌گیری · ۶۰ تا کمتر از ۸۰ بلوغ · ۸۰ تا ۱۰۰ بالغ
+    expect(bandForValue(39.5, maturity).key).toBe('nascent');
+    expect(bandForValue(40, maturity).key).toBe('forming');
+    expect(bandForValue(59.5, maturity).key).toBe('forming');
+    expect(bandForValue(60, maturity).key).toBe('maturing');
+    expect(bandForValue(79.5, maturity).key).toBe('maturing');
+    expect(bandForValue(80, maturity).key).toBe('mature');
+    expect(bandForValue(100, maturity).key).toBe('mature');
+    // لایه (۰..۲۰): کمتر از ۱۰ ضعف · ۱۰ تا کمتر از ۱۵ در حال رشد · ۱۵ تا ۲۰ قوی
+    expect(bandForValue(9.5, layer).key).toBe('weak');
+    expect(bandForValue(10, layer).key).toBe('growing');
+    expect(bandForValue(14.5, layer).key).toBe('growing');
+    expect(bandForValue(15, layer).key).toBe('strong');
+    expect(bandForValue(20, layer).key).toBe('strong');
+  });
+
+  it('نمرهٔ کل نیم‌امتیازی (مثل ۷۹٫۵) رتبهٔ درست می‌گیرد، نه گرد می‌شود نه گم', () => {
+    // همهٔ لایه‌ها مؤثر ۸ به‌جز یک پرسش ۶ → مجموع لایه‌ها ۳۹٫۵+…؛ ساخت مستقیم:
+    const answers = fillEff(8);
+    const gov = content.matrix.sections[0]!;
+    setEff(answers, gov.questions[0]!, 7); // حاکمیت: (۷+۸+۸+۸)/۲ = ۱۵٫۵
+    setEff(answers, gov.questions[1]!, 8);
+    const m = build(answers);
+    // مجموع: ۱۵٫۵ + ۱۶×۴ → ۷۹٫۵
+    expect(m.overall0to100).toBeCloseTo(79.5, 5);
+    expect(m.maturity.key).toBe('maturing');
   });
 
   it('گلوگاه در تساوی نمره: لایهٔ بالادستی‌تر (حاکمیت پیش از بقیه)', () => {

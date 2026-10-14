@@ -8,7 +8,7 @@
 # نوارهای لایه و بلوغ «موقت» (provisional) خود سند‌اند؛ وضعیت سند:
 # 0.1-draft و نیازمند پایلوت (draft_pilot_required).
 # ---------------------------------------------------------------------------
-version: matrix-score-2.1.0
+version: matrix-score-2.2.0
 
 # امتیاز مطلوب هر لایه/کل (مبنای محاسبهٔ شکاف) — معادل ۱۵ از ۲۰ در هر لایه
 target_index: 75
@@ -28,17 +28,19 @@ five_layer:
   per_layer_max: 20
   total_max: 100
   bottleneck_rule: lowest_layer_tie_upstream
-  # نوارهای موقت لایه روی مقیاس ۰..۲۰ (عین سند)
+  # نوارهای موقت لایه روی مقیاس ۰..۲۰ (عین سند نهایی) — مرزها پیوسته و
+  # نیم‌بازند [min, max) تا نیم‌امتیازها (گام ۰٫۵ نمرهٔ لایه) بدون طبقه نمانند؛
+  # فقط آخرین نوار سرِ بالا را شامل می‌شود و نیازی به گردکردن نیست.
   layer_bands_provisional:
-    - { key: weak, label: "ضعف (گلوگاه بالقوه)", min: 0, max: 9.9 }
-    - { key: growing, label: "در حال رشد", min: 10, max: 14.9 }
-    - { key: strong, label: "قوی", min: 15, max: 20 }
-  # نوارهای موقت بلوغ کل روی مقیاس ۰..۱۰۰ (عین سند)
+    - { key: weak, label: "ضعف (گلوگاه بالقوه)", min: 0, max: 10, max_inclusive: false }
+    - { key: growing, label: "در حال رشد", min: 10, max: 15, max_inclusive: false }
+    - { key: strong, label: "قوی", min: 15, max: 20, max_inclusive: true }
+  # نوارهای موقت بلوغ کل روی مقیاس ۰..۱۰۰ (عین سند نهایی؛ نیم‌باز)
   maturity_bands_provisional:
-    - { key: nascent, label: نوپا, min: 0, max: 39 }
-    - { key: forming, label: در حال شکل‌گیری, min: 40, max: 59 }
-    - { key: maturing, label: در حال بلوغ, min: 60, max: 79 }
-    - { key: mature, label: بالغ, min: 80, max: 100 }
+    - { key: nascent, label: نوپا, min: 0, max: 40, max_inclusive: false }
+    - { key: forming, label: "در حال شکل‌گیری", min: 40, max: 60, max_inclusive: false }
+    - { key: maturing, label: "در حال بلوغ", min: 60, max: 80, max_inclusive: false }
+    - { key: mature, label: بالغ, min: 80, max: 100, max_inclusive: true }
   # سؤال‌های معکوس سند (نمره = ۱۰ − پاسخ) — برای ردیابی؛ جهت در پرسش‌نامه است
   reverse_items: [L1-Q2, L2-Q3, L3-Q2, L4-Q3, L5-Q3]
 

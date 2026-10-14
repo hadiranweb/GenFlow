@@ -18,7 +18,7 @@
 # data/scoring/matrix.yaml یکی است: ≥۷۵ مطلوب · ۶۰..۷۵ مرزی ·
 # ۴۰..۶۰ نیازمند اصلاح · <۴۰ بحرانی (معادل ۰..۲۰: ≥۱۵ · ۱۲..۱۵ · ۸..۱۲ · <۸).
 # ---------------------------------------------------------------------------
-version: five-layer-interpretation-1.1.0
+version: five-layer-interpretation-1.2.0
 source_document: "عارضه‌یابی پنج لایه - نسخه ۰ تا ۱۰ (طبق پلی‌بوک) — نوت واحد عارضه‌یابی مدل سیستم‌سازی کسب‌وکارهای کوچک (مدل پنج‌لایه)، version 0.1-draft"
 
 scoring:
@@ -28,15 +28,16 @@ scoring:
   total_formula: "sum of layer scores (equal weights)"
   bottleneck_rule: "کم‌امتیازترین لایه = گلوگاه بحرانی فعلی کسب‌وکار"
   # نوارهای موقت (provisional) خود سند — نسخهٔ ۰ تا ۱۰
+  # مرزها پیوسته و نیم‌بازند [min, max) — نسخهٔ نهایی سند؛ نیم‌امتیاز بدون طبقه نمی‌ماند
   layer_bands_provisional:
-    - { key: weak, label: "ضعف (گلوگاه بالقوه)", min: 0, max: 9.9, meaning: "لایه عملاً برقرار نیست و به‌احتمال زیاد گلوگاه فعلی کل سیستم است." }
-    - { key: growing, label: "در حال رشد", min: 10, max: 14.9, meaning: "اسکلت لایه وجود دارد اما ناپایدار است؛ با اقدام‌های مشخص قابل تثبیت است." }
-    - { key: strong, label: "قوی", min: 15, max: 20, meaning: "لایه برقرار است؛ تمرکز بر تثبیت و انتقال الگو به لایه‌های ضعیف‌تر." }
+    - { key: weak, label: "ضعف (گلوگاه بالقوه)", min: 0, max: 10, max_inclusive: false, meaning: "لایه عملاً برقرار نیست و به‌احتمال زیاد گلوگاه فعلی کل سیستم است." }
+    - { key: growing, label: "در حال رشد", min: 10, max: 15, max_inclusive: false, meaning: "اسکلت لایه وجود دارد اما ناپایدار است؛ با اقدام‌های مشخص قابل تثبیت است." }
+    - { key: strong, label: "قوی", min: 15, max: 20, max_inclusive: true, meaning: "لایه برقرار است؛ تمرکز بر تثبیت و انتقال الگو به لایه‌های ضعیف‌تر." }
   maturity_bands_provisional:
-    - { key: nascent, label: نوپا, min: 0, max: 39 }
-    - { key: forming, label: "در حال شکل‌گیری", min: 40, max: 59 }
-    - { key: maturing, label: "در حال بلوغ", min: 60, max: 79 }
-    - { key: mature, label: بالغ, min: 80, max: 100 }
+    - { key: nascent, label: نوپا, min: 0, max: 40, max_inclusive: false }
+    - { key: forming, label: "در حال شکل‌گیری", min: 40, max: 60, max_inclusive: false }
+    - { key: maturing, label: "در حال بلوغ", min: 60, max: 80, max_inclusive: false }
+    - { key: mature, label: بالغ, min: 80, max: 100, max_inclusive: true }
   gap_inclusion_rule: "همهٔ ۵ لایه بدون توجه به نمره در گزارش شکاف می‌آیند؛ نمره فقط برای اولویت‌بندی و گلوگاه است."
   reverse_items: [L1-Q2, L2-Q3, L3-Q2, L4-Q3, L5-Q3]
 
