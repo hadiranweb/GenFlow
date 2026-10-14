@@ -2,6 +2,8 @@
  * تست‌های ماتریس عارضه‌یابی — مطابق پیش‌نویس مالک محصول:
  *   هدف ۷۵ · آستانهٔ عارضه ۴ · دسته‌ها ۷۵/۶۰/۴۰ · دو ساید بودن پرسش‌ها
  */
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { bandForValue, bandOf, buildMatrix, collectExplanations, toMatrixBundle } from '../src/domain/matrix.js';
 import type { AnswersMap } from '../src/domain/types.js';
@@ -9,6 +11,18 @@ import { testContent } from './helpers.js';
 
 const content = testContent();
 const questions = content.matrix.sections.flatMap((s) => s.questions);
+const ownerQuestionCopy = JSON.parse(
+  readFileSync(path.resolve('docs/reference/diagnostic-questions-owner-copy.json'), 'utf8'),
+) as {
+  version: string;
+  layers: Array<{ code: string; title: string }>;
+  questions: Array<{
+    code: string;
+    source_ref: string;
+    text: string;
+    anchors: { '0': string; '5': string; '10': string };
+  }>;
+};
 
 /** تبدیل «نمرهٔ مؤثر» به پاسخ خام با توجه به قطبیت (پرسش‌های معکوس سند) */
 function rawFor(q: { polarity: string }, effective: number): number {
@@ -56,6 +70,20 @@ describe('پیکربندی عارضه‌یابی', () => {
     }
   });
 
+  it('تمام متن سؤال‌ها و لنگرهای ۰/۵/۱۰ با فهرست نهایی کاربر یکسان است', () => {
+    expect(content.matrix.version).toBe(ownerQuestionCopy.version);
+    expect(content.matrix.sections.map((s) => ({ code: s.code, title: s.title }))).toEqual(ownerQuestionCopy.layers);
+    for (const expected of ownerQuestionCopy.questions) {
+      const q = questions.find((item) => item.sourceRef === expected.source_ref);
+      expect(q, expected.source_ref).toBeDefined();
+      expect(q!.code).toBe(expected.code);
+      expect(q!.text).toBe(expected.text);
+      expect(q!.low).toBe(expected.anchors['0']);
+      expect(q!.mid).toBe(expected.anchors['5']);
+      expect(q!.high).toBe(expected.anchors['10']);
+    }
+  });
+
   it('ردیابی منبع: هر پرسش source_ref و keyword_refs معتبر دارد', () => {
     const refs = questions.map((q) => q.sourceRef);
     expect(new Set(refs).size).toBe(20);
@@ -64,7 +92,7 @@ describe('پیکربندی عارضه‌یابی', () => {
     expect(refs).toContain('L5-Q4');
     for (const q of questions) {
       // در نسخهٔ ۰ تا ۱۰، متن خودِ پرسش‌ها عین سند است و ردیابی با source_ref انجام می‌شود
-      expect(q.text).toContain('در مقیاس ۰ تا ۱۰');
+      expect(q.text).toMatch(/^از ۰ تا ۱۰، /);
       expect((q.keywordRefs ?? []).length).toBeGreaterThan(0);
     }
     const criticalRefs = questions.filter((q) => q.critical).map((q) => q.sourceRef);
