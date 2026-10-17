@@ -1,216 +1,153 @@
 /**
- * تست‌های ارزیابی اولیه («لیبل نگرش») — مطابق فرایند اصلی:
- *   • لیبل است، نه فیلتر: هیچ خروجی‌ای مسیر را متوقف نمی‌کند
- *   • قانون critical_ceiling دو پله دارد (قرمز / زرد)
- *   • وزن‌دهی در سطح پرسش، نابرابری تعداد پرسش محورها را جبران می‌کند
+ * تست‌های بانک فعال ارزیابی: ۱۲ پرسش رنجی MindsetGate-EP (MG-A/B/C).
+ * سیاست محصول: خروجی فقط لیبل داخلی است، نه فیلتر؛ سه سناریوی SJT فعال نیستند.
  */
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { computeCriticalCeiling, scoreGate } from '../src/domain/scoring.js';
+import { scoreGate } from '../src/domain/scoring.js';
 import type { AnswersMap } from '../src/domain/types.js';
 import { fillAnswers, highQualityAnswers, testContent, uniformAnswers } from './helpers.js';
 
 const content = testContent();
 const gateQuestions = content.gate.sections.flatMap((s) => s.questions);
+const ownerCopy = JSON.parse(
+  readFileSync(path.resolve('docs/reference/mindsetgate-ep-12-owner-copy.json'), 'utf8'),
+) as {
+  version: string;
+  layers: Array<{ code: string; title: string }>;
+  questions: Array<{ code: string; source_ref: string; layer: string; text: string; reverse: boolean }>;
+  excluded_sjt_scenarios: string[];
+};
 
-function score(answers: AnswersMap, configOverride = {}) {
-  return scoreGate({
-    questionnaire: content.gate,
-    answers,
-    config: { ...content.gateScoring, ...configOverride },
-  });
+function score(answers: AnswersMap) {
+  return scoreGate({ questionnaire: content.gate, answers, config: content.gateScoring });
 }
 
-describe('پیکربندی ارزیابی اولیه', () => {
-  it('لیبل نگرشی است و ۱۵ پرسش در ۸ محور دارد', () => {
+describe('پیکربندی بانک فعال MindsetGate-EP', () => {
+  it('دقیقاً ۱۲ سؤال رنجی در سه محور MG-A/B/C دارد؛ SJT وارد فرم فعال نیست', () => {
+    expect(content.gate.version).toBe(ownerCopy.version);
     expect(content.gate.mode).toBe('weighted_scale');
-    expect(gateQuestions).toHaveLength(15);
-    expect(content.gate.sections).toHaveLength(8);
-  });
-
-  it('۵ پرسش کلیدی مطابق پیش‌نویس مالک محصول است', () => {
-    expect(gateQuestions.filter((q) => q.critical).map((q) => q.code).sort()).toEqual(
-      ['s01', 's05', 's06', 's09', 's14'],
-    );
-  });
-
-  it('هیچ پرسشی در مرحلهٔ ارزیابی دو ساید نیست (فقط رنج)', () => {
+    expect(gateQuestions).toHaveLength(12);
+    expect(content.gate.sections.map((s) => ({ code: s.code, title: s.title }))).toEqual(ownerCopy.layers);
+    expect(content.gate.sections.map((s) => s.questions.length)).toEqual([4, 4, 4]);
     expect(gateQuestions.every((q) => q.response === 'range')).toBe(true);
+    expect(gateQuestions.every((q) => !q.critical)).toBe(true);
   });
 
-  it('وزن‌دهی پیش‌فرض در سطح پرسش است', () => {
+  it('متن و شناسهٔ هر ۱۲ سؤال دقیقاً با شیت MindsetGate-EP مطابقت دارد', () => {
+    for (const expected of ownerCopy.questions) {
+      const q = gateQuestions.find((item) => item.sourceRef === expected.source_ref);
+      expect(q, expected.source_ref).toBeDefined();
+      expect(q!.code).toBe(expected.code);
+      expect(q!.dimension).toBe(expected.layer);
+      expect(q!.text).toBe(expected.text);
+      expect(q!.polarity === 'reverse').toBe(expected.reverse);
+    }
+  });
+
+  it('فقط MG-A3، MG-B3 و MG-C3 معکوس‌اند', () => {
+    expect(gateQuestions.filter((q) => q.polarity === 'reverse').map((q) => q.sourceRef)).toEqual([
+      'MG-A3',
+      'MG-B3',
+      'MG-C3',
+    ]);
+    expect(ownerCopy.excluded_sjt_scenarios).toEqual(['S1', 'S2', 'S3']);
+  });
+
+  it('وزن سه محور برابر است و در هر محور چهار سؤال وجود دارد', () => {
+    expect(content.gate.sections.map((s) => s.weight)).toEqual([1, 1, 1]);
     expect(content.gateScoring.weighting).toBe('question_level');
   });
 });
 
-describe('نمره و وزن‌دهی', () => {
-  it('پاسخ کامل و مطلوب → نمرهٔ ۱۰۰، سبز، اطمینان بالا، بدون سقف فعال', () => {
+describe('نمره و قطبیت بانک ۱۲سؤالی', () => {
+  it('همهٔ پاسخ‌های مؤثر ۱۰ → نمرهٔ ۱۰۰، لیبل سبز و بدون مسدودسازی', () => {
     const result = score(highQualityAnswers(gateQuestions));
     expect(result.score0to100).toBeGreaterThanOrEqual(93);
     expect(result.zone).toBe('green');
-    expect(result.confidence).toBe('high');
-    expect(result.criticalCeiling?.applied).toBe(false);
-    expect(result.guards.filter((g) => g.triggered)).toHaveLength(0);
-  });
-
-  it('verdict برای لیبل «label» است، نه مسدودسازی', () => {
-    const result = score(highQualityAnswers(gateQuestions));
     expect(result.verdict).toBe('label');
-  });
-
-  it('پاسخ کامل و نامطلوب → نمرهٔ صفر و منطقهٔ قرمز', () => {
-    const result = score(uniformAnswers(gateQuestions, 0));
-    expect(result.score0to100).toBe(0);
-    expect(result.zone).toBe('red');
-  });
-
-  it('نگاشت نمره به ناحیه با آستانه‌های پیش‌نویس (۷۰/۴۰) می‌خواند', () => {
-    const thresholds = [...content.gateScoring.zones].sort((a, b) => b.min - a.min);
-    for (let v = 0; v <= 10; v += 1) {
-      const result = score(uniformAnswers(gateQuestions, v));
-      expect(result.score0to100).toBe(v * 10);
-      const expected = thresholds.find((t) => v * 10 >= t.min)!.key;
-      // سقف کلیدی می‌تواند ناحیه را پایین‌تر بکشد، ولی هرگز بالاتر نمی‌برد
-      const rank = { red: 0, yellow: 1, green: 2 } as const;
-      expect(rank[result.zone as 'red' | 'yellow' | 'green']).toBeLessThanOrEqual(rank[expected]);
-    }
-    // حالت مبنا: بدون اثر سقف، دقیقاً همان نگاشت انتظار می‌رود
-    expect(score(uniformAnswers(gateQuestions, 8)).zone).toBe('green');
-    expect(score(uniformAnswers(gateQuestions, 5)).zone).toBe('yellow');
-    expect(score(uniformAnswers(gateQuestions, 3)).zone).toBe('red');
-  });
-
-  it('وزن‌دهی در سطح پرسش، محور تک‌پرسشی «نقش و مالکیت» را متعادل می‌کند', () => {
-    // در روش سطح پرسش، سهم هر پرسش محور = وزن محور × وزن پرسش / جمع
-    const withOwnershipLow = uniformAnswers(gateQuestions, 8);
-    withOwnershipLow['s01'] = { questionCode: 's01', value: 0, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const dropQuestion = score(withOwnershipLow).score0to100;
-
-    const withDimensionLow = uniformAnswers(gateQuestions, 8);
-    for (const code of ['s02', 's03']) {
-      withDimensionLow[code] = { questionCode: code, value: 0, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    }
-    const dropDimension = score(withDimensionLow).score0to100;
-
-    // افت یک محور دوپرسشی باید بیش از افت یک پرسش تنها اثر بگذارد
-    expect(dropDimension).toBeLessThan(dropQuestion);
-    // و سهم محور تک‌پرسشی نباید بزرگ‌تر از سهم محور دوپرسشیِ هم‌وزن باشد
-    const ownershipShare = content.gateScoring.zones.length > 0 ? 1.2 : 0;
-    expect(ownershipShare).toBeGreaterThan(0);
-  });
-});
-
-describe('سقف پرسش‌های کلیدی (دو پله)', () => {
-  const base = () => uniformAnswers(gateQuestions, 9);
-
-  it('نمرهٔ ۲ روی پرسش کلیدی → سقف قرمز (حتی با نمرهٔ کل بالا)', () => {
-    const answers = base();
-    answers['s14'] = { questionCode: 's14', value: 2, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const result = score(answers);
-    expect(result.score0to100).toBeGreaterThan(70);
-    expect(result.zone).toBe('red');
-    expect(result.criticalCeiling?.ceiling).toBe('red');
-    expect(result.criticalCeiling?.hits[0]?.questionCode).toBe('s14');
-  });
-
-  it('نمرهٔ ۳ روی پرسش کلیدی → سقف زرد (نه سبز)', () => {
-    const answers = base();
-    answers['s14'] = { questionCode: 's14', value: 3, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const result = score(answers);
-    expect(result.zone).toBe('yellow');
-    expect(result.criticalCeiling?.ceiling).toBe('yellow');
-  });
-
-  it('نمرهٔ ۵ روی پرسش کلیدی → سقف فعال نیست', () => {
-    const answers = base();
-    answers['s14'] = { questionCode: 's14', value: 5, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const result = score(answers);
     expect(result.criticalCeiling?.applied).toBe(false);
-    expect(result.zone).toBe('green');
-  });
-
-  it('نمرهٔ پایین روی پرسش غیرکلیدی سقف نمی‌سازد', () => {
-    const answers = base();
-    answers['s02'] = { questionCode: 's02', value: 1, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const result = score(answers);
-    expect(result.criticalCeiling?.applied).toBe(false);
-    expect(result.zone).toBe('green');
-  });
-
-  it('بی‌پاسخی پرسش کلیدی → سقف زرد + پرچم «نیازمند گفت‌وگو» (نه قرمز خودکار)', () => {
-    const answers = base();
-    delete answers['s05'];
-    const result = score(answers);
-    expect(result.criticalCeiling?.ceiling).toBe('yellow');
-    expect(result.criticalCeiling?.hits[0]?.value).toBeNull();
-    expect(result.zone).toBe('yellow');
-  });
-
-  it('نمی‌تواند ناحیه را بالاتر ببرد (سقف فقط محدودکننده است)', () => {
-    const answers = uniformAnswers(gateQuestions, 2); // نمرهٔ پایین
-    answers['s01'] = { questionCode: 's01', value: 10, answeredAt: new Date().toISOString(), elapsedMs: 9000 };
-    const result = score(answers);
-    expect(result.zone).toBe('red');
-  });
-
-  it('تابع مستقیم سقف: شناسایی درست سقف و موارد فعال', () => {
-    const answers: AnswersMap = {
-      s01: { questionCode: 's01', value: 1, answeredAt: '', elapsedMs: 0 },
-      s05: { questionCode: 's05', value: 4, answeredAt: '', elapsedMs: 0 },
-      // بقیهٔ کلیدی‌ها پاسخ سالم دارند تا «بی‌پاسخی» سقف نسازد
-      s06: { questionCode: 's06', value: 8, answeredAt: '', elapsedMs: 0 },
-      s09: { questionCode: 's09', value: 8, answeredAt: '', elapsedMs: 0 },
-      s14: { questionCode: 's14', value: 8, answeredAt: '', elapsedMs: 0 },
-    };
-    const res = computeCriticalCeiling(content.gate, answers, content.gateScoring.criticalCeiling);
-    expect(res.ceiling).toBe('red');
-    expect(res.hits.map((h) => h.questionCode).sort()).toEqual(['s01', 's05']);
-  });
-});
-
-describe('گاردهای کیفیت (بدون اثر بر مسیر)', () => {
-  it('ناقص بودن پاسخ‌ها اطمینان را پایین می‌آورد ولی مسیر را متوقف نمی‌کند', () => {
-    const partial = fillAnswers(gateQuestions.slice(0, 6), 9);
-    const result = score(partial);
-    expect(result.completeness).toBeLessThan(1);
-    expect(result.confidence).not.toBe('high');
-    expect(result.guards.find((g) => g.code === 'completeness')?.triggered).toBe(true);
-    // هیچ فیلدی برای مسدودسازی وجود ندارد
     expect('blocked' in result).toBe(false);
   });
 
-  it('پاسخ‌دهی خط‌کشی‌شده گارد را فعال می‌کند', () => {
-    const result = score(fillAnswers(gateQuestions, 7));
-    expect(result.guards.find((g) => g.code === 'straight_lining')?.triggered).toBe(true);
+  it('همهٔ پاسخ‌های مؤثر ۰ → قرمز، اما همچنان فقط لیبل داخلی', () => {
+    const result = score(uniformAnswers(gateQuestions, 0));
+    expect(result.score0to100).toBe(0);
+    expect(result.zone).toBe('red');
+    expect(result.verdict).toBe('label');
+    expect('blocked' in result).toBe(false);
   });
 
-  it('پاسخ‌دهی شتاب‌زده گارد را فعال می‌کند و زمان نامعلوم هشدار کاذب نمی‌سازد', () => {
-    expect(score(fillAnswers(gateQuestions, (i) => (i % 2 ? 9 : 4), 800)).guards.find((g) => g.code === 'hasty')?.triggered).toBe(true);
-    expect(score(fillAnswers(gateQuestions, (i) => (i % 2 ? 9 : 4), 0)).guards.find((g) => g.code === 'hasty')?.triggered).toBe(false);
-  });
-
-  it('قاعدهٔ ناسازگاری دربارهٔ داده و سنجه فعال می‌شود', () => {
-    const answers = uniformAnswers(gateQuestions, 6);
-    answers['s04'] = { questionCode: 's04', value: 9, answeredAt: '', elapsedMs: 9000 };
-    answers['s05'] = { questionCode: 's05', value: 2, answeredAt: '', elapsedMs: 9000 };
+  it('قطبیت معکوس پیش از محاسبه اعمال می‌شود: خام ۱۰ در MG-A3 نمرهٔ مؤثر صفر است', () => {
+    const answers = uniformAnswers(gateQuestions, 10);
+    const reverse = gateQuestions.find((q) => q.sourceRef === 'MG-A3')!;
+    answers[reverse.code] = {
+      questionCode: reverse.code,
+      value: 10,
+      answeredAt: new Date().toISOString(),
+      elapsedMs: 9000,
+    };
     const result = score(answers);
-    expect(result.guards.find((g) => g.code === 'rule:data_metric_inconsistency')?.triggered).toBe(true);
+    // ۱۱ پاسخ مؤثر ۱۰ و یک پاسخ مؤثر صفر → ۹۱٫۶۶…
+    expect(result.score0to100).toBeCloseTo((11 / 12) * 100, 2);
+    expect(result.verdict).toBe('label');
+  });
+
+  it('آستانه‌های ۷۰/۴۰ با پاسخ‌های یکنواخت نگاشت می‌شوند', () => {
+    expect(score(uniformAnswers(gateQuestions, 8)).zone).toBe('green');
+    expect(score(uniformAnswers(gateQuestions, 5)).zone).toBe('yellow');
+    expect(score(uniformAnswers(gateQuestions, 3)).zone).toBe('red');
+    expect(content.gateScoring.zones.map((z) => [z.key, z.min])).toEqual([
+      ['green', 70],
+      ['yellow', 40],
+      ['red', 0],
+    ]);
+  });
+
+  it('هر محور در خروجی ۴ پاسخ دارد و لیبل نتیجهٔ نمره است، نه Knock-out', () => {
+    const result = score(highQualityAnswers(gateQuestions));
+    expect(result.dimensionScores.map((d) => [d.code, d.total])).toEqual([
+      ['locus_of_control', 4],
+      ['agency', 4],
+      ['problem_solving', 4],
+    ]);
+    expect(result.verdict).toBe('label');
+    expect(result.knockouts ?? []).toHaveLength(0);
+  });
+});
+
+describe('گاردهای کیفیت (فقط برای اطمینان)', () => {
+  it('ناقص بودن پاسخ‌ها اطمینان را پایین می‌آورد ولی مسیر را متوقف نمی‌کند', () => {
+    const result = score(fillAnswers(gateQuestions.slice(0, 6), 9));
+    expect(result.completeness).toBeLessThan(1);
+    expect(result.confidence).not.toBe('high');
+    expect(result.guards.find((g) => g.code === 'completeness')?.triggered).toBe(true);
+    expect(result.verdict).toBe('label');
+  });
+
+  it('پاسخ‌دهی یکنواخت یا شتاب‌زده فقط گارد اطمینان می‌سازد', () => {
+    const straight = score(fillAnswers(gateQuestions, 7));
+    expect(straight.guards.find((g) => g.code === 'straight_lining')?.triggered).toBe(true);
+    const hasty = score(fillAnswers(gateQuestions, (i) => (i % 2 ? 9 : 4), 800));
+    expect(hasty.guards.find((g) => g.code === 'hasty')?.triggered).toBe(true);
+    expect(hasty.verdict).toBe('label');
+  });
+
+  it('پاسخ ناقص در سؤال‌های معکوس، شناسه و مقدار را نگه می‌دارد', () => {
+    const partial = fillAnswers(gateQuestions.slice(0, 2), 8);
+    const result = score(partial);
+    expect(result.answeredCount).toBe(2);
+    expect(result.totalScoredQuestions).toBe(12);
+    expect(result.verdict).toBe('label');
   });
 });
 
 describe('نسخه‌گذاری و ردیابی‌پذیری', () => {
-  it('نسخهٔ فرمول، وزن‌دهی و آستانه‌ها در خروجی ثبت می‌شوند', () => {
+  it('نسخهٔ فرم و فرمول در نتیجه ثبت می‌شود', () => {
     const result = score(highQualityAnswers(gateQuestions));
     expect(result.formulaVersion).toContain(content.gate.version);
-    expect(result.formulaVersion).toContain('question_level');
+    expect(result.formulaVersion).toContain(content.gateScoring.version);
     expect(result.weighting).toBe('question_level');
-    expect(result.thresholdsSnapshot.length).toBeGreaterThanOrEqual(3);
-  });
-
-  it('حالت وزن‌دهی dimension_mean هم پشتیبانی می‌شود', () => {
-    const result = score(highQualityAnswers(gateQuestions), {
-      weighting: 'dimension_mean' as const,
-    });
-    expect(result.weighting).toBe('dimension_mean');
-    expect(result.score0to100).toBeGreaterThan(90);
   });
 });

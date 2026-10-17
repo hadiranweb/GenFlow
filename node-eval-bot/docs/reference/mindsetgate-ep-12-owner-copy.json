@@ -1,0 +1,112 @@
+{
+  "source_file": "Archive — Question Bank v0 (initial draft).xlsx",
+  "source_sheet": "MindsetGate-EP (15)",
+  "version": "gate-mindset-ep-1.0.0",
+  "selected_count": 12,
+  "note": "Only the 12 self-report MG-A/B/C items are active. The sheet's three SJT scenarios, each having four options, are not active in this version.",
+  "layers": [
+    {
+      "code": "locus_of_control",
+      "title": "منبع کنترل"
+    },
+    {
+      "code": "agency",
+      "title": "فاعلیت و خودتنظیمی"
+    },
+    {
+      "code": "problem_solving",
+      "title": "تفکر مسئله‌محور"
+    }
+  ],
+  "questions": [
+    {
+      "code": "mg_a1",
+      "source_ref": "MG-A1",
+      "layer": "locus_of_control",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی کاری نتیجه نمی‌دهد، چقدر ابتدا در تصمیم یا اقدام خودم دنبال علت می‌گردم؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_a2",
+      "source_ref": "MG-A2",
+      "layer": "locus_of_control",
+      "text": "در مقیاس ۰ تا ۱۰، تا چه اندازه فکر می‌کنید بیشتر نتایج زندگی‌تان را تلاش خودتان تعیین می‌کند نه شانس؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_a3",
+      "source_ref": "MG-A3",
+      "layer": "locus_of_control",
+      "text": "در مقیاس ۰ تا ۱۰، تا چه اندازه احساس می‌کنید اتفاقات مهم زندگی‌تان بدون دخالت شما رخ می‌دهد؟",
+      "reverse": true
+    },
+    {
+      "code": "mg_a4",
+      "source_ref": "MG-A4",
+      "layer": "locus_of_control",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی یک نرم‌افزار خطا می‌دهد، چقدر قبل از مقصر دانستن آن، خودتان راه‌حلی جست‌وجو می‌کنید؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_b1",
+      "source_ref": "MG-B1",
+      "layer": "agency",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی یک فرم یا سامانه جدید را نمی‌فهمید، چقدر ابتدا خودتان راهنما را می‌خوانید و امتحان می‌کنید؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_b2",
+      "source_ref": "MG-B2",
+      "layer": "agency",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی در ثبت‌نام یا استفاده از یک سامانه با اشکال مواجه می‌شوید، چقدر با امتحان روش‌های دیگر مشکل را دنبال می‌کنید؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_b3",
+      "source_ref": "MG-B3",
+      "layer": "agency",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی کاری با اشکال مواجه می‌شود، چقدر تمایل دارید آن را رها کنید تا کس دیگری حلش کند؟",
+      "reverse": true
+    },
+    {
+      "code": "mg_b4",
+      "source_ref": "MG-B4",
+      "layer": "agency",
+      "text": "در مقیاس ۰ تا ۱۰، در شرایط ناکامی تا چه اندازه می‌توانید ناراحتی خود را کنترل کرده و کار را ادامه دهید؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_c1",
+      "source_ref": "MG-C1",
+      "layer": "problem_solving",
+      "text": "در مقیاس ۰ تا ۱۰، در موقعیت مبهم، چقدر ابتدا اطلاعات جمع می‌کنید و گزینه‌ها را مقایسه می‌کنید؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_c2",
+      "source_ref": "MG-C2",
+      "layer": "problem_solving",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی درباره یک مشکل صحبت می‌کنید، چقدر تمرکز شما بر پیشنهاد راه‌حل است تا بیان ناراحتی؟",
+      "reverse": false
+    },
+    {
+      "code": "mg_c3",
+      "source_ref": "MG-C3",
+      "layer": "problem_solving",
+      "text": "در مقیاس ۰ تا ۱۰، وقتی مشکلی پیش می‌آید، چقدر بیشتر وقت خود را صرف توصیف نارضایتی می‌کنید؟",
+      "reverse": true
+    },
+    {
+      "code": "mg_c4",
+      "source_ref": "MG-C4",
+      "layer": "problem_solving",
+      "text": "در مقیاس ۰ تا ۱۰، اگر راه اول جواب ندهد، چقدر سریع راه جایگزین امتحان می‌کنید؟",
+      "reverse": false
+    }
+  ],
+  "excluded_sjt_scenarios": [
+    "S1",
+    "S2",
+    "S3"
+  ]
+}

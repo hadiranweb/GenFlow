@@ -1,0 +1,2722 @@
+schema: questions.source-of-truth
+version: 1.2.0
+updated: '2026-10-17'
+note: منبع حقیقت محتوا — مستقل از جنریتور PDF. بیلد اپ/استقرار فقط از این فایل می‌خواند؛ onboarding فعال ۱۲ سؤال MG-A/B/C است.
+selection_state:
+  app: final
+  onboarding: final
+selection_note: >-
+  Onboarding فعال = ۱۲ آیتم خودگزارشی MG-A1…MG-C4 از شیت MindsetGate-EP؛
+  سه سناریوی MG.SJT.S1…S3 انتخاب نشده‌اند. GATE.s01…s15 از build فعال خارج
+  و فقط در آرشیو نگهداری می‌شوند.
+archive:
+  rule: آرشیو = خارج از هر دو بیلد؛ فقط مرجع.
+  count: 102
+  question_ids:
+  - GATE.SJT.loc_form_reset
+  - GATE.SJT.loc_wrong_field
+  - GATE.SJT.loc_permission_delay
+  - GATE.SJT.loc_unclear_rules
+  - GATE.SJT.loc_teammate_error
+  - GATE.SJT.ag_slow_page
+  - GATE.SJT.ag_sms_code
+  - GATE.SJT.ag_ticket_delay
+  - GATE.SJT.ag_upload_bug
+  - GATE.SJT.ag_restart_lost
+  - GATE.SJT.ps_payment_mismatch
+  - GATE.SJT.ps_feature_not_ready
+  - GATE.SJT.ps_auto_response
+  - GATE.SJT.ps_improve_onboarding
+  - GATE.SJT.ps_unclear_next_step
+  - GATE.s15
+  - GATE.s14
+  - GATE.s13
+  - GATE.s12
+  - GATE.s11
+  - GATE.s10
+  - GATE.s09
+  - GATE.s08
+  - GATE.s07
+  - GATE.s06
+  - GATE.s05
+  - GATE.s04
+  - GATE.s03
+  - GATE.s02
+  - GATE.s01
+  - SCR.s01
+  - SCR.s02
+  - SCR.s03
+  - SCR.s04
+  - SCR.s05
+  - SCR.s06
+  - SCR.s07
+  - SCR.s08
+  - SCR.s09
+  - SCR.s10
+  - SCR.s11
+  - SCR.s12
+  - SCR.s13
+  - SCR.s14
+  - SCR.s15
+  - DIAG.d101
+  - DIAG.d102
+  - DIAG.d103
+  - DIAG.d104
+  - DIAG.d105
+  - DIAG.d106
+  - DIAG.d201
+  - DIAG.d202
+  - DIAG.d203
+  - DIAG.d204
+  - DIAG.d205
+  - DIAG.d206
+  - DIAG.d301
+  - DIAG.d302
+  - DIAG.d303
+  - DIAG.d304
+  - DIAG.d305
+  - DIAG.d306
+  - DIAG.d401
+  - DIAG.d402
+  - DIAG.d403
+  - DIAG.d404
+  - DIAG.d405
+  - DIAG.d406
+  - DIAG.d501
+  - DIAG.d502
+  - DIAG.d503
+  - DIAG.d504
+  - DIAG.d505
+  - DIAG.d506
+  - DIAG.d601
+  - DIAG.d602
+  - DIAG.d603
+  - DIAG.d604
+  - DIAG.d605
+  - DIAG.d606
+  - DIAG.d701
+  - DIAG.d702
+  - DIAG.d703
+  - DIAG.d704
+  - DIAG.d705
+  - DIAG.d706
+  - DIAG.d801
+  - DIAG.d802
+  - DIAG.d803
+  - DIAG.d804
+  - DIAG.d805
+  - DIAG.d806
+  - DIAG.d901
+  - DIAG.d902
+  - DIAG.d903
+  - DIAG.d904
+  - DIAG.d905
+  - DIAG.d906
+  - MG.SJT.S1
+  - MG.SJT.S2
+  - MG.SJT.S3
+bundles:
+  app:
+    label: نسخهٔ اپ
+    count: 20
+    question_ids:
+    - FL.L1.Q1
+    - FL.L1.Q2
+    - FL.L1.Q3
+    - FL.L1.Q4
+    - FL.L2.Q1
+    - FL.L2.Q2
+    - FL.L2.Q3
+    - FL.L2.Q4
+    - FL.L3.Q1
+    - FL.L3.Q2
+    - FL.L3.Q3
+    - FL.L3.Q4
+    - FL.L4.Q1
+    - FL.L4.Q2
+    - FL.L4.Q3
+    - FL.L4.Q4
+    - FL.L5.Q1
+    - FL.L5.Q2
+    - FL.L5.Q3
+    - FL.L5.Q4
+  onboarding:
+    label: نسخهٔ ارزیابی ذهنیت (MindsetGate-EP؛ فقط خودگزارشی MG-A/B/C)
+    count: 12
+    question_ids:
+    - MG.A1
+    - MG.A2
+    - MG.A3
+    - MG.A4
+    - MG.B1
+    - MG.B2
+    - MG.B3
+    - MG.B4
+    - MG.C1
+    - MG.C2
+    - MG.C3
+    - MG.C4
+counts:
+  total_items: 134
+  by_collection:
+    پنج‌لایه: 20
+    گیت نگرشی: 15
+    گیت SJT: 15
+    غربالگری نود: 15
+    عارضه‌یابی تفصیلی نود: 54
+    Mindset Gate (EP): 15
+items:
+- id: FL.L1.Q1
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، اگر امروز بخواهید کسب‌وکارتان را واگذار کنید، این مجموعه چقدر به‌عنوان یک سیستم مستقل (بدون
+    حضور شما) قابل انتقال است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: true
+  status: approved
+  build: اپ
+  note: 'L1-Q1 · لایه 1: بنیان و رهبری · تلهٔ کارآفرینی — وابستگی کسب‌وکار به حضور مالک'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L1.Q2
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، چقدر از زمان هفتگی شما صرف کارهای اجرایی و فنی روزمره می‌شود؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L1-Q2 · لایه 1: بنیان و رهبری · سهم زمان اجرایی مالک (معکوس: ۱۰ یعنی وابستگی زیاد)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L1.Q3
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، اهداف کوتاه‌مدت (۳ ماهه) و بلندمدت (سالانه) کسب‌وکارتان چقدر مکتوب، شفاف و با مدیران یا شرکا
+    به اشتراک گذاشته شده است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L1-Q3 · لایه 1: بنیان و رهبری · مکتوب و تسهیم‌شده بودن اهداف'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L1.Q4
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، حساب‌های مالی شرکت و برداشت‌های شخصی شما چقدر از هم تفکیک و جدا شده‌اند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L1-Q4 · لایه 1: بنیان و رهبری · تفکیک مالی مالک از شرکت'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L2.Q1
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، مسیر کامل مشتری (از جذب و بازاریابی تا تحویل محصول یا خدمت) چقدر مکتوب و شفاف ترسیم شده است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L2-Q1 · لایه 2: معماری و طراحی · مکتوب بودن زنجیرهٔ ارزش مشتری'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L2.Q2
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، چقدر از کارهای روتین و تکراری شرکت دارای دستورالعمل گام‌به‌گام (SOP) یا چک‌لیست مشخص هستند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: true
+  status: approved
+  build: اپ
+  note: 'L2-Q2 · لایه 2: معماری و طراحی · پوشش SOP روی کارهای روتین'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L2.Q3
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، یک کارمند جدید برای یادگیری کارش چقدر به آموزش حضوری و تجربه کلامی دیگران وابسته است؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L2-Q3 · لایه 2: معماری و طراحی · وابستگی ورود نیروی جدید به تجربهٔ شفاهی (معکوس)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L2.Q4
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، مسئول نهاییِ هر خروجی و نتیجه در کسب‌وکارتان چقدر مشخص و شفاف است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L2-Q4 · لایه 2: معماری و طراحی · شفافیت مسئول نهایی هر خروجی (RACI)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L3.Q1
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، اگر شما ۴ هفته متوالی غایب و از دسترس خارج باشید، کسب‌وکار چقدر می‌تواند بدون افت کیفیت به کارش
+    ادامه دهد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: true
+  status: approved
+  build: اپ
+  note: 'L3-Q1 · لایه 3: جاری‌سازی · آزمون غیبت مدیر — تداوم عملیات بدون مالک'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L3.Q2
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، کارکنان در طول روز چقدر برای تصمیم‌گیری‌های خرد یا گرفتن تأیید نهایی به شما مراجعه می‌کنند؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L3-Q2 · لایه 3: جاری‌سازی · فراوانی ارجاع تصمیم‌های خرد به مدیر (تفویض معکوس)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L3.Q3
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، تیم شما چقدر به دستورالعمل‌های مکتوب پایبند است و کارها را طبق آن‌ها انجام می‌دهد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L3-Q3 · لایه 3: جاری‌سازی · پایبندی رفتاری تیم به سیستم (فرهنگ سیستم‌پذیری)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L3.Q4
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، فرآیندها و آموزش‌های نوشته‌شده چقدر در عمل پیاده‌سازی و جاری شده‌اند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L3-Q4 · لایه 3: جاری‌سازی · جاری‌شدن واقعی مستندات در رفتار روزمره'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L4.Q1
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، وضعیت کسب‌وکارتان چقدر با داشبورد عددی و شاخص‌های کلیدی (KPI) رصد می‌شود؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: true
+  status: approved
+  build: اپ
+  note: 'L4-Q1 · لایه 4: نگهداشت و پایش · ابزار رصد وضعیت — داشبورد عددی در برابر شهود'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L4.Q2
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، جلسات کاری تیم شما چقدر منظم، ساختاریافته و مسئله‌محور برگزار می‌شوند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L4-Q2 · لایه 4: نگهداشت و پایش · ریتم منضبط جلسات پایش'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L4.Q3
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، وقتی یک خطای تکراری در کیفیت یا ارائه خدمات رخ می‌دهد، واکنش سیستم چقدر سرزنش یا جریمه فرد است؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L4-Q3 · لایه 4: نگهداشت و پایش · واکنش به خطای تکراری (معکوس: سرزنش در برابر بررسی فرایند)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L4.Q4
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، سیستم گزارش‌دهی شما چقدر می‌تواند انحراف از اهداف را به صورت خودکار هشدار دهد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L4-Q4 · لایه 4: نگهداشت و پایش · خودکار بودن گزارش‌دهی و هشدار انحراف'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L5.Q1
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، اگر حجم سفارش‌ها یا مشتریان شما در ماه آینده ۳ برابر شود، کسب‌وکارتان چقدر توانایی پاسخگویی
+    (بدون افت کیفیت) را دارد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: true
+  status: approved
+  build: اپ
+  note: 'L5-Q1 · لایه 5: توسعه و مقیاس‌پذیری · آزمون سه‌برابرشدن حجم — کشش سیستم'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L5.Q2
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، مدل کسب‌وکارتان چقدر قابلیت تکثیر (افتتاح شعبه، نمایندگی یا خط درآمد جدید) بدون حضور مستقیم
+    شما را دارد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L5-Q2 · لایه 5: توسعه و مقیاس‌پذیری · تکثیرپذیری مدل بدون حضور مالک'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L5.Q3
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، رشد کسب‌وکارتان چقدر به وقت و حضور شخصی شما وابسته است؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L5-Q3 · لایه 5: توسعه و مقیاس‌پذیری · گلوگاه زمان فیزیکی مالک (معکوس)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: FL.L5.Q4
+  collection: پنج‌لایه
+  version: matrix-five-layer-1.3.0
+  role: مرجع (canonical)
+  type: خودگزارشی
+  text: از ۰ تا ۱۰، کسب‌وکارتان چقدر توانایی دارد که با زیاد شدن مشتری‌ها، «زمان و هزینهِ ارائه کار به هر مشتری»
+    را پایین و کنترل‌شده نگه دارد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: approved
+  build: اپ
+  note: 'L5-Q4 · لایه 5: توسعه و مقیاس‌پذیری · اقتصاد واحد — هزینهٔ نهایی تحویل با رشد (پرسش تازهٔ پلی‌بوک)'
+  app:
+    included: true
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s01
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید که تعیین مالک مشخص و مکتوب‌کردن اختیارات او برای موفقیت این نود حیاتی است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.2
+  critical: true
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s02
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر برای شما مهم است که فرآیندهای اصلی نود به‌صورت مکتوب (پلی‌بوک/چک‌لیست) ثبت شده باشند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s03
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید هر فرآیند کلیدی باید ورودی، خروجی و معیار موفقیت روشنی داشته باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s04
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر برای شما مهم است که داده‌های کلیدی کسب‌وکار در یک محل مشخص و قابل اتکا نگهداری شود؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.1
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s05
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید تعریف و پایش منظم شاخص‌های کلیدی عملکرد (KPI) ضروری است؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.1
+  critical: true
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s06
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر برای شما مهم است که استانداردها و الزامات قانونی مرتبط با این فعالیت شناسایی و رعایت شوند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.1
+  critical: true
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s07
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد مهم است که کنترل کیفیت خروجی‌ها (بازبینی/چک‌لیست) به‌صورت روتین انجام شود؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.1
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s08
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر استفاده از ابزار دیجیتال مناسب (CRM/ERP/سامانهٔ تخصصی) را برای این نود ضروری می‌دانید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 0.9
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s09
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید کارهای تکراری باید خودکار یا استاندارد شوند؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 0.9
+  critical: true
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s10
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر مهم است که مهارت‌های لازم برای اجرای این نود در تیم موجود باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.05
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s11
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید دانش کلیدی نود باید مستند و قابل انتقال به فرد جدید باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.05
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s12
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر برای شما مهم است که مشتری هدف و ارزش پیشنهادی نود به‌روشنی تعریف شده باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.05
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s13
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد مهم است که جریان ورود مشتری/فروش قابل پیش‌بینی و تکرارپذیر باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.05
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s14
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: تا چه حد باور دارید درآمد و هزینه‌های نود باید به‌صورت منظم اندازه‌گیری و تحلیل شود؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.15
+  critical: true
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.s15
+  collection: گیت نگرشی
+  version: gate-attitude-1.0.0
+  role: مرجع (canonical)
+  type: خودگزارشی نگرشی
+  text: چقدر مهم است که نود حداقل به نقطهٔ سربه‌سر رسیده یا مسیر روشنی برای آن داشته باشد؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1.15
+  critical: false
+  status: archived
+  build: آرشیو
+  note: گیت نگرشی قدیمی؛ جایگزین شده با MindsetGate-EP MG-A/B/C و خارج از build فعال.
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.loc_form_reset
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: در میانهٔ فرم ثبت‌نام، صفحه ری‌ست می‌شود و اطلاعاتی که وارد کرده بودید پاک می‌شود.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.34
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: منبع کنترل — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.loc_wrong_field
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: پس از ارسال فرم متوجه می‌شوید یکی از فیلدها را اشتباه پر کرده‌اید و همین باعث توقف فرایند شده است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.34
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: منبع کنترل — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.loc_permission_delay
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: بعد از ثبت‌نام، دسترسی شما به بخش اصلی چند روز طول می‌کشد و علتش هم روشن نیست.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.34
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: منبع کنترل — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.loc_unclear_rules
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: قوانین این اکوسیستم برایتان مبهم است و نمی‌دانید دقیقاً چه چیزی مجاز و چه چیزی ممنوع است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.34
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: منبع کنترل — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.loc_teammate_error
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: یکی از هم‌کارانتان اطلاعات ناقص داده و به همین دلیل کار شما در فرایند ورود عقب افتاده است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.34
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: منبع کنترل — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ag_slow_page
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: صفحهٔ ثبت‌نام برای چند دقیقه کند یا بی‌پاسخ می‌شود.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: فاعلیت و خودتنظیمی — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ag_sms_code
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: کد تأیید پیامکی برای شما ارسال نمی‌شود.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: فاعلیت و خودتنظیمی — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ag_ticket_delay
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: تیکت پشتیبانی شما ۲۴ ساعت بی‌پاسخ مانده است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: فاعلیت و خودتنظیمی — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ag_upload_bug
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: هنگام بارگذاری مدرک، خطای تکرارشدنی می‌گیرید و فایل ارسال نمی‌شود.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: فاعلیت و خودتنظیمی — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ag_restart_lost
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: سرویس وسط کار ری‌استارت می‌شود و گفت‌وگوی نیمه‌کارهٔ شما ناتمام می‌ماند.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: فاعلیت و خودتنظیمی — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ps_payment_mismatch
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: مبلغ پرداخت شما با آنچه توافق کرده بودید، تفاوت دارد.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: تفکر مسئله‌محور — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ps_feature_not_ready
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: متوجه می‌شوید بخشی از سرویس که به آن نیاز دارید هنوز آماده نیست.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: تفکر مسئله‌محور — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ps_auto_response
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: پاسخ خودکار پشتیبانی، سؤال شما را نفهمیده و راهنمای بی‌ربط فرستاده است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: تفکر مسئله‌محور — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ps_improve_onboarding
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: حس می‌کنید فرایند ورود طولانی و پر از گام‌های بی‌فایده است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'محور: تفکر مسئله‌محور — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: GATE.SJT.ps_unclear_next_step
+  collection: گیت SJT
+  version: gate-mindset-1.0.0
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: در ادامهٔ مسیر نمی‌دانید گام بعدی شما چیست و چه‌کسی مسئول آن است.
+  answer: 3 گزینه — امتیازدهی سیگنالی
+  reverse: false
+  weight: 0.33
+  critical: true
+  status: archived
+  build: آرشیو
+  note: 'محور: تفکر مسئله‌محور — در تست‌های پروژه «آرشیوی/غیرفعال» توصیف شده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s01
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مالک و مسئول مشخصی برای این نود تعیین شده و اختیارات او مکتوب است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: نقش و مالکیت · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s02
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: فرآیندهای اصلی نود به‌صورت مکتوب (پلی‌بوک/چک‌لیست) مستند شده‌اند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیند و مستندسازی · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s03
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: هر فرآیند کلیدی، ورودی، خروجی و معیار موفقیت روشنی دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیند و مستندسازی · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s04
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: داده‌های کلیدی کسب‌وکار در یک محل مشخص و قابل اتکا نگهداری می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و سنجه · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s05
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: شاخص‌های کلیدی عملکرد (KPI) تعریف شده و به‌طور منظم پایش می‌شوند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و سنجه · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s06
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: استانداردها و الزامات قانونی مرتبط با این فعالیت شناسایی و رعایت می‌شوند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استاندارد و کیفیت · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s07
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: کنترل کیفیت خروجی‌ها (بازبینی/چک‌لیست) به‌صورت روتین انجام می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استاندارد و کیفیت · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s08
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: ابزار دیجیتال مناسب (CRM/ERP/سامانه‌ی تخصصی) در نود استفاده می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: اتوماسیون و ابزار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s09
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: کارهای تکراری تا حد ممکن خودکار یا استاندارد شده‌اند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: اتوماسیون و ابزار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s10
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مهارت‌های لازم برای اجرای این نود در تیم موجود است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مهارت و تیم · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s11
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: دانش کلیدی نود مستند و قابل انتقال به فرد جدید است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مهارت و تیم · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s12
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مشتری هدف و ارزش پیشنهادی نود به‌روشنی تعریف شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازار و مشتری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s13
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: جریان ورود مشتری/فروش قابل پیش‌بینی و تکرارپذیر است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازار و مشتری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s14
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: درآمد و هزینه‌های نود به‌صورت منظم اندازه‌گیری و تحلیل می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: پایداری مالی · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: SCR.s15
+  collection: غربالگری نود
+  version: stage1 draft v1
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: نود حداقل به نقطه‌ی سربه‌سر رسیده یا مسیر روشنی برای آن دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: پایداری مالی · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d101
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مدل درآمدی نود (چگونه پول درمی‌آورد) مکتوب و شفاف است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d102
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: بازار هدف و اندازه‌ی فرصت آن برآورد مستند دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d103
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مزیت رقابتی ما مشخص و قابل دفاع است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d104
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: اهداف ۱۲ ماه آینده به اهداف فصلی و ماهانه شکسته شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d105
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: تصمیم‌های راهبردی بر پایه‌ی داده گرفته می‌شود، نه سلیقه.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d106
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: برنامه‌ی رشد نود (محصول، بازار، ظرفیت) مکتوب است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استراتژی و مدل کسب‌وکار · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d201
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: نقشه‌ی فرآیندهای اصلی (Workflow Map) ترسیم شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d202
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مالک و مسئول هر فرآیند مشخص است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d203
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: ورودی و خروجی هر فرآیند مستند است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d204
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: گلوگاه‌ها شناسایی شده و زمان چرخه‌ی هر فرآیند اندازه‌گیری می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d205
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: رویه‌های اضطراری/جایگزین برای اختلال‌ها تعریف شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d206
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: بهبود فرآیندها چرخه‌ی منظم دارد (بازخورد ← اصلاح).
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فرآیندها و رویه‌ها · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d301
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: فیلدها و ساختار داده‌های اصلی (Data Model) تعریف شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d302
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: سطوح دسترسی و محرمانگی داده‌ها مشخص و رعایت می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d303
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: پاک‌سازی داده‌ی تکراری/متناقض به‌صورت منظم انجام می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d304
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: گزارش‌های مدیریتی مستقیماً از داده استخراج می‌شوند (نه دستی).
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d305
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: داشبورد مدیریتی به‌روز در دسترس تصمیم‌گیرنده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d306
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: مسیر بازگشت نتیجه‌ی تحلیل به عملیات روزمره برقرار است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: داده و مدل داده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d401
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: ابزارهای فعلی پاسخ نیاز نود را می‌دهند و از هم پراکنده نیستند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d402
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: اتوماسیون‌های موجود پایدارند و خطای مکرر ندارند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d403
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: یکپارچگی بین سامانه‌ها (API/فایل مشترک) برقرار است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d404
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: محیط آزمون و پشتیبان‌گیری سامانه‌ها انجام می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d405
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: تیم توان نگهداری ابزارها را دارد یا پشتیبانی قراردادی وجود دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d406
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: نقشه‌ی راه فناوری (چه چیزی، چه زمانی، با چه هزینه‌ای) مکتوب است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: فناوری و اتوماسیون · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d501
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: فهرست استانداردها و الزامات مرتبط به‌روز نگهداری می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d502
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: گواهی‌نامه‌ها/مجوزهای لازم معتبر و در دسترس‌اند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d503
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: کنترل کیفیت تجهیزات/خروجی‌ها طبق دستورالعمل انجام می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d504
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: سوابق ممیزی و اقدامات اصلاحی نگهداری می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d505
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: کارکنان با الزامات قانونی مرتبط با نقش خود آشنا هستند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d506
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: ریسک‌های انطباقی (جریمه/توقف فعالیت) ارزیابی شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: استانداردها و انطباق · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d601
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: ساختار سازمانی و شرح وظایف به‌روز است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d602
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: فرآیند جذب و ورود نیروی جدید (Onboarding) استاندارد دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d603
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: برنامه‌ی آموزش مهارتی به‌صورت منظم اجرا می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d604
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: شاخص عملکرد فردی اندازه‌گیری و بازخورد داده می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d605
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: وابستگی به افراد کلیدی مدیریت شده (جایگزین/مستندسازی).
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d606
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: رضایت و ماندگاری نیروی کلیدی پایش می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: سرمایه انسانی و آموزش · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d701
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: پرسونای مشتری و نیاز او مستند شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d702
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: کانال‌های جذب مشتری مشخص و اندازه‌گیری می‌شوند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d703
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: قیمت‌گذاری بر پایه‌ی هزینه و ارزش انجام شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d704
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: قیف فروش (از سرنخ تا خرید) تعریف و پایش می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d705
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: رضایت مشتری و نرخ شکایت/بازگشت اندازه‌گیری می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d706
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: محتوا و هویت برند (پیام، لحن، تصویر) یکدست است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: بازاریابی، فروش و برند · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d801
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: صورت درآمد و هزینه‌ی ماهانه تهیه می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d802
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: بهای تمام‌شده‌ی محصول/خدمت محاسبه شده و به‌روز است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d803
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: حاشیه‌ی سود هر محصول/خدمت مشخص است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d804
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: برنامه‌ی نقدینگی و پیش‌بینی جریان نقدی وجود دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d805
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: هزینه‌های پنهان/هدررفت شناسایی شده و هدف کاهش دارند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d806
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: سرمایه‌گذاری‌ها و بازگشت آن‌ها (ROI) ارزیابی می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: مالی و بهره‌وری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d901
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: فهرست ریسک‌های اصلی (عملیاتی/مالی/حقوقی) تهیه شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: true
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d902
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: برای ریسک‌های بحرانی برنامه‌ی کاهش/اقدام نوشته شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d903
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: بیمه/پشتیبان مناسب (تجهیزات، اطلاعات، افراد) وجود دارد.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d904
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: حوادث و خطاها ثبت و ریشه‌یابی (عارضه‌یابی) می‌شوند.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d905
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: نگهداری پیشگیرانه/دوره‌ای تجهیزات و سامانه‌ها انجام می‌شود.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: DIAG.d906
+  collection: عارضه‌یابی تفصیلی نود
+  version: stage2 draft v1 / matrix-diagnostics-1.0.0
+  role: پیش‌نویس
+  type: گویهٔ وضعیت
+  text: وابستگی به یک مشتری/فرد/تأمین‌کننده مدیریت شده است.
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: 1
+  critical: false
+  status: draft_archived
+  build: آرشیو
+  note: 'بُعد: ریسک، کیفیت و پایداری · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: MG.A1
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی کاری نتیجه نمی‌دهد، چقدر ابتدا در تصمیم یا اقدام خودم دنبال علت می‌گردم؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور A: منبع کنترل · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.A2
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، تا چه اندازه فکر می‌کنید بیشتر نتایج زندگی‌تان را تلاش خودتان تعیین می‌کند نه شانس؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور A: منبع کنترل · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.A3
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، تا چه اندازه احساس می‌کنید اتفاقات مهم زندگی‌تان بدون دخالت شما رخ می‌دهد؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور A: منبع کنترل · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.A4
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی یک نرم‌افزار خطا می‌دهد، چقدر قبل از مقصر دانستن آن، خودتان راه‌حلی جست‌وجو می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور A: منبع کنترل · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.B1
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی یک فرم یا سامانه جدید را نمی‌فهمید، چقدر ابتدا خودتان راهنما را می‌خوانید و امتحان
+    می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور B: فاعلیت و خودتنظیمی · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.B2
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی در ثبت‌نام یا استفاده از یک سامانه با اشکال مواجه می‌شوید، چقدر با امتحان روش‌های
+    دیگر مشکل را دنبال می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور B: فاعلیت و خودتنظیمی · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.B3
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی کاری با اشکال مواجه می‌شود، چقدر تمایل دارید آن را رها کنید تا کس دیگری حلش کند؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور B: فاعلیت و خودتنظیمی · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.B4
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، در شرایط ناکامی تا چه اندازه می‌توانید ناراحتی خود را کنترل کرده و کار را ادامه دهید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور B: فاعلیت و خودتنظیمی · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.C1
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، در موقعیت مبهم، چقدر ابتدا اطلاعات جمع می‌کنید و گزینه‌ها را مقایسه می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور C: تفکر مسئله‌محور · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.C2
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی درباره یک مشکل صحبت می‌کنید، چقدر تمرکز شما بر پیشنهاد راه‌حل است تا بیان ناراحتی؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور C: تفکر مسئله‌محور · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.C3
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، وقتی مشکلی پیش می‌آید، چقدر بیشتر وقت خود را صرف توصیف نارضایتی می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: true
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور C: تفکر مسئله‌محور · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.C4
+  collection: Mindset Gate (EP)
+  version: gate-mindset-ep-1.0.0
+  role: مرجع منتخب برای onboarding
+  type: خودگزارشی
+  text: در مقیاس ۰ تا ۱۰، اگر راه اول جواب ندهد، چقدر سریع راه جایگزین امتحان می‌کنید؟
+  answer: مقیاس ۰–۱۰
+  reverse: false
+  weight: null
+  critical: false
+  status: selected
+  build: onboarding
+  note: 'MindsetGate-EP · محور C: تفکر مسئله‌محور · منتخب برای ارزیابی onboarding؛ رنج ۰–۱۰'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: true
+    basis: final
+- id: MG.SJT.S1
+  collection: Mindset Gate (EP)
+  version: 0.1-draft
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: در مرحله ثبت‌نام، دکمه ادامه کار نمی‌کند و پیام خطای نامفهومی نمایش داده می‌شود.
+  answer: 4 گزینه — کلید پیشنهادی
+  reverse: false
+  weight: null
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'سناریو: ثبت‌نام با خطا — کلیدها اعتبارسنجی‌نشده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: MG.SJT.S2
+  collection: Mindset Gate (EP)
+  version: 0.1-draft
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: برای احراز هویت باید مدرک خاصی آپلود کنید، اما راهنمایی روشنی درباره نسخه قابل قبول نیست.
+  answer: 3 گزینه — کلید پیشنهادی
+  reverse: false
+  weight: null
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'سناریو: ابهام در مدارک — کلیدها اعتبارسنجی‌نشده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final
+- id: MG.SJT.S3
+  collection: Mindset Gate (EP)
+  version: 0.1-draft
+  role: جایگزین (alternate)
+  type: سناریوی SJT
+  text: پس از ۱۰ دقیقه، فرایند تأیید هویت هنوز تمام نشده و هیچ پیشرفتی نمی‌بینید.
+  answer: 3 گزینه — کلید پیشنهادی
+  reverse: false
+  weight: null
+  critical: false
+  status: archived
+  build: آرشیو
+  note: 'سناریو: کندی فرایند — کلیدها اعتبارسنجی‌نشده · آرشیو — خارج از بیلد اپ و استقرار'
+  app:
+    included: false
+    basis: final
+  onboarding:
+    included: false
+    basis: final

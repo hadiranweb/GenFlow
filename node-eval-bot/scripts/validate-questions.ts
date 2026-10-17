@@ -13,7 +13,7 @@ function main(): void {
   process.stdout.write('📋 بررسی محتوای فرایند\n' + '─'.repeat(60) + '\n');
 
   for (const [label, q] of [
-    ['مرحله ۱ — ارزیابی نود (لیبل)', content.gate],
+    ['مرحله ۱ — ارزیابی ذهنیت MindsetGate-EP (لیبل داخلی)', content.gate],
     ['مرحله ۲ — عارضه‌یابی تفصیلی', content.matrix],
   ] as const) {
     const all = q.sections.flatMap((s) => s.questions);
@@ -37,9 +37,9 @@ function main(): void {
       '\n⚙️ سیاست محاسبهٔ ارزیابی (scoring/gate.yaml)',
       `   نسخه: ${content.gateScoring.version} · وزن‌دهی: ${content.gateScoring.weighting}`,
       `   نواحی: ${content.gateScoring.zones.map((z) => `${z.label} ≥ ${toPersianDigits(z.min)}`).join(' | ')}`,
-      `   سقف کلیدی: ≤ ${toPersianDigits(content.gateScoring.criticalCeiling.criticalRedMax)} → قرمز · ` +
-        `≤ ${toPersianDigits(content.gateScoring.criticalCeiling.criticalYellowMax)} → زرد · ` +
-        `بی‌پاسخ ${content.gateScoring.criticalCeiling.unansweredIsFlagged ? 'پرچم‌دار' : 'بدون اثر'}`,
+      `   سقف پرسش کلیدی: ${content.gate.sections.some((s) => s.questions.some((q) => q.critical))
+        ? `≤ ${toPersianDigits(content.gateScoring.criticalCeiling.criticalRedMax)} → قرمز · ≤ ${toPersianDigits(content.gateScoring.criticalCeiling.criticalYellowMax)} → زرد`
+        : 'این بانک پرسش کلیدی ندارد؛ سقف بی‌اثر است'}`,
       '',
       '⚙️ سیاست محاسبهٔ عارضه‌یابی (scoring/matrix.yaml)',
       `   نسخه: ${content.matrixScoring.version} · هدف: ${toPersianDigits(content.matrixScoring.targetIndex)} · ` +

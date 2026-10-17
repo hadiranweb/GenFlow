@@ -41,7 +41,7 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     sessionId = session.id;
     expect(session.status).toBe('consent_pending');
     expect(session.session_no).toBe(1);
-    expect(flow.combinedTotal).toBe(35);
+    expect(flow.combinedTotal).toBe(32);
   });
 
   it('پس از تأیید، پرسش اول نمایش داده می‌شود و پیشرفت پیوسته است', () => {
@@ -49,8 +49,8 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     const view = flow.grantConsent(session);
     expect(view.flow).toBe('screening');
     expect(view.displayIndex).toBe(1);
-    expect(view.total).toBe(35);
-    expect(view.text).toContain('پرسش ۱ از ۳۵');
+    expect(view.total).toBe(32);
+    expect(view.text).toContain('پرسش ۱ از ۳۲');
   });
 
   it('کلیک کهنه نادیده گرفته می‌شود و مقدار نامعتبر رد می‌شود', () => {
@@ -63,7 +63,7 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
     const outcome = flow.submitAnswer(repo.getSession(sessionId)!, 0, 8);
     expect(outcome.kind).toBe('advanced');
     if (outcome.kind === 'advanced') expect(outcome.view.displayIndex).toBe(2);
-    expect(repo.getSessionState(sessionId)!.gateAnswers['s01']!.value).toBe(8);
+    expect(repo.getSessionState(sessionId)!.gateAnswers['mg_a1']!.value).toBe(8);
   });
 
   it('تکمیل ارزیابی → محاسبهٔ لیبل + ادامهٔ بی‌وقفه به عارضه‌یابی', () => {
@@ -78,8 +78,8 @@ describe('جریان اصلی — ارزیابی بی‌وقفه و بدون م�
       expect(outcome.gate.verdict).toBe('label');
       expect('blocked' in outcome).toBe(false);
       expect(outcome.nextView.flow).toBe('diagnostics');
-      expect(outcome.nextView.displayIndex).toBe(16);
-      expect(outcome.nextView.text).toContain('پرسش ۱۶ از ۳۵');
+      expect(outcome.nextView.displayIndex).toBe(13);
+      expect(outcome.nextView.text).toContain('پرسش ۱۳ از ۳۲');
     }
     expect(repo.getSession(sessionId)!.status).toBe('diagnostics_in_progress');
   });
